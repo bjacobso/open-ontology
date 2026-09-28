@@ -33,7 +33,10 @@
     "build": "tsdown",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "example": "tsx examples/field-service/run.ts"
+    "example": "tsx examples/field-service/run.ts",
+    "site:check": "node apps/site/check.mjs",
+    "site:dev": "wrangler dev --config apps/site/wrangler.jsonc",
+    "site:deploy": "wrangler deploy --config apps/site/wrangler.jsonc"
   },
   "dependencies": {
     "@formalang/ts": "0.3.0",
@@ -45,7 +48,8 @@
     "tsdown": "0.20.0",
     "tsx": "4.19.0",
     "typescript": "5.9.3",
-    "vitest": "4.1.2"
+    "vitest": "4.1.2",
+    "wrangler": "4.142.0"
   },
   "peerDependencies": {
     "effect": "4.0.0-rc.112"

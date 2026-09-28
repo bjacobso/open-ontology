@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f1f0e7" />
+    <meta name="description" content="Define objects, links, actions, and named queries in TypeScript or Forma. Run one portable ontology model on Triplex." />
+    <title>Open Ontology — One model, two authoring paths</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/site.css" />
+    <script defer src="/site.js"></script>
+  </head>
+  <body>
+    <div class="oo-home">
+      <header class="oo-home__nav">
+        <a class="oo-home__brand" href="/" aria-label="Open Ontology home">
+          <span class="oo-home__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" width="20" height="20"><path d="M14 4 24 14 14 24 4 14 14 4Z" stroke="currentColor" stroke-width="1.6"/><circle cx="14" cy="14" r="3" fill="currentColor"/></svg></span>
+          <span>Open Ontology</span>
+        </a>
+        <nav aria-label="Main navigation">
+          <a href="#model">Model</a>
+          <a href="#forma">Forma</a>
+          <a href="#start">Get started</a>
+          <a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a>
+        </nav>
+      </header>
+
+      <main class="oo-home__main">
+        <section class="oo-home__hero" aria-labelledby="hero-title">
+          <div class="oo-home__hero-copy">
+            <div class="oo-home__eyebrow"><span class="oo-home__pulse"></span> Experimental ontology package · v0.1</div>
+            <h1 id="hero-title">Model your domain <em>like Palantir.</em></h1>
+            <p class="oo-home__tagline">Without the Palantir-scale everything.</p>
+            <p class="oo-home__lead">Define the things your software knows, the relationships between them, the actions people take, and the questions they ask. Author the model in TypeScript or Forma; run it on Triplex.</p>
+            <div class="oo-home__release" aria-label="Project status">
+              <span>Current checkpoint</span>
+              <strong>One package. One executable example. Local in-memory runtime.</strong>
+            </div>
+            <div class="oo-home__actions">
+              <a class="oo-home__primary" href="https://github.com/bjacobso/open-ontology">Explore the source <span aria-hidden="true">↗</span></a>
+              <a href="#model">See the model ↓</a>
+              <a href="https://github.com/bjacobso/open-ontology#run">Run locally</a>
+            </div>
+          </div>
+          <div class="oo-home__hero-code" aria-label="Work order object type in TypeScript">
+            <span class="oo-home__specimen-tag">FROM THE EXAMPLE</span>
+            <div class="oo-home__window-head"><span class="oo-home__window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>field-service/model.ts</span><span>OBJECT TYPE</span></div>
+            <pre><code>const WorkOrder = Ontology.ObjectType(
+  "WorkOrder",
+  {
+    properties: {
+      title: Property.make(
+        ":work-order/title",
+        Schema.String,
+      ).required(),
+      status: Property.make(
+        ":work-order/status",
+        Schema.String,
+      ).required(),
+    },
+  },
+);</code></pre>
+          </div>
+        </section>
+
+        <section class="oo-home__flow" aria-label="How Open Ontology composes">
+          <div><span>01 / MODEL</span><strong>Name the things</strong><small>Objects, properties, and links</small></div>
+          <div><span>02 / ACT</span><strong>Give the model behavior</strong><small>Typed actions and named queries</small></div>
+          <div><span>03 / RUN</span><strong>Put it on facts</strong><small>Triplex transactions and Datalog</small></div>
+        </section>
+
+        <section class="oo-home__thesis" aria-labelledby="thesis-title">
+          <div class="oo-home__thesis-label"><span>THE MODEL</span><span>OO–001</span></div>
+          <div class="oo-home__thesis-copy">
+            <h2 id="thesis-title">Your domain model should be able to <em>do things.</em></h2>
+            <p>Object and link types describe the domain. Actions change it. Named queries answer questions against the same facts. The resulting IR is portable JSON.</p>
+          </div>
+          <div class="oo-home__formula" aria-label="Ontology composition"><span>objects</span><b>+</b><span>links</span><b>+</b><span>actions</span><b>+</b><span>queries</span><b>=</b><strong>one ontology IR</strong></div>
+          <p class="oo-home__margin-note">A package you can inspect and run locally.</p>
+        </section>
+
+        <section id="model" class="oo-home__section" aria-labelledby="model-title">
+          <div class="oo-home__section-grid">
+            <div class="oo-home__section-head"><span class="oo-home__overline">TypeScript DSL</span><h2 id="model-title">One field-service model, end to end.</h2></div>
+            <p>The repository's example defines a technician, a work order, their assignment, an action, and a named Datalog query. Its action and query run in a local Triplex test.</p>
+          </div>
+          <div class="oo-home__code-group">
+            <div class="oo-home__tabs" role="tablist" aria-label="TypeScript ontology stages">
+              <button id="tab-0" data-description="Object and link types" type="button" role="tab" aria-selected="true" aria-controls="panel-0" tabindex="0">01 · Model</button>
+              <button id="tab-1" data-description="Typed action plan" type="button" role="tab" aria-selected="false" aria-controls="panel-1" tabindex="-1">02 · Action</button>
+              <button id="tab-2" data-description="Named Datalog query" type="button" role="tab" aria-selected="false" aria-controls="panel-2" tabindex="-1">03 · Query</button>
+            </div>
+            <div class="oo-home__code-head"><span>field-service/model.ts</span><span id="code-description">Object and link types</span></div>
+            <div id="panel-0" role="tabpanel" aria-labelledby="tab-0"><pre><code>const Technician = Ontology.ObjectType("Technician", {
+  properties: {
+    name: Property.make(":technician/name", Schema.String).required(),
+  },
+});
+
+const WorkOrder = Ontology.ObjectType("WorkOrder", {
+  properties: {
+    title: Property.make(":work-order/title", Schema.String).required(),
+    status: Property.make(":work-order/status", Schema.String).required(),
+  },
+});
+
+const AssignedTo = Ontology.LinkType("assigned-to", {
+  from: WorkOrder,
+  to: Technician,
+  properties: {
+    assignedAt: Property.instant(":assigned-to/assigned-at").required(),
+  },
+});</code></pre></div>
+            <div id="panel-1" role="tabpanel" aria-labelledby="tab-1" hidden><pre><code>const AssignWorkOrder = Ontology.ActionType("assign-work-order", {
+  input: Schema.Struct({
+    workOrder: Schema.String,
+    technician: Schema.String,
+  }),
+  changes: [
+    Change.set(
+      Input.value("workOrder"),
+      WorkOrder.properties.status,
+      "assigned",
+    ),
+    Change.link(
+      AssignedTo,
+      Input.value("workOrder"),
+      Input.value("technician"),
+      { ":assigned-to/assigned-at": Input.now },
+    ),
+  ],
+});</code></pre></div>
+            <div id="panel-2" role="tabpanel" aria-labelledby="tab-2" hidden><pre><code>const AssignedWork = Ontology.QueryType("assigned-work", {
+  query: Datalog.query({
+    find: [v.title, v.technician],
+    where: [
+      Datalog.match(v.work, WorkOrder.properties.title, v.title),
+      Datalog.match(v.assignment, AssignedTo.endpoints.from, v.work),
+      Datalog.match(v.assignment, AssignedTo.endpoints.to, v.person),
+      Datalog.match(v.person, Technician.properties.name, v.technician),
+    ],
+  }),
+});
+
+// See the complete checked-in query and variable declarations:
+// examples/field-service/model.ts</code></pre></div>
+          </div>
+          <p class="oo-home__source-link"><a href="https://github.com/bjacobso/open-ontology/blob/main/examples/field-service/model.ts">Read the complete TypeScript model ↗</a></p>
+        </section>
+
+        <section id="forma" class="oo-home__section" aria-labelledby="forma-title">
+          <div class="oo-home__section-grid">
+            <div class="oo-home__section-head"><span class="oo-home__overline">Forma Lisp DSL</span><h2 id="forma-title">The same model through a second authoring path.</h2></div>
+            <p>Forma reads the ontology forms and elaborates them into the same portable IR as the TypeScript DSL. The test checks equivalence and reports line and column locations for invalid source.</p>
+          </div>
+          <div class="oo-home__code-group oo-home__code-group--lisp">
+            <div class="oo-home__code-head"><span>field-service/model.lisp</span><span>Relation and action excerpt</span></div>
+            <pre><code>(define-relation assigned-to WorkOrder Technician
+  (:field [assigned-to/assigned-at Instant {:required true}]))
+
+(define-action assign-work-order
+  (:input [workOrder String {:required true}])
+  (:input [technician String {:required true}])
+  (:returns String)
+  (:do (changes
+    (set workOrder :work-order/status "assigned")
+    (link assigned-to workOrder technician
+      {:assigned-to/assigned-at now}))))
+
+(define-datalog-query assigned-work
+  (:query
+    {:find ["?title" "?technician"]
+     :where [["?work" ":work-order/title" "?title"]
+             ["?assignment" ":assigned-to/from" "?work"]
+             ["?assignment" ":assigned-to/to" "?person"]
+             ["?person" ":technician/name" "?technician"]]}))</code></pre>
+          </div>
+          <p class="oo-home__source-link"><a href="https://github.com/bjacobso/open-ontology/blob/main/examples/field-service/model.lisp">Read the complete Forma model ↗</a></p>
+        </section>
+
+        <section class="oo-home__section" aria-labelledby="boundary-title">
+          <div class="oo-home__section-grid">
+            <div class="oo-home__section-head"><span class="oo-home__overline">Current boundary</span><h2 id="boundary-title">Built to grow from one working model.</h2></div>
+            <p>The package currently proves local authoring and execution. SQLite persistence, policy authorization, and a versioned deployment path are the next runtime checkpoint before a product server is offered.</p>
+          </div>
+          <div class="oo-home__cards">
+            <article><span>01 / AUTHOR</span><h3>TypeScript or Forma</h3><p>Choose the source format that fits the work. Both lower to one JSON-safe ontology IR.</p></article>
+            <article><span>02 / EXECUTE</span><h3>Triplex facts</h3><p>Run action changes as transactions and ask named Datalog queries against local facts.</p></article>
+            <article><span>03 / EXTEND</span><h3>A narrow core</h3><p>Keep UI and deployment hosts outside the package until a real consumer needs them.</p></article>
+          </div>
+        </section>
+
+        <section id="start" class="oo-home__section oo-home__guides" aria-labelledby="start-title">
+          <div class="oo-home__section-head"><span class="oo-home__overline">Start building</span><h2 id="start-title">Run the field-service example.</h2></div>
+          <div class="oo-home__code-group oo-home__quickstart"><div class="oo-home__code-head"><span>terminal</span><span>Node 22+ · pnpm 10.11</span></div><pre><code>git clone https://github.com/bjacobso/open-ontology.git
+cd open-ontology
+pnpm install --frozen-lockfile
+pnpm example</code></pre></div>
+          <nav aria-label="Project resources">
+            <a href="https://github.com/bjacobso/open-ontology#run">README <span>↗</span></a>
+            <a href="https://github.com/bjacobso/open-ontology/blob/main/docs/architecture.md">Architecture <span>↗</span></a>
+            <a href="https://github.com/bjacobso/open-ontology/tree/main/examples/field-service">Example <span>↗</span></a>
+            <a href="https://github.com/bjacobso/forma">Forma <span>↗</span></a>
+            <a href="https://github.com/bjacobso/triplex">Triplex <span>↗</span></a>
+            <a href="https://github.com/bjacobso/open-ontology-legacy">Historical repository <span>↗</span></a>
+          </nav>
+        </section>
+      </main>
+      <footer class="oo-home__footer"><span>Open Ontology · The ontology, not the empire.</span><nav aria-label="Footer navigation"><a href="https://github.com/bjacobso/open-ontology">Source ↗</a><a href="https://github.com/bjacobso/open-ontology-legacy">History ↗</a></nav></footer>
+    </div>
+  </body>
+</html>
