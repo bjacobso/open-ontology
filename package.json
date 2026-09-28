@@ -1,0 +1,57 @@
+{
+  "name": "@open-ontology/ontology",
+  "version": "0.1.0",
+  "description": "Portable ontology model and adapters for Forma and Triplex",
+  "type": "module",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "preludes",
+    "docs",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./forma": {
+      "types": "./dist/forma.d.ts",
+      "import": "./dist/forma.js"
+    },
+    "./ir": {
+      "types": "./dist/ir.d.ts",
+      "import": "./dist/ir.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime.d.ts",
+      "import": "./dist/runtime.js"
+    },
+    "./preludes/*": "./preludes/*"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "example": "tsx examples/field-service/run.ts"
+  },
+  "dependencies": {
+    "@formalang/ts": "0.3.0",
+    "@triplex-build/triplex": "0.2.0",
+    "effect": "4.0.0-rc.112"
+  },
+  "devDependencies": {
+    "@types/node": "25.9.1",
+    "tsdown": "0.20.0",
+    "tsx": "4.19.0",
+    "typescript": "5.9.3",
+    "vitest": "4.1.2"
+  },
+  "peerDependencies": {
+    "effect": "4.0.0-rc.112"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.11.0"
+}

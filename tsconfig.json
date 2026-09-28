@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "ESNext", "module": "ESNext", "moduleResolution": "bundler",
+    "lib": ["ESNext"], "strict": true, "skipLibCheck": true,
+    "noEmit": true, "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true, "noUnusedLocals": true,
+    "noUnusedParameters": true, "types": ["node", "vitest/globals"]
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts", "examples/**/*.ts", "*.config.ts"]
+}
