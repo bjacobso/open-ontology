@@ -22,6 +22,12 @@ pnpm example
 
 The package exports the TypeScript DSL, portable IR, Forma elaborator, and Triplex runtime adapter. The checked-in Forma preludes are loaded at runtime and included in the package tarball. See [architecture](docs/architecture.md) for the boundary and current operational limits.
 
+## Website
+
+The static site in [apps/site](apps/site) adapts the visual design of the historical repository's `packages/web/app/routes/home.*`. It describes only the current package and links to the checked-in field-service example. Run `pnpm site:check` to validate local links and assets, or `pnpm site:dev` to preview it with Wrangler.
+
+The [site deployment workflow](.github/workflows/deploy-site.yml) checks pull requests and deploys merges to `main` to the personal Cloudflare account as the separate `open-ontology-site` Worker. It needs `CLOUDFLARE_ACCOUNT_ID` and a scoped `CLOUDFLARE_API_TOKEN` GitHub secret. This Worker has no custom domain; the historical `open-ontology-main` Worker continues serving `open-ontology.com` until a separate cutover.
+
 The dependency lockfile resolves `@formalang/ts@0.3.0`, `@triplex-build/triplex@0.2.0`, and this package to `effect@4.0.0-rc.112`. Forma 0.3.0's published package declares Effect 4.0.0-rc.112; the Effect 3 boundary noted in the transition plan applied to an earlier Forma package state.
 
 ## Next checkpoint

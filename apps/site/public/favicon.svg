@@ -1,0 +1,27 @@
+<svg width="32" height="32" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 7-Node Circular Graph Logo - Favicon -->
+
+  <!-- Outer ring - organic curved connections between adjacent nodes -->
+  <path d="M32 8 Q42 6, 50.5 14.5" stroke="#121212" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M50.5 14.5 Q58 22, 55.5 33" stroke="#121212" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M55.5 33 Q56 44, 46 51" stroke="#121212" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M46 51 Q32 58, 18 51" stroke="#121212" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M18 51 Q8 44, 8.5 33" stroke="#121212" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M8.5 33 Q6 22, 13.5 14.5" stroke="#121212" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M13.5 14.5 Q22 6, 32 8" stroke="#121212" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Inner connections - 4 organic curved lines for graph effect -->
+  <path d="M32 8 Q40 28, 46 51" stroke="#121212" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M50.5 14.5 Q32 30, 8.5 33" stroke="#121212" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M55.5 33 Q30 38, 18 51" stroke="#121212" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M46 51 Q28 46, 8.5 33" stroke="#121212" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Nodes -->
+  <circle cx="32" cy="8" r="4" fill="#121212"/>
+  <circle cx="50.5" cy="14.5" r="4" fill="#121212"/>
+  <circle cx="55.5" cy="33" r="4" fill="#121212"/>
+  <circle cx="46" cy="51" r="4" fill="#121212"/>
+  <circle cx="18" cy="51" r="4" fill="#121212"/>
+  <circle cx="8.5" cy="33" r="4" fill="#121212"/>
+  <circle cx="13.5" cy="14.5" r="4" fill="#121212"/>
+</svg>
