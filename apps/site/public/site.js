@@ -1,28 +1,59 @@
-const tabs = [...document.querySelectorAll('.oo-home__tabs [role="tab"]')];
-const panels = tabs.map((_, index) => document.getElementById(`panel-${index}`));
-const description = document.getElementById("code-description");
+// Progressive enhancement only: every word on the page is present without JavaScript.
 
-function activateTab(index) {
-  tabs.forEach((tab, tabIndex) => {
-    const active = tabIndex === index;
-    tab.setAttribute("aria-selected", String(active));
-    tab.tabIndex = active ? 0 : -1;
-    panels[tabIndex].hidden = !active;
-  });
-  description.textContent = tabs[index].dataset.description;
+const escape = (text) => text.replace(/[&<>]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[char]);
+
+const FORMS = new Set([
+  "define-entity", "define-relation", "define-action", "define-mutation", "define-datalog-query",
+]);
+const OPERATIONS = new Set(["changes", "create", "set", "clear", "link", "now"]);
+const TOKEN = /(;[^\n]*)|("(?:[^"\\]|\\.)*")|(:[A-Za-z][\w/-]*)|(-?\b\d[\d_]*\b)|([A-Za-z][\w-]*)/g;
+
+function highlightLisp(source) {
+  let html = "";
+  let last = 0;
+  for (const match of source.matchAll(TOKEN)) {
+    html += escape(source.slice(last, match.index));
+    const [token, comment, string, keyword, number, word] = match;
+    const kind = comment ? "com"
+      : string ? (/^"\?/.test(string) ? "var" : "str")
+      : keyword ? "kw"
+      : number ? "num"
+      : word && FORMS.has(word) ? "form"
+      : word && OPERATIONS.has(word) ? "op"
+      : null;
+    html += kind ? `<span class="t-${kind}">${escape(token)}</span>` : escape(token);
+    last = match.index + token.length;
+  }
+  return html + escape(source.slice(last));
 }
 
-tabs.forEach((tab, index) => {
-  tab.addEventListener("click", () => activateTab(index));
-  tab.addEventListener("keydown", (event) => {
-    const next = event.key === "ArrowRight" ? (index + 1) % tabs.length
-      : event.key === "ArrowLeft" ? (index - 1 + tabs.length) % tabs.length
-      : event.key === "Home" ? 0
-      : event.key === "End" ? tabs.length - 1
-      : null;
-    if (next === null) return;
-    event.preventDefault();
-    activateTab(next);
-    tabs[next].focus();
-  });
-});
+for (const block of document.querySelectorAll("code.lang-lisp")) {
+  block.innerHTML = highlightLisp(block.textContent);
+}
+
+async function copy(button, text) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    return;
+  }
+  const label = button.textContent;
+  button.textContent = "Copied";
+  button.dataset.copied = "";
+  setTimeout(() => {
+    button.textContent = label;
+    delete button.dataset.copied;
+  }, 1600);
+}
+
+if (navigator.clipboard) {
+  for (const button of document.querySelectorAll(".oo-copy")) {
+    button.hidden = false;
+    button.addEventListener("click", () => {
+      const text = button.dataset.copyUrl
+        ? new URL(button.dataset.copyUrl, location.href).href
+        : button.previousElementSibling?.textContent ?? "";
+      copy(button, text);
+    });
+  }
+}

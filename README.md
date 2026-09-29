@@ -4,6 +4,8 @@
 
 The selected implementation was adapted from the [historical Open Ontology repository](https://github.com/bjacobso/open-ontology-legacy) at [commit `7c2ff8a`](https://github.com/bjacobso/open-ontology-legacy/commit/7c2ff8a614b9f06a6e530aa80d0c7311dc81a323), especially its `packages/ontology` directory. The current code removes its server convenience method and does not bring over the old workspace or runtime.
 
+Join the community on [Discord](https://discord.gg/cjW4gxsdXK).
+
 ## Run
 
 Requires Node 22 or later and pnpm 10.11.0.
@@ -14,9 +16,13 @@ pnpm build
 pnpm typecheck
 pnpm test
 pnpm example
+pnpm example:support-desk
+pnpm model:check examples/support-desk/model.lisp
 ```
 
-`pnpm example` loads [the TypeScript model](examples/field-service/model.ts) and [the Forma model](examples/field-service/model.lisp), checks their IR for equivalence, seeds an in-memory Triplex host, invokes `assign-work-order`, and prints the `assigned-work` query result.
+`pnpm example` loads [the TypeScript model](examples/field-service/model.ts) and [the Forma model](examples/field-service/model.lisp), checks their IR for equivalence, seeds an in-memory Triplex host, invokes `assign-work-order`, and prints the `assigned-work` query result. `pnpm example:support-desk` runs a Forma-only model that exercises `create`, `clear` followed by `set`, reference fields, relations, negation, ordering, and aggregates.
+
+`pnpm model:check <model.lisp | model.ts>` elaborates a model, applies the runtime's naming and input-schema rules, and reports errors with `file:line:col`. It also warns about models that compile but misbehave: queries that match undeclared attributes or find unbound variables, optional inputs used by changes, single-valued fields set without a preceding `clear`, and changes that target a fixed object id. Pass `--json` for machine-readable output.
 
 ## Package boundary
 
@@ -24,7 +30,7 @@ The package exports the TypeScript DSL, portable IR, Forma elaborator, and Tripl
 
 ## Website
 
-The static site in [apps/site](apps/site) adapts the visual design of the historical repository's `packages/web/app/routes/home.*`. It describes only the current package and links to the checked-in field-service example. Run `pnpm site:check` to validate local links and assets, or `pnpm site:dev` to preview it with Wrangler.
+The static site in [apps/site](apps/site) adapts the visual design of the historical repository's `packages/web/app/routes/home.*`. Its primary reader is an agent modeling a domain on someone's behalf. The homepage points agents to [`llms-full.txt`](apps/site/public/llms-full.txt), a single plain-text authoring guide covering the grammar, a modeling procedure, the checker, runtime semantics, and limits, and to its [`llms.txt`](apps/site/public/llms.txt) index. `test/agent-guide.test.ts` keeps the guide honest: every Forma block must check without warnings, and the quoted checker and example output must match what the commands print. Run `pnpm site:check` to validate local links and assets, or `pnpm site:dev` to preview it with Wrangler.
 
 The [site deployment workflow](.github/workflows/deploy-site.yml) checks pull requests and deploys merges to `main` to the personal Cloudflare account as the separate `open-ontology-site` Worker. It needs `CLOUDFLARE_ACCOUNT_ID` and a scoped `CLOUDFLARE_API_TOKEN` GitHub secret. This Worker has no custom domain; the historical `open-ontology-main` Worker continues serving `open-ontology.com` until a separate cutover.
 

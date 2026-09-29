@@ -21,6 +21,7 @@ const AssignedTo = Ontology.LinkType("assigned-to", {
 const AssignWorkOrder = Ontology.ActionType("assign-work-order", {
   input: Schema.Struct({ workOrder: Schema.String, technician: Schema.String }),
   changes: [
+    Change.clear(Input.value("workOrder"), WorkOrder.properties.status),
     Change.set(Input.value("workOrder"), WorkOrder.properties.status, "assigned"),
     Change.link(AssignedTo, Input.value("workOrder"), Input.value("technician"), {
       ":assigned-to/assigned-at": Input.now,

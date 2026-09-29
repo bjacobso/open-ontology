@@ -1,0 +1,460 @@
+# Open Ontology: authoring guide for agents
+
+> Open Ontology is a small, closed language for domain models. It has four declarations (entities, relations, actions, queries) and four kinds of change (create, set, clear, link). A model compiles to one portable JSON IR and runs actions as transactions and queries as Datalog on Triplex. This file is everything an agent needs to turn a person's description of their domain into a checked, running model.
+
+This guide covers `@open-ontology/ontology` 0.1.0, source at https://github.com/bjacobso/open-ontology. Every `lisp` block below is elaborated, checked with zero warnings, and (for the worked example) executed by the repository's test suite. If this file and the code disagree, the code wins. Report the mismatch as an issue or on Discord: https://discord.gg/cjW4gxsdXK
+
+Current checkpoint: one package, local in-memory runtime. Nothing persists between processes. There is no server, authorization, or npm release yet. See "Limits" before promising anything to the person you are helping.
+
+## 1. When to use it
+
+Use Open Ontology when the person wants any of these:
+
+- A precise, reviewable description of their domain: the things they track, how those things connect, what people do to them, and the questions they ask.
+- An executable check that the description holds together: actions really change state, queries really return the expected rows.
+- A single JSON artifact that other tools (a future API, UI, or agent tool surface) can read instead of re-deriving the domain.
+
+Do not promise these in v0.1. They are not implemented:
+
+- Durable storage, multi-user access, authorization, or an HTTP/OpenAPI server.
+- Queries with parameters, deleting objects, removing links, or conditional logic inside actions.
+- Enforcement of `required` or single-value cardinality on write.
+
+If the person needs those today, still write the model: it is the part that carries forward. Tell them plainly that the runtime is a local check.
+
+## 2. Setup
+
+The package is not on npm. Work inside a clone. Requires Node 22+ and pnpm 10.11.
+
+```sh
+git clone https://github.com/bjacobso/open-ontology.git
+cd open-ontology
+pnpm install --frozen-lockfile
+pnpm model:check examples/support-desk/model.lisp   # checker works
+pnpm example:support-desk                           # runtime works
+```
+
+Put a new model at `examples/<domain>/model.lisp`, with a scenario at `examples/<domain>/run.ts` copied from `examples/support-desk/run.ts`. The relative import `../../src/index.js` then resolves without changes.
+
+## 3. Procedure: from conversation to checked model
+
+1. **Draft before interrogating.** Read what the person already gave you (docs, spreadsheets, schemas, a paragraph) and write a first model. Ask only about the gaps. A concrete draft gets better corrections than a questionnaire does.
+2. **Fill gaps with these questions,** one area at a time:
+   - Things: "What do you keep track of? How do you tell two of them apart?" → entities and id conventions.
+   - Facts: "What do you need to know about each one? Which facts always exist?" → fields and `{:required true}`.
+   - Connections: "How are they connected? Is there only ever one current connection, or does the connection have its own facts, such as when or why?" → a reference field, or a relation.
+   - Verbs: "What do people do that changes these things? What do they supply when they do it?" → actions and inputs.
+   - Questions: "What do you look up every day or week?" → named queries.
+3. **Map words to forms** using the table in section 4.
+4. **Name things** by the rules in section 5.7. The checker enforces them.
+5. **Check:** `pnpm model:check examples/<domain>/model.lisp`. Fix every error and every warning, then re-run until it prints `0 warnings`. Errors carry `file:line:col`.
+6. **Run a scenario.** Seed the facts that exist before any action, invoke each action the way the person described it, and query. Compare the rows with what the person said they expect. An empty result usually means a misspelled attribute or a missing seed fact.
+7. **Hand back** four things: the model file, the `model:check` summary, the scenario output, and a "not captured yet" list for anything v0.1 cannot express. Also leave `; TODO:` comments in the model at each such point. If the gaps matter to the person, point them to the community Discord (section 12), where the roadmap is discussed.
+
+## 4. Mapping the person's words to forms
+
+| When the person says | Write |
+| --- | --- |
+| "We track customers and tickets." | `(define-entity Customer ...)`, `(define-entity Ticket ...)` |
+| "Each ticket belongs to one customer." | A reference field on the ticket: `(:field [ticket/customer Customer {:required true}])` |
+| "Tickets get escalated to engineers, and we note why and when." | A relation with its own fields: `(define-relation escalated-to Ticket Engineer (:field [escalated-to/reason String ...]))` |
+| "Status is open, escalated, or closed." | A `String` field, changed only by actions that `clear` and then `set` it. v0.1 has no enums. List the allowed values in a comment. |
+| "Support opens a ticket for a customer." | `(define-action open-ticket ...)` with a `create` change |
+| "Which open tickets matter most?" | `(define-datalog-query open-work ...)` with `not` and `:orderBy` |
+| "How many tickets are in each status?" | A query with `:aggregate [["count" "?t" "?count"]]` |
+| "Show tickets for customer X." | Queries take no parameters. Return the customer as a column and filter in the caller. |
+| "Close a ticket and forget who it was escalated to." | v0.1 cannot remove links. Record the end state on the object (a status), or use a reference field, which `clear` and `set` can replace. |
+
+Reference field or relation? Use a **reference field** when there is one current value that can be replaced. Use a **relation** when the connection has its own facts, or when you want every connection kept as history.
+
+## 5. Language reference (Forma)
+
+Forma is a Lisp. `;` starts a comment. Brackets `[...]` are vectors, and `{...}` are maps with keyword keys. The fragments in this section build one model cumulatively. The complete file is in section 10.
+
+### 5.1 define-entity
+
+```lisp
+(define-entity Customer
+  (:doc "An organisation that raises tickets.")
+  (:field [customer/name String {:required true}]))
+
+(define-entity Engineer
+  (:field [engineer/name String {:required true}]))
+
+(define-entity Ticket
+  (:field [ticket/title String {:required true}])
+  (:field [ticket/customer Customer {:required true}])
+  (:field [ticket/status String {:required true}])
+  (:field [ticket/priority Int {:required true}])
+  (:field [ticket/opened-at Instant {:required true}]))
+```
+
+- `(:field [namespace/name Type {:required true}])`. The options map is optional. `:required` is the only option carried into the IR.
+- `(:doc "...")` becomes the entity's `description`. Only entities accept `:doc`.
+- A field whose type names another entity (`Customer`) is a reference. Its value is the target's id.
+
+### 5.2 define-relation
+
+```lisp
+(define-relation escalated-to Ticket Engineer
+  (:field [escalated-to/reason String {:required true}])
+  (:field [escalated-to/at Instant {:required true}]))
+```
+
+- `(define-relation name FromEntity ToEntity fields...)`. Fields are optional.
+- Each link instance is its own object, with id `link:<relation>:<from-id>:<to-id>`. Its endpoints are the attributes `:<relation>/from` and `:<relation>/to`. Do not declare fields named `from` or `to`.
+- Linking the same pair again reuses that id and adds a second value for each link field.
+
+### 5.3 define-action
+
+```lisp
+(define-action open-ticket
+  (:input [ticket String {:required true}])
+  (:input [customer String {:required true}])
+  (:input [title String {:required true}])
+  (:input [priority Int {:required true}])
+  (:returns String)
+  (:do (create Ticket ticket
+         {:ticket/title title
+          :ticket/customer customer
+          :ticket/status "open"
+          :ticket/priority priority
+          :ticket/opened-at now})))
+
+(define-action escalate-ticket
+  (:input [ticket String {:required true}])
+  (:input [engineer String {:required true}])
+  (:input [reason String {:required true}])
+  (:returns String)
+  (:do (changes
+    (clear ticket :ticket/status)
+    (set ticket :ticket/status "escalated")
+    (link escalated-to ticket engineer
+      {:escalated-to/reason reason :escalated-to/at now}))))
+```
+
+- `(:input [name Type {:required true}])`, repeated. Inputs are decoded before anything is written. A missing required input fails with a schema error such as `Missing key at ["title"]`.
+- Mark every input the changes use as required. An optional input that is omitted fails with `Missing action input: <name>`.
+- `(:returns String)`: include it. The form declares it, and v0.1 ignores the value.
+- `(:do change)` for one change, or `(:do (changes change...))` for several, applied in order within one transaction.
+- `define-mutation` has the same syntax and produces the same IR.
+
+### 5.4 Changes and values
+
+| Change | Syntax | Effect |
+| --- | --- | --- |
+| create | `(create Entity id {:ns/field value ...})` | Asserts each listed field on object `id`. |
+| set | `(set object :ns/field value)` | Adds a value. It does **not** remove the previous one. |
+| clear | `(clear object :ns/field)` | Retracts every value of that field on the object. |
+| link | `(link relation from to {:relation/field value ...})` | Creates or extends the link object between `from` and `to`. |
+
+To **replace** a value, write `(clear x :ns/field)` and then `(set x :ns/field v)`. `set` and `clear` apply to entity fields only, not relation fields.
+
+A value is exactly one of:
+
+- An input name, unquoted: `ticket`.
+- `now`: the invocation time (`options.now`, or the current clock).
+- A literal: `"open"`, `2`, `true`.
+
+Quote every string literal. An unquoted name that is not a declared input silently becomes a string literal. `model:check` warns when an object position holds such a literal.
+
+### 5.5 define-datalog-query
+
+```lisp
+(define-datalog-query open-work
+  (:query
+    {:find ["?title" "?customer" "?priority"]
+     :where [["?t" ":ticket/title" "?title"]
+             ["?t" ":ticket/priority" "?priority"]
+             ["?t" ":ticket/customer" "?c"]
+             ["?c" ":customer/name" "?customer"]
+             ["not" ["?t" ":ticket/status" "closed"]]]
+     :orderBy [{:variable "?priority" :direction "desc"}]}))
+
+(define-datalog-query tickets-by-status
+  (:query
+    {:find ["?status" "?count"]
+     :where [["?t" ":ticket/status" "?status"]]
+     :aggregate [["count" "?t" "?count"]]}))
+```
+
+Inside a query every term is a quoted string: variables start with `?`, and attributes start with `:`.
+
+| Clause | Form |
+| --- | --- |
+| pattern | `["?entity" ":ns/field" "?value"]`. Any position may be a constant, such as an id `"ticket:1"` or a value `"closed"`, `2`, or `true`. |
+| comparison | `[op "?var" value]`, where `op` is one of `>`, `>=`, `<`, `<=`, `=`, `!=` |
+| negation | `["not" clause ...]` excludes rows where all the inner clauses match |
+| follow a reference | `["?t" ":ticket/customer" "?c"] ["?c" ":customer/name" "?name"]` |
+| follow a relation | `["?e" ":escalated-to/from" "?t"] ["?e" ":escalated-to/to" "?who"]` |
+
+These keys are optional:
+
+- `:aggregate [[fn "?source" "?target"]]`, where `fn` is one of `count`, `sum`, `avg`, `min`, `max`. The other `:find` variables group the rows.
+- `:orderBy [{:variable "?v" :direction "asc"|"desc"}]`
+- `:limit n`
+- `:offset n`
+
+Queries take no parameters. `model:check` warns when a pattern names an attribute nothing declares (such a query silently returns no rows). It also warns when a `:find` variable is never bound.
+
+### 5.6 Types
+
+| Forma | IR `valueType.kind` | Value at run time |
+| --- | --- | --- |
+| `String` | `string` | string |
+| `Int`, `Float`, `Number` | `number` | number |
+| `Bool`, `Boolean` | `boolean` | boolean |
+| `Instant`, `DateTime` | `datetime` | epoch milliseconds in and out |
+| `Json` | `json` | any JSON value; `toTriplexConfig` rejects it in v0.1 |
+| `EntityName` or `(Ref EntityName)` | `ref` | the target object's id string |
+| `(List T)`, `(Set T)` | kind of `T`, with `cardinality: "many"` | each `set` adds one more value |
+
+### 5.7 Naming rules (enforced)
+
+- Entities are PascalCase: `^[A-Z][A-Za-z0-9]*$`, for example `WorkOrder`.
+- Relations, actions and queries are kebab-case: `^[a-z][a-z0-9-]*$`, for example `assign-work-order`.
+- Field keys are lowercase and namespaced: `namespace/name`, matching `^[a-z][a-z0-9_-]*/[a-z][a-z0-9_-]*$`. The convention is the kebab-cased owner as the namespace: `work-order/title`, `escalated-to/reason`. Declarations may omit the leading `:`. Changes and queries write it: `:work-order/title`.
+- Object ids are strings the caller chooses. The convention is `kind:key`, for example `ticket:1`.
+- Names must be unique within a model.
+
+### 5.8 Rejected forms
+
+The adapter accepts only `define-entity`, `define-relation`, `define-action`, `define-mutation` and `define-datalog-query`. Other Forma forms (`define-view`, `define-role`, `define-permission`, `define-process`, `define-query`, …) are recognized and rejected with "`<form>` is not yet supported by the Triplex ontology adapter". Unknown change operations, such as `delete`, are rejected too.
+
+## 6. Checking a model
+
+```sh
+pnpm model:check <model.lisp | model.ts> [--name <name>] [--version <version>] [--json]
+```
+
+The command elaborates the file, applies the runtime's naming and input-schema rules, and lints for mistakes that compile but misbehave. It exits 0 when the model is valid (warnings allowed), 1 on an error, and 2 on bad usage. Use `--json` for a machine-readable result; it lists `ok`, `diagnostics` and `summary` first, then `ir`.
+
+```text
+$ pnpm model:check examples/field-service/model.lisp --name field-service --version 1
+ok examples/field-service/model.lisp (field-service@1)
+  object  Technician  :technician/name string!
+  object  WorkOrder  :work-order/title string!, :work-order/status string!
+  link    assigned-to  WorkOrder -> Technician  :assigned-to/assigned-at datetime!
+  action  assign-work-order(workOrder string!, technician string!)  clear :work-order/status, set :work-order/status, link assigned-to
+  query   assigned-work  find ?title ?technician
+0 warnings
+```
+
+In the summary, `!` marks a required field or input, and `[T]` marks a many-valued field. An error looks like this:
+
+```text
+model.lisp:2:1: error: Link assigned-to has unknown endpoints Missing -> WorkOrder
+```
+
+Warnings the checker raises, and the fix for each:
+
+| Warning | Fix |
+| --- | --- |
+| query matches an attribute no object or link declares | Correct the spelling, or declare the field |
+| query finds a variable no `:where` clause binds | Bind it with a pattern, or drop it from `:find` |
+| action uses an optional input in a change | Mark the input `{:required true}` |
+| action sets a single-valued field without clearing it | Add `(clear obj :ns/field)` before the `set` |
+| action targets a fixed object id | Declare the missing input, or fix its spelling |
+
+## 7. Running a scenario
+
+`makeOntologyRuntime(ir)` returns `invoke(action, input, options)` and `query(name)`. Both are Effect programs that need a Triplex layer. v0.1 uses the in-memory `KvTriples.layer`.
+
+```ts
+import { readFile } from "node:fs/promises";
+import { Effect } from "effect";
+import { EntityId, KvTriples, Triples, string } from "@triplex-build/triplex";
+import { elaborateFormaOntology, makeOntologyRuntime } from "../../src/index.js";
+
+const source = await readFile(new URL("./model.lisp", import.meta.url), "utf8");
+const runtime = makeOntologyRuntime(elaborateFormaOntology(source, { name: "support-desk", version: "1" }));
+
+const rows = await Effect.runPromise(
+  Effect.gen(function* () {
+    const triples = yield* Triples;
+    // Seed facts that exist before any action runs.
+    yield* triples.transact([
+      { op: "assert", entityId: EntityId.make("customer:acme"), entityType: "Customer", attribute: ":customer/name", value: string("Acme") },
+    ]);
+    yield* runtime.invoke(
+      "open-ticket",
+      { ticket: "ticket:1", customer: "customer:acme", title: "VPN drops hourly", priority: 2 },
+      { actor: "agent:triage", commandId: "open:1" },
+    );
+    return (yield* runtime.query("open-work")).results;
+  }).pipe(Effect.provide(KvTriples.layer)),
+);
+```
+
+Semantics you can rely on in v0.1:
+
+- One invocation is one transaction. The input is decoded first. If decoding or building the changes fails, nothing is written.
+- `actor` is recorded on every written fact. It is stored, not checked.
+- `commandId` makes an invocation idempotent: reusing it fails with `CommandAlreadyCommittedError`.
+- `now` in a change resolves to `options.now`, or to the current time.
+- Query results are rows keyed by variable, including the `?`: `{ "?title": "VPN drops hourly" }`. References come back as id strings and instants as epoch milliseconds.
+- `required` and single-value cardinality are recorded in the IR but not enforced on write.
+
+## 8. TypeScript authoring
+
+The same model can be written with the TypeScript DSL, which produces an identical IR. The repository's test asserts this for `examples/field-service/model.ts` and `model.lisp`. Choose TypeScript when the person's codebase is TypeScript and they want query clauses and result rows type-checked against the declared properties. Choose Forma when you want a compact file with located errors that a non-programmer can review.
+
+```ts
+const AssignWorkOrder = Ontology.ActionType("assign-work-order", {
+  input: Schema.Struct({ workOrder: Schema.String, technician: Schema.String }),
+  changes: [
+    Change.clear(Input.value("workOrder"), WorkOrder.properties.status),
+    Change.set(Input.value("workOrder"), WorkOrder.properties.status, "assigned"),
+    Change.link(AssignedTo, Input.value("workOrder"), Input.value("technician"), {
+      ":assigned-to/assigned-at": Input.now,
+    }),
+  ],
+});
+```
+
+`pnpm model:check path/to/model.ts` imports the module and checks the first exported `defineOntology(...)` result. The TypeScript DSL also offers `Property.make(key, schema).many()` and `.unique()`, which Forma does not expose.
+
+## 9. The portable IR
+
+`elaborateFormaOntology(source, { name, version })` and `ontologyToIR(definition)` both return:
+
+```json
+{
+  "kind": "ontology",
+  "name": "field-service",
+  "version": "1",
+  "objectTypes": [{ "kind": "object-type", "name": "WorkOrder", "properties": [{ "name": "status", "key": ":work-order/status", "valueType": { "kind": "string" }, "required": true, "cardinality": "one", "unique": false }] }],
+  "linkTypes": [{ "kind": "link-type", "name": "assigned-to", "from": "WorkOrder", "to": "Technician", "properties": [] }],
+  "actionTypes": [{ "kind": "action-type", "name": "assign-work-order", "input": [], "inputSchema": {}, "changes": [] }],
+  "queryTypes": [{ "kind": "query-type", "name": "assigned-work", "query": { "find": [], "where": [] } }]
+}
+```
+
+The arrays above are abbreviated. The IR is plain JSON: store it, diff it, or hand it to another tool. Each action carries a JSON Schema (draft 2020-12) for its input in `inputSchema`. `materializeOntology(ir)` restores the executable model. `toTriplexConfig(ir)` emits Triplex configuration nodes and constraints. Types are in `src/ir.ts`.
+
+## 10. Worked example: support desk
+
+The person said: "Customers raise tickets with a priority. Support can escalate a ticket to an engineer with a reason, and close it. We need the open work in priority order, who each ticket was escalated to and why, and a count per status."
+
+This is `examples/support-desk/model.lisp` in full:
+
+```lisp
+(define-entity Customer
+  (:doc "An organisation that raises tickets.")
+  (:field [customer/name String {:required true}]))
+
+(define-entity Engineer
+  (:field [engineer/name String {:required true}]))
+
+(define-entity Ticket
+  (:field [ticket/title String {:required true}])
+  (:field [ticket/customer Customer {:required true}])
+  (:field [ticket/status String {:required true}])
+  (:field [ticket/priority Int {:required true}])
+  (:field [ticket/opened-at Instant {:required true}]))
+
+(define-relation escalated-to Ticket Engineer
+  (:field [escalated-to/reason String {:required true}])
+  (:field [escalated-to/at Instant {:required true}]))
+
+(define-action open-ticket
+  (:input [ticket String {:required true}])
+  (:input [customer String {:required true}])
+  (:input [title String {:required true}])
+  (:input [priority Int {:required true}])
+  (:returns String)
+  (:do (create Ticket ticket
+         {:ticket/title title
+          :ticket/customer customer
+          :ticket/status "open"
+          :ticket/priority priority
+          :ticket/opened-at now})))
+
+(define-action escalate-ticket
+  (:input [ticket String {:required true}])
+  (:input [engineer String {:required true}])
+  (:input [reason String {:required true}])
+  (:returns String)
+  (:do (changes
+    (clear ticket :ticket/status)
+    (set ticket :ticket/status "escalated")
+    (link escalated-to ticket engineer
+      {:escalated-to/reason reason :escalated-to/at now}))))
+
+(define-action close-ticket
+  (:input [ticket String {:required true}])
+  (:returns String)
+  (:do (changes
+    (clear ticket :ticket/status)
+    (set ticket :ticket/status "closed"))))
+
+(define-datalog-query open-work
+  (:query
+    {:find ["?title" "?customer" "?priority"]
+     :where [["?t" ":ticket/title" "?title"]
+             ["?t" ":ticket/priority" "?priority"]
+             ["?t" ":ticket/customer" "?c"]
+             ["?c" ":customer/name" "?customer"]
+             ["not" ["?t" ":ticket/status" "closed"]]]
+     :orderBy [{:variable "?priority" :direction "desc"}]}))
+
+(define-datalog-query escalations
+  (:query
+    {:find ["?title" "?engineer" "?reason"]
+     :where [["?e" ":escalated-to/from" "?t"]
+             ["?e" ":escalated-to/to" "?who"]
+             ["?e" ":escalated-to/reason" "?reason"]
+             ["?t" ":ticket/title" "?title"]
+             ["?who" ":engineer/name" "?engineer"]]}))
+
+(define-datalog-query tickets-by-status
+  (:query
+    {:find ["?status" "?count"]
+     :where [["?t" ":ticket/status" "?status"]]
+     :aggregate [["count" "?t" "?count"]]}))
+```
+
+`examples/support-desk/run.ts` seeds Acme and Lin, then opens three tickets, escalates one and closes one. `pnpm example:support-desk` prints:
+
+```json
+{
+  "open-work": [
+    { "?title": "VPN drops hourly", "?customer": "Acme", "?priority": 2 },
+    { "?title": "Invoice PDF blank", "?customer": "Acme", "?priority": 1 }
+  ],
+  "escalations": [
+    { "?title": "VPN drops hourly", "?engineer": "Lin", "?reason": "Needs network access" }
+  ],
+  "tickets-by-status": [
+    { "?status": "escalated", "?count": 1 },
+    { "?status": "open", "?count": 1 },
+    { "?status": "closed", "?count": 1 }
+  ]
+}
+```
+
+Not captured yet, and worth telling the person: "only support staff may close tickets" (no policy in v0.1); "show me Acme's tickets" (no query parameters); "un-escalate" (no link removal).
+
+## 11. Limits of v0.1
+
+- Runtime: in-memory Triplex only. Nothing survives the process.
+- Security: no policy or authorization. `actor` is recorded, not checked.
+- Surface: no HTTP server, OpenAPI, or UI. The package is not published to npm.
+- Actions: a fixed list of changes over literals, inputs and `now`. There are no conditions, computed values, deletes or unlinks.
+- Queries: named and fixed. There are no parameters.
+- Integrity: `required`, cardinality and uniqueness are recorded, not enforced on write.
+- Forms: only the five listed in section 5.8.
+
+Next checkpoint, in order: SQLite persistence, policy authorization, and a versioned config release and deploy. After that come restart and historical-query tests, verification of attribution and idempotency, and a migration or rebuild procedure. HTTP reflection and OpenAPI follow that.
+
+## 12. Files
+
+- Package entry: https://github.com/bjacobso/open-ontology/blob/main/src/index.ts
+- IR types: https://github.com/bjacobso/open-ontology/blob/main/src/ir.ts
+- Forma adapter: https://github.com/bjacobso/open-ontology/blob/main/src/forma.ts
+- Runtime: https://github.com/bjacobso/open-ontology/blob/main/src/runtime.ts
+- Checker: https://github.com/bjacobso/open-ontology/blob/main/scripts/check-model.ts
+- Field-service example: https://github.com/bjacobso/open-ontology/tree/main/examples/field-service
+- Support-desk example: https://github.com/bjacobso/open-ontology/tree/main/examples/support-desk
+- Architecture: https://github.com/bjacobso/open-ontology/blob/main/docs/architecture.md
+- Community Discord: https://discord.gg/cjW4gxsdXK
