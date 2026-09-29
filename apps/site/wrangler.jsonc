@@ -3,6 +3,9 @@
   "name": "open-ontology-site",
   "compatibility_date": "2026-09-27",
   "workers_dev": true,
+  "routes": [
+    { "pattern": "open-ontology.com", "custom_domain": true }
+  ],
   "assets": {
     "directory": "./public",
     "not_found_handling": "404-page"
