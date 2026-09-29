@@ -13,6 +13,7 @@
   (:input [technician String {:required true}])
   (:returns String)
   (:do (changes
+    (clear workOrder :work-order/status)
     (set workOrder :work-order/status "assigned")
     (link assigned-to workOrder technician {:assigned-to/assigned-at now}))))
 

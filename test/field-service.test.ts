@@ -46,8 +46,11 @@ describe("field-service authoring", () => {
         { op: "assert", entityId: EntityId.make("work-order:42"), entityType: "WorkOrder", attribute: ":work-order/status", value: string("open") },
       ]);
       yield* runtime.invoke("assign-work-order", { workOrder: "work-order:42", technician: "technician:ada" }, { actor: "dispatcher:grace", commandId: "assign:42", now: 1_800_000_000_000 });
-      return yield* runtime.query("assigned-work");
+      const statuses = yield* triples.queryAll({ find: ["?status"], where: [["work-order:42", ":work-order/status", "?status"]] });
+      return { assigned: yield* runtime.query("assigned-work"), statuses };
     }).pipe(Effect.provide(KvTriples.layer)));
-    expect(response.results).toEqual([{ "?title": "Repair cooling pump", "?technician": "Ada" }]);
+    expect(response.assigned.results).toEqual([{ "?title": "Repair cooling pump", "?technician": "Ada" }]);
+    // The action clears the old status before setting the new one, so only one value remains.
+    expect(response.statuses.results).toEqual([{ "?status": "assigned" }]);
   });
 });

@@ -4,161 +4,85 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f1f0e7" />
-    <meta name="description" content="Define objects, links, actions, and named queries in TypeScript or Forma. Run one portable ontology model on Triplex." />
-    <title>Open Ontology — One model, two authoring paths</title>
+    <meta name="description" content="Open Ontology is a small, closed language for domain models: entities, relations, actions, and queries. Agents write it, a checker verifies it, and it runs as transactions and Datalog. Agent guide: /llms-full.txt" />
+    <title>Open Ontology: domain models agents can write, check, and run</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="text/plain" href="/llms-full.txt" title="Open Ontology agent guide" />
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="Open Ontology llms.txt index" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/site.css" />
     <script defer src="/site.js"></script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareSourceCode",
+        "name": "Open Ontology",
+        "description": "A small, closed language for domain models (entities, relations, actions, queries) that compiles to portable JSON IR and runs on Triplex.",
+        "codeRepository": "https://github.com/bjacobso/open-ontology",
+        "programmingLanguage": ["TypeScript", "Lisp"],
+        "license": "https://opensource.org/licenses/MIT",
+        "version": "0.1.0"
+      }
+    </script>
   </head>
   <body>
-    <div class="oo-home">
-      <header class="oo-home__nav">
-        <a class="oo-home__brand" href="/" aria-label="Open Ontology home">
-          <span class="oo-home__mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" width="20" height="20"><path d="M14 4 24 14 14 24 4 14 14 4Z" stroke="currentColor" stroke-width="1.6"/><circle cx="14" cy="14" r="3" fill="currentColor"/></svg></span>
+    <div class="oo">
+      <a class="oo-skip" href="#main">Skip to content</a>
+      <header class="oo-nav">
+        <a class="oo-brand" href="/" aria-label="Open Ontology home">
+          <span class="oo-mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" width="20" height="20"><path d="M14 4 24 14 14 24 4 14 14 4Z" stroke="currentColor" stroke-width="1.6"/><circle cx="14" cy="14" r="3" fill="currentColor"/></svg></span>
           <span>Open Ontology</span>
         </a>
         <nav aria-label="Main navigation">
-          <a href="#model">Model</a>
-          <a href="#forma">Forma</a>
-          <a href="#start">Get started</a>
+          <a href="#language">Language</a>
+          <a href="#procedure">Procedure</a>
+          <a href="#check">Check &amp; run</a>
+          <a href="#limits">Limits</a>
+          <a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a>
+          <a class="oo-nav__discord" href="https://discord.gg/cjW4gxsdXK"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg><span>Discord</span></a>
           <a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a>
         </nav>
       </header>
 
-      <main class="oo-home__main">
-        <section class="oo-home__hero" aria-labelledby="hero-title">
-          <div class="oo-home__hero-copy">
-            <div class="oo-home__eyebrow"><span class="oo-home__pulse"></span> Experimental ontology package · v0.1</div>
-            <h1 id="hero-title">Model your domain <em>like Palantir.</em></h1>
-            <p class="oo-home__tagline">Without the Palantir-scale everything.</p>
-            <p class="oo-home__lead">Define the things your software knows, the relationships between them, the actions people take, and the questions they ask. Author the model in TypeScript or Forma; run it on Triplex.</p>
-            <div class="oo-home__release" aria-label="Project status">
-              <span>Current checkpoint</span>
-              <strong>One package. One executable example. Local in-memory runtime.</strong>
+      <aside class="oo-agentbar" aria-label="Note for AI agents">
+        <p><strong>Agents:</strong> skip the HTML. <a href="/llms-full.txt">/llms-full.txt</a> is the complete authoring guide in one plain-text file, tested against v0.1. The index is at <a href="/llms.txt">/llms.txt</a>.</p>
+      </aside>
+
+      <main id="main" class="oo-main">
+        <section class="oo-hero" aria-labelledby="hero-title">
+          <div class="oo-hero__copy">
+            <p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> v0.1 · experimental · Local in-memory runtime</p>
+            <h1 id="hero-title">Turn how a business works into a model that <em>runs.</em></h1>
+            <p class="oo-lead">Open Ontology is a small, closed language for domain models. It covers the things a business tracks, how they connect, what people do to them, and the questions they ask. Agents write the model, a checker verifies it, and people own the result: one plain file that compiles to portable JSON and runs.</p>
+
+            <div class="oo-forAgents">
+              <p class="oo-forAgents__label">Modeling for someone?</p>
+              <p class="oo-forAgents__text">Everything you need is one fetch away: grammar, a seven-step procedure, the check command, runtime semantics and limits.</p>
+              <div class="oo-forAgents__fetch">
+                <code>GET /llms-full.txt</code>
+                <button type="button" class="oo-copy" data-copy-url="/llms-full.txt" hidden>Copy URL</button>
+              </div>
             </div>
-            <div class="oo-home__actions">
-              <a class="oo-home__primary" href="https://github.com/bjacobso/open-ontology">Explore the source <span aria-hidden="true">↗</span></a>
-              <a href="#model">See the model ↓</a>
-              <a href="https://github.com/bjacobso/open-ontology#run">Run locally</a>
+
+            <div class="oo-actions">
+              <a class="oo-primary" href="/llms-full.txt">Read the agent guide <span aria-hidden="true">→</span></a>
+              <a href="#check">See it check and run ↓</a>
+              <a href="https://github.com/bjacobso/open-ontology">Source ↗</a>
+              <a href="https://discord.gg/cjW4gxsdXK">Join the Discord ↗</a>
             </div>
           </div>
-          <div class="oo-home__hero-code" aria-label="Work order object type in TypeScript">
-            <span class="oo-home__specimen-tag">FROM THE EXAMPLE</span>
-            <div class="oo-home__window-head"><span class="oo-home__window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>field-service/model.ts</span><span>OBJECT TYPE</span></div>
-            <pre><code>const WorkOrder = Ontology.ObjectType(
-  "WorkOrder",
-  {
-    properties: {
-      title: Property.make(
-        ":work-order/title",
-        Schema.String,
-      ).required(),
-      status: Property.make(
-        ":work-order/status",
-        Schema.String,
-      ).required(),
-    },
-  },
-);</code></pre>
-          </div>
-        </section>
 
-        <section class="oo-home__flow" aria-label="How Open Ontology composes">
-          <div><span>01 / MODEL</span><strong>Name the things</strong><small>Objects, properties, and links</small></div>
-          <div><span>02 / ACT</span><strong>Give the model behavior</strong><small>Typed actions and named queries</small></div>
-          <div><span>03 / RUN</span><strong>Put it on facts</strong><small>Triplex transactions and Datalog</small></div>
-        </section>
-
-        <section class="oo-home__thesis" aria-labelledby="thesis-title">
-          <div class="oo-home__thesis-label"><span>THE MODEL</span><span>OO–001</span></div>
-          <div class="oo-home__thesis-copy">
-            <h2 id="thesis-title">Your domain model should be able to <em>do things.</em></h2>
-            <p>Object and link types describe the domain. Actions change it. Named queries answer questions against the same facts. The resulting IR is portable JSON.</p>
-          </div>
-          <div class="oo-home__formula" aria-label="Ontology composition"><span>objects</span><b>+</b><span>links</span><b>+</b><span>actions</span><b>+</b><span>queries</span><b>=</b><strong>one ontology IR</strong></div>
-          <p class="oo-home__margin-note">A package you can inspect and run locally.</p>
-        </section>
-
-        <section id="model" class="oo-home__section" aria-labelledby="model-title">
-          <div class="oo-home__section-grid">
-            <div class="oo-home__section-head"><span class="oo-home__overline">TypeScript DSL</span><h2 id="model-title">One field-service model, end to end.</h2></div>
-            <p>The repository's example defines a technician, a work order, their assignment, an action, and a named Datalog query. Its action and query run in a local Triplex test.</p>
-          </div>
-          <div class="oo-home__code-group">
-            <div class="oo-home__tabs" role="tablist" aria-label="TypeScript ontology stages">
-              <button id="tab-0" data-description="Object and link types" type="button" role="tab" aria-selected="true" aria-controls="panel-0" tabindex="0">01 · Model</button>
-              <button id="tab-1" data-description="Typed action plan" type="button" role="tab" aria-selected="false" aria-controls="panel-1" tabindex="-1">02 · Action</button>
-              <button id="tab-2" data-description="Named Datalog query" type="button" role="tab" aria-selected="false" aria-controls="panel-2" tabindex="-1">03 · Query</button>
+          <figure class="oo-specimen" aria-labelledby="specimen-caption">
+            <span class="oo-specimen__tag" aria-hidden="true">THE JOB</span>
+            <div class="oo-specimen__step">
+              <span class="oo-specimen__label">01 · The person says</span>
+              <blockquote>“Dispatchers assign open work orders to technicians. I need to see who is on what.”</blockquote>
             </div>
-            <div class="oo-home__code-head"><span>field-service/model.ts</span><span id="code-description">Object and link types</span></div>
-            <div id="panel-0" role="tabpanel" aria-labelledby="tab-0"><pre><code>const Technician = Ontology.ObjectType("Technician", {
-  properties: {
-    name: Property.make(":technician/name", Schema.String).required(),
-  },
-});
-
-const WorkOrder = Ontology.ObjectType("WorkOrder", {
-  properties: {
-    title: Property.make(":work-order/title", Schema.String).required(),
-    status: Property.make(":work-order/status", Schema.String).required(),
-  },
-});
-
-const AssignedTo = Ontology.LinkType("assigned-to", {
-  from: WorkOrder,
-  to: Technician,
-  properties: {
-    assignedAt: Property.instant(":assigned-to/assigned-at").required(),
-  },
-});</code></pre></div>
-            <div id="panel-1" role="tabpanel" aria-labelledby="tab-1" hidden><pre><code>const AssignWorkOrder = Ontology.ActionType("assign-work-order", {
-  input: Schema.Struct({
-    workOrder: Schema.String,
-    technician: Schema.String,
-  }),
-  changes: [
-    Change.set(
-      Input.value("workOrder"),
-      WorkOrder.properties.status,
-      "assigned",
-    ),
-    Change.link(
-      AssignedTo,
-      Input.value("workOrder"),
-      Input.value("technician"),
-      { ":assigned-to/assigned-at": Input.now },
-    ),
-  ],
-});</code></pre></div>
-            <div id="panel-2" role="tabpanel" aria-labelledby="tab-2" hidden><pre><code>const AssignedWork = Ontology.QueryType("assigned-work", {
-  query: Datalog.query({
-    find: [v.title, v.technician],
-    where: [
-      Datalog.match(v.work, WorkOrder.properties.title, v.title),
-      Datalog.match(v.assignment, AssignedTo.endpoints.from, v.work),
-      Datalog.match(v.assignment, AssignedTo.endpoints.to, v.person),
-      Datalog.match(v.person, Technician.properties.name, v.technician),
-    ],
-  }),
-});
-
-// See the complete checked-in query and variable declarations:
-// examples/field-service/model.ts</code></pre></div>
-          </div>
-          <p class="oo-home__source-link"><a href="https://github.com/bjacobso/open-ontology/blob/main/examples/field-service/model.ts">Read the complete TypeScript model ↗</a></p>
-        </section>
-
-        <section id="forma" class="oo-home__section" aria-labelledby="forma-title">
-          <div class="oo-home__section-grid">
-            <div class="oo-home__section-head"><span class="oo-home__overline">Forma Lisp DSL</span><h2 id="forma-title">The same model through a second authoring path.</h2></div>
-            <p>Forma reads the ontology forms and elaborates them into the same portable IR as the TypeScript DSL. The test checks equivalence and reports line and column locations for invalid source.</p>
-          </div>
-          <div class="oo-home__code-group oo-home__code-group--lisp">
-            <div class="oo-home__code-head"><span>field-service/model.lisp</span><span>Relation and action excerpt</span></div>
-            <pre><code>(define-relation assigned-to WorkOrder Technician
+            <div class="oo-specimen__step oo-specimen__step--code">
+              <span class="oo-specimen__label">02 · You write <b>examples/field-service/model.lisp</b></span>
+<pre><code class="lang-lisp">(define-relation assigned-to WorkOrder Technician
   (:field [assigned-to/assigned-at Instant {:required true}]))
 
 (define-action assign-work-order
@@ -166,50 +90,337 @@ const AssignedTo = Ontology.LinkType("assigned-to", {
   (:input [technician String {:required true}])
   (:returns String)
   (:do (changes
+    (clear workOrder :work-order/status)
     (set workOrder :work-order/status "assigned")
     (link assigned-to workOrder technician
-      {:assigned-to/assigned-at now}))))
+      {:assigned-to/assigned-at now}))))</code></pre>
+            </div>
+            <div class="oo-specimen__step oo-specimen__step--out">
+              <span class="oo-specimen__label">03 · It runs <b>pnpm example</b></span>
+<pre><code>[{ "?title": "Repair cooling pump", "?technician": "Ada" }]</code></pre>
+            </div>
+            <figcaption id="specimen-caption" class="oo-sr">A request in plain language, the Forma model that captures it, and the query result after the action runs.</figcaption>
+          </figure>
+        </section>
 
-(define-datalog-query assigned-work
+        <section class="oo-strip" aria-label="What the language guarantees">
+          <div><span>Closed</span><strong>4 declarations, 4 changes</strong><small>Nothing to over-engineer</small></div>
+          <div><span>Checked</span><strong>Errors at line:col</strong><small>And lint for silent failures</small></div>
+          <div><span>Executable</span><strong>Actions → transactions</strong><small>Queries → Datalog</small></div>
+          <div><span>Portable</span><strong>One JSON IR</strong><small>From Forma or TypeScript</small></div>
+        </section>
+
+        <section id="language" class="oo-section" aria-labelledby="language-title">
+          <div class="oo-head">
+            <p class="oo-overline">01 / The language</p>
+            <h2 id="language-title">Four declarations. Four changes. That is the whole language.</h2>
+            <p>A closed vocabulary is easier to write correctly and easier for the person to review. It also leaves no room to invent structure the business does not have. If they know Palantir Foundry's Ontology, it is the same core (objects, links, actions) as an open file they own.</p>
+          </div>
+
+          <div class="oo-decls">
+            <article>
+              <header><span>Nouns</span><h3>define-entity</h3></header>
+              <p>A thing the business tracks, with namespaced fields. A field typed as another entity is a reference.</p>
+<pre><code class="lang-lisp">(define-entity Ticket
+  (:field [ticket/title String {:required true}])
+  (:field [ticket/customer Customer {:required true}])
+  (:field [ticket/priority Int {:required true}]))</code></pre>
+            </article>
+            <article>
+              <header><span>Connections</span><h3>define-relation</h3></header>
+              <p>A typed edge between two entities that carries its own facts, such as when or why.</p>
+<pre><code class="lang-lisp">(define-relation escalated-to Ticket Engineer
+  (:field [escalated-to/reason String {:required true}])
+  (:field [escalated-to/at Instant {:required true}]))</code></pre>
+            </article>
+            <article>
+              <header><span>Verbs</span><h3>define-action</h3></header>
+              <p>Something a person does. Its typed inputs are decoded first, and its changes commit as one transaction.</p>
+<pre><code class="lang-lisp">(define-action close-ticket
+  (:input [ticket String {:required true}])
+  (:returns String)
+  (:do (changes
+    (clear ticket :ticket/status)
+    (set ticket :ticket/status "closed"))))</code></pre>
+            </article>
+            <article>
+              <header><span>Questions</span><h3>define-datalog-query</h3></header>
+              <p>A named question over the same facts, with joins, negation, ordering and aggregates.</p>
+<pre><code class="lang-lisp">(define-datalog-query tickets-by-status
   (:query
-    {:find ["?title" "?technician"]
-     :where [["?work" ":work-order/title" "?title"]
-             ["?assignment" ":assigned-to/from" "?work"]
-             ["?assignment" ":assigned-to/to" "?person"]
-             ["?person" ":technician/name" "?technician"]]}))</code></pre>
+    {:find ["?status" "?count"]
+     :where [["?t" ":ticket/status" "?status"]]
+     :aggregate [["count" "?t" "?count"]]}))</code></pre>
+            </article>
           </div>
-          <p class="oo-home__source-link"><a href="https://github.com/bjacobso/open-ontology/blob/main/examples/field-service/model.lisp">Read the complete Forma model ↗</a></p>
+
+          <div class="oo-changes" role="table" aria-label="Action changes">
+            <div role="row" class="oo-changes__head"><span role="columnheader">Change</span><span role="columnheader">Syntax</span><span role="columnheader">Effect</span></div>
+            <div role="row"><span role="cell"><b>create</b></span><code role="cell">(create Entity id {:ns/field value})</code><span role="cell">Asserts each listed field on object <code>id</code>.</span></div>
+            <div role="row"><span role="cell"><b>set</b></span><code role="cell">(set object :ns/field value)</code><span role="cell">Adds a value. It does not remove the old one.</span></div>
+            <div role="row"><span role="cell"><b>clear</b></span><code role="cell">(clear object :ns/field)</code><span role="cell">Retracts every value. Put it before <code>set</code> to replace.</span></div>
+            <div role="row"><span role="cell"><b>link</b></span><code role="cell">(link relation from to {:rel/field value})</code><span role="cell">Creates the link object between <code>from</code> and <code>to</code>.</span></div>
+          </div>
+          <p class="oo-note">A value is an input name, <code>now</code>, or a quoted literal. Nothing else: no conditions, no computed values. Full grammar, types and naming rules are in <a href="/llms-full.txt">the agent guide, section 5</a>.</p>
         </section>
 
-        <section class="oo-home__section" aria-labelledby="boundary-title">
-          <div class="oo-home__section-grid">
-            <div class="oo-home__section-head"><span class="oo-home__overline">Current boundary</span><h2 id="boundary-title">Built to grow from one working model.</h2></div>
-            <p>The package currently proves local authoring and execution. SQLite persistence, policy authorization, and a versioned deployment path are the next runtime checkpoint before a product server is offered.</p>
+        <section id="procedure" class="oo-section" aria-labelledby="procedure-title">
+          <div class="oo-head">
+            <p class="oo-overline">02 / The procedure</p>
+            <h2 id="procedure-title">From a conversation to a checked model.</h2>
+            <p>The same seven steps work for any domain. The agent does the translating, and the person only has to confirm what they recognize.</p>
           </div>
-          <div class="oo-home__cards">
-            <article><span>01 / AUTHOR</span><h3>TypeScript or Forma</h3><p>Choose the source format that fits the work. Both lower to one JSON-safe ontology IR.</p></article>
-            <article><span>02 / EXECUTE</span><h3>Triplex facts</h3><p>Run action changes as transactions and ask named Datalog queries against local facts.</p></article>
-            <article><span>03 / EXTEND</span><h3>A narrow core</h3><p>Keep UI and deployment hosts outside the package until a real consumer needs them.</p></article>
+          <div class="oo-procedure">
+            <ol class="oo-steps">
+              <li><b>Draft before interrogating.</b> Write a first model from whatever the person gave you. Ask only about the gaps.</li>
+              <li><b>Fill gaps by area:</b> things, facts, connections, verbs, questions.</li>
+              <li><b>Map words to forms</b> using the table alongside.</li>
+              <li><b>Name things by the rules:</b> PascalCase entities, kebab-case everything else, <code>namespace/field</code> keys.</li>
+              <li><b>Check:</b> run <code>pnpm model:check model.lisp</code> until it reports <code>0 warnings</code>.</li>
+              <li><b>Run a scenario:</b> seed facts, invoke actions, compare the query rows with what the person expects.</li>
+              <li><b>Hand back</b> the file, the check summary, the scenario output, and what v0.1 cannot express yet.</li>
+            </ol>
+            <div class="oo-map">
+              <table>
+                <caption>When the person says… write…</caption>
+                <thead><tr><th scope="col">The person says</th><th scope="col">You write</th></tr></thead>
+                <tbody>
+                  <tr><td>“We track customers and tickets.”</td><td><code>define-entity</code> ×2</td></tr>
+                  <tr><td>“Each ticket belongs to one customer.”</td><td>Reference field <code>[ticket/customer Customer]</code></td></tr>
+                  <tr><td>“We escalate to an engineer and note why.”</td><td><code>define-relation</code> with a <code>reason</code> field</td></tr>
+                  <tr><td>“Status is open, escalated or closed.”</td><td><code>String</code> field, replaced with <code>clear</code> + <code>set</code></td></tr>
+                  <tr><td>“Support opens a ticket.”</td><td><code>define-action</code> with <code>create</code></td></tr>
+                  <tr><td>“How many per status?”</td><td>Query with <code>:aggregate count</code></td></tr>
+                  <tr><td>“Show Acme's tickets.”</td><td>No query parameters in v0.1: return the customer column</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
-        <section id="start" class="oo-home__section oo-home__guides" aria-labelledby="start-title">
-          <div class="oo-home__section-head"><span class="oo-home__overline">Start building</span><h2 id="start-title">Run the field-service example.</h2></div>
-          <div class="oo-home__code-group oo-home__quickstart"><div class="oo-home__code-head"><span>terminal</span><span>Node 22+ · pnpm 10.11</span></div><pre><code>git clone https://github.com/bjacobso/open-ontology.git
+        <section id="check" class="oo-section" aria-labelledby="check-title">
+          <div class="oo-head">
+            <p class="oo-overline">03 / Check</p>
+            <h2 id="check-title">Errors with line numbers. Warnings for what compiles but misbehaves.</h2>
+            <p><code>pnpm model:check</code> elaborates a <code>.lisp</code> or <code>.ts</code> model and applies the runtime's naming and input rules. It also lints for the mistakes that fail silently: a misspelled attribute, a value that is never replaced, an input that can't be omitted. Add <code>--json</code> for machine-readable output.</p>
+          </div>
+          <div class="oo-terms">
+            <div class="oo-term">
+              <div class="oo-term__head"><span>A draft with two mistakes</span><span>exit 0</span></div>
+<pre><code><span class="oo-prompt">$ pnpm model:check examples/support-desk/draft.lisp</span>
+<span class="oo-warn">draft.lisp:43:1: warning:</span> Action close-ticket sets :ticket/status without
+  clearing it first; the previous value stays queryable. Add (clear ...
+  :ticket/status) before the set to replace it
+<span class="oo-warn">draft.lisp:68:1: warning:</span> Query tickets-by-status matches :ticket/stauts,
+  which no object or link declares; it will match nothing
+ok examples/support-desk/draft.lisp (draft@0.1.0)
+  …
+  object  Ticket  :ticket/title string!, :ticket/customer Customer!, …
+  link    escalated-to  Ticket -&gt; Engineer  :escalated-to/reason string!, …
+  …
+  action  close-ticket(ticket string!)  set :ticket/status
+  …
+  query   tickets-by-status  find ?status ?count
+2 warnings</code></pre>
+            </div>
+            <div class="oo-term">
+              <div class="oo-term__head"><span>A broken reference</span><span>exit 1</span></div>
+<pre><code><span class="oo-prompt">$ pnpm model:check examples/support-desk/draft.lisp</span>
+<span class="oo-err">draft.lisp:15:1: error:</span> Link escalated-to has unknown
+  endpoints Ticket -&gt; Engneer</code></pre>
+              <div class="oo-term__head"><span>The fixed model</span><span>exit 0</span></div>
+<pre><code><span class="oo-prompt">$ pnpm model:check examples/support-desk/model.lisp</span>
+ok examples/support-desk/model.lisp (model@0.1.0)
+  …
+0 warnings</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <section id="run" class="oo-section" aria-labelledby="run-title">
+          <div class="oo-head">
+            <p class="oo-overline">04 / Run</p>
+            <h2 id="run-title">What happens when an action runs.</h2>
+            <p>The field-service example seeds three facts, invokes <code>assign-work-order</code> on behalf of a dispatcher, and asks <code>assigned-work</code>. Each step below is the real behavior of the v0.1 runtime on the in-memory Triplex host.</p>
+          </div>
+          <ol class="oo-timeline">
+            <li>
+              <span class="oo-timeline__n">1</span>
+              <div>
+                <h3>Facts exist</h3>
+                <p>The scenario seeds what is true before anyone acts.</p>
+                <table class="oo-facts">
+                  <thead><tr><th scope="col">entity</th><th scope="col">attribute</th><th scope="col">value</th></tr></thead>
+                  <tbody>
+                    <tr><td>technician:ada</td><td>:technician/name</td><td>"Ada"</td></tr>
+                    <tr><td>work-order:42</td><td>:work-order/title</td><td>"Repair cooling pump"</td></tr>
+                    <tr><td>work-order:42</td><td>:work-order/status</td><td>"open"</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </li>
+            <li>
+              <span class="oo-timeline__n">2</span>
+              <div>
+                <h3>Someone acts</h3>
+                <p>The input is decoded against the action's schema before anything is written. <code>actor</code> is recorded on every fact, and reusing a <code>commandId</code> fails with <code>CommandAlreadyCommittedError</code>.</p>
+<pre class="oo-inline-code"><code>runtime.invoke("assign-work-order",
+  { workOrder: "work-order:42", technician: "technician:ada" },
+  { actor: "dispatcher:grace", commandId: "assign:42", now: 1_800_000_000_000 })</code></pre>
+              </div>
+            </li>
+            <li>
+              <span class="oo-timeline__n">3</span>
+              <div>
+                <h3>One transaction commits</h3>
+                <p>The three changes become five operations, and they commit together or not at all.</p>
+                <table class="oo-facts">
+                  <thead><tr><th scope="col">op</th><th scope="col">entity</th><th scope="col">attribute</th><th scope="col">value</th></tr></thead>
+                  <tbody>
+                    <tr class="oo-retract"><td>retract</td><td>work-order:42</td><td>:work-order/status</td><td>*</td></tr>
+                    <tr><td>assert</td><td>work-order:42</td><td>:work-order/status</td><td>"assigned"</td></tr>
+                    <tr><td>assert</td><td>link:assigned-to:work-order:42:technician:ada</td><td>:assigned-to/from</td><td>ref work-order:42</td></tr>
+                    <tr><td>assert</td><td>link:assigned-to:work-order:42:technician:ada</td><td>:assigned-to/to</td><td>ref technician:ada</td></tr>
+                    <tr><td>assert</td><td>link:assigned-to:work-order:42:technician:ada</td><td>:assigned-to/assigned-at</td><td>1800000000000</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </li>
+            <li>
+              <span class="oo-timeline__n">4</span>
+              <div>
+                <h3>The question is answered</h3>
+                <p><code>runtime.query("assigned-work")</code> joins the work order, the link and the technician. It returns rows keyed by variable:</p>
+<pre class="oo-inline-code"><code>[{ "?title": "Repair cooling pump", "?technician": "Ada" }]</code></pre>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <section id="ir" class="oo-section" aria-labelledby="ir-title">
+          <div class="oo-head">
+            <p class="oo-overline">05 / Portable</p>
+            <h2 id="ir-title">Two syntaxes. One JSON contract.</h2>
+            <p>Forma is compact, and its errors point at a line and column. The TypeScript DSL type-checks queries against declared properties. Both compile to the same IR, and the test suite asserts that the two field-service models produce identical JSON. Store it, diff it, or hand it to another tool.</p>
+          </div>
+          <div class="oo-ir">
+            <div class="oo-panel">
+              <div class="oo-panel__head"><span>model.lisp</span><span>Forma</span></div>
+<pre><code class="lang-lisp">(define-entity WorkOrder
+  (:field [work-order/title String {:required true}])
+  (:field [work-order/status String {:required true}]))</code></pre>
+            </div>
+            <div class="oo-panel">
+              <div class="oo-panel__head"><span>model.ts</span><span>TypeScript</span></div>
+<pre><code>const WorkOrder = Ontology.ObjectType("WorkOrder", {
+  properties: {
+    title: Property.make(":work-order/title", Schema.String).required(),
+    status: Property.make(":work-order/status", Schema.String).required(),
+  },
+});</code></pre>
+            </div>
+            <div class="oo-panel oo-panel--ir">
+              <div class="oo-panel__head"><span>OntologyIR</span><span>identical from both</span></div>
+<pre><code>{ "kind": "object-type", "name": "WorkOrder",
+  "properties": [
+    { "key": ":work-order/title", "name": "title",
+      "valueType": { "kind": "string" },
+      "required": true, "cardinality": "one", "unique": false },
+    { "key": ":work-order/status", … } ] }</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <section id="limits" class="oo-section" aria-labelledby="limits-title">
+          <div class="oo-head">
+            <p class="oo-overline">06 / Limits</p>
+            <h2 id="limits-title">What v0.1 does not do. Say so before you promise it.</h2>
+            <p>The model is the part that carries forward. The runtime today is a local check, and the list on the right is what the next checkpoint adds.</p>
+          </div>
+          <div class="oo-limits">
+            <div>
+              <h3>Works today</h3>
+              <ul class="oo-yes">
+                <li>Authoring in Forma or TypeScript, compiled to one JSON IR</li>
+                <li>Located errors, naming rules and lint with <code>pnpm model:check</code></li>
+                <li>Actions as atomic, attributed, idempotent Triplex transactions</li>
+                <li>Named Datalog queries: joins, <code>not</code>, comparisons, aggregates, ordering, limit and offset</li>
+                <li>Two runnable examples: field service and support desk</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Not yet</h3>
+              <ul class="oo-no">
+                <li>Persistence: in-memory host only, so nothing survives the process</li>
+                <li>Authorization: <code>actor</code> is recorded, not checked</li>
+                <li>HTTP, OpenAPI or UI surfaces, and an npm release</li>
+                <li>Query parameters, deletes, unlinks, conditional actions</li>
+                <li>Write-time enforcement of <code>required</code> and cardinality</li>
+              </ul>
+            </div>
+            <div class="oo-roadmap">
+              <h3>Next checkpoint</h3>
+              <ol>
+                <li>SQLite persistence</li>
+                <li>Policy authorization</li>
+                <li>Versioned config release and deploy</li>
+                <li>Restart and historical-query tests</li>
+                <li>Attribution and idempotency verification</li>
+                <li>Migration or rebuild procedure</li>
+              </ol>
+              <p>Then HTTP reflection and OpenAPI.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="start" class="oo-section oo-start" aria-labelledby="start-title">
+          <div class="oo-head">
+            <p class="oo-overline">07 / Start</p>
+            <h2 id="start-title">Clone, check, run.</h2>
+            <p>The package is not on npm yet, so work inside a clone. Put a new model at <code>examples/&lt;domain&gt;/model.lisp</code> and copy <code>examples/support-desk/run.ts</code> next to it.</p>
+          </div>
+          <div class="oo-term oo-term--start">
+            <div class="oo-term__head"><span>terminal</span><span>Node 22+ · pnpm 10.11</span></div>
+<pre><code>git clone https://github.com/bjacobso/open-ontology.git
 cd open-ontology
 pnpm install --frozen-lockfile
-pnpm example</code></pre></div>
-          <nav aria-label="Project resources">
-            <a href="https://github.com/bjacobso/open-ontology#run">README <span>↗</span></a>
+pnpm model:check examples/support-desk/model.lisp
+pnpm example:support-desk</code></pre>
+            <button type="button" class="oo-copy oo-copy--term" data-copy-from="prev" hidden>Copy</button>
+          </div>
+          <nav class="oo-links" aria-label="Project resources">
+            <a href="/llms-full.txt">Agent guide <span>txt</span></a>
+            <a href="/llms.txt">llms.txt <span>index</span></a>
+            <a href="https://github.com/bjacobso/open-ontology/tree/main/examples/support-desk">Support-desk example <span>↗</span></a>
+            <a href="https://github.com/bjacobso/open-ontology/tree/main/examples/field-service">Field-service example <span>↗</span></a>
+            <a href="https://github.com/bjacobso/open-ontology/blob/main/src/ir.ts">IR types <span>↗</span></a>
             <a href="https://github.com/bjacobso/open-ontology/blob/main/docs/architecture.md">Architecture <span>↗</span></a>
-            <a href="https://github.com/bjacobso/open-ontology/tree/main/examples/field-service">Example <span>↗</span></a>
-            <a href="https://github.com/bjacobso/forma">Forma <span>↗</span></a>
-            <a href="https://github.com/bjacobso/triplex">Triplex <span>↗</span></a>
-            <a href="https://github.com/bjacobso/open-ontology-legacy">Historical repository <span>↗</span></a>
           </nav>
         </section>
+
+        <section id="community" class="oo-community" aria-labelledby="community-title">
+          <div class="oo-community__mark"><svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></div>
+          <div class="oo-community__copy">
+            <p class="oo-overline">08 / Community</p>
+            <h2 id="community-title">Help shape v0.2 on Discord.</h2>
+            <p>Bring the domain you are modeling, the form you wished existed, or the limit you hit. The roadmap follows what real models need.</p>
+          </div>
+          <a class="oo-primary oo-community__cta" href="https://discord.gg/cjW4gxsdXK">Join the Discord <span aria-hidden="true">↗</span></a>
+        </section>
       </main>
-      <footer class="oo-home__footer"><span>Open Ontology · The ontology, not the empire.</span><nav aria-label="Footer navigation"><a href="https://github.com/bjacobso/open-ontology">Source ↗</a><a href="https://github.com/bjacobso/open-ontology-legacy">History ↗</a></nav></footer>
+
+      <footer class="oo-footer">
+        <span>Open Ontology · The ontology, not the empire.</span>
+        <nav aria-label="Footer navigation">
+          <a href="/llms.txt">llms.txt</a>
+          <a href="/llms-full.txt">Agent guide</a>
+          <a href="https://discord.gg/cjW4gxsdXK">Discord ↗</a>
+          <a href="https://github.com/bjacobso/open-ontology">Source ↗</a>
+          <a href="https://github.com/bjacobso/forma">Forma ↗</a>
+          <a href="https://github.com/bjacobso/triplex">Triplex ↗</a>
+          <a href="https://github.com/bjacobso/open-ontology-legacy">History ↗</a>
+        </nav>
+      </footer>
     </div>
   </body>
 </html>

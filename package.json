@@ -34,6 +34,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "example": "tsx examples/field-service/run.ts",
+    "example:support-desk": "tsx examples/support-desk/run.ts",
+    "model:check": "tsx scripts/check-model.ts",
     "site:check": "node apps/site/check.mjs",
     "site:dev": "wrangler dev --config apps/site/wrangler.jsonc",
     "site:deploy": "wrangler deploy --config apps/site/wrangler.jsonc"
