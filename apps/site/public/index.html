@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f1f0e7" />
+    <meta name="theme-color" content="#f6f5ef" />
     <meta name="description" content="Open Ontology is a small, closed language for domain models: entities, relations, actions, and queries. Agents write it, a checker verifies it, and it runs as transactions and Datalog. Agent guide: /llms-full.txt" />
     <title>Open Ontology: domain models agents can write, check, and run</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -11,7 +11,7 @@
     <link rel="alternate" type="text/plain" href="/llms.txt" title="Open Ontology llms.txt index" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/site.css" />
     <script defer src="/site.js"></script>
     <script type="application/ld+json">
@@ -32,14 +32,14 @@
       <a class="oo-skip" href="#main">Skip to content</a>
       <header class="oo-nav">
         <a class="oo-brand" href="/" aria-label="Open Ontology home">
-          <span class="oo-mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" width="20" height="20"><path d="M14 4 24 14 14 24 4 14 14 4Z" stroke="currentColor" stroke-width="1.6"/><circle cx="14" cy="14" r="3" fill="currentColor"/></svg></span>
+          <span class="oo-mark" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" width="20" height="20" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M32 8Q42 6 50.5 14.5Q58 22 55.5 33Q56 44 46 51Q32 58 18 51Q8 44 8.5 33Q6 22 13.5 14.5Q22 6 32 8M32 8Q40 28 46 51M50.5 14.5Q32 30 8.5 33M55.5 33Q30 38 18 51"/><g fill="currentColor" stroke="none"><circle cx="32" cy="8" r="6"/><circle cx="50.5" cy="14.5" r="6"/><circle cx="55.5" cy="33" r="6"/><circle cx="46" cy="51" r="6"/><circle cx="18" cy="51" r="6"/><circle cx="8.5" cy="33" r="6"/><circle cx="13.5" cy="14.5" r="6"/></g></svg></span>
           <span>Open Ontology</span>
         </a>
         <nav aria-label="Main navigation">
-          <a href="#language">Language</a>
-          <a href="#procedure">Procedure</a>
-          <a href="#check">Check &amp; run</a>
-          <a href="#limits">Limits</a>
+          <a class="oo-nav__section" href="#language">Language</a>
+          <a class="oo-nav__section" href="#procedure">Procedure</a>
+          <a class="oo-nav__section" href="#check">Check &amp; run</a>
+          <a class="oo-nav__section" href="#limits">Limits</a>
           <a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a>
           <a class="oo-nav__discord" href="https://discord.gg/cjW4gxsdXK"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg><span>Discord</span></a>
           <a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a>
@@ -47,7 +47,7 @@
       </header>
 
       <aside class="oo-agentbar" aria-label="Note for AI agents">
-        <p><strong>Agents:</strong> skip the HTML. <a href="/llms-full.txt">/llms-full.txt</a> is the complete authoring guide in one plain-text file, tested against v0.1. The index is at <a href="/llms.txt">/llms.txt</a>.</p>
+        <p><strong>For agents</strong> Skip the HTML. <a href="/llms-full.txt">/llms-full.txt</a> is the complete authoring guide in one plain-text file, tested against v0.1. The index is at <a href="/llms.txt">/llms.txt</a>.</p>
       </aside>
 
       <main id="main" class="oo-main">
@@ -68,14 +68,18 @@
 
             <div class="oo-actions">
               <a class="oo-primary" href="/llms-full.txt">Read the agent guide <span aria-hidden="true">→</span></a>
-              <a href="#check">See it check and run ↓</a>
-              <a href="https://github.com/bjacobso/open-ontology">Source ↗</a>
-              <a href="https://discord.gg/cjW4gxsdXK">Join the Discord ↗</a>
+              <a class="oo-secondary" href="#check">See it check and run <span aria-hidden="true">↓</span></a>
             </div>
+            <p class="oo-meta">
+              <span>MIT licensed</span>
+              <span>Forma or TypeScript</span>
+              <a href="https://github.com/bjacobso/open-ontology">Source ↗</a>
+              <a href="https://discord.gg/cjW4gxsdXK">Discord ↗</a>
+            </p>
           </div>
 
           <figure class="oo-specimen" aria-labelledby="specimen-caption">
-            <span class="oo-specimen__tag" aria-hidden="true">THE JOB</span>
+            <div class="oo-window" aria-hidden="true"><span></span><span></span><span></span><b>field-service</b><em>the job</em></div>
             <div class="oo-specimen__step">
               <span class="oo-specimen__label">01 · The person says</span>
               <blockquote>“Dispatchers assign open work orders to technicians. I need to see who is on what.”</blockquote>
@@ -104,21 +108,21 @@
         </section>
 
         <section class="oo-strip" aria-label="What the language guarantees">
-          <div><span>Closed</span><strong>4 declarations, 4 changes</strong><small>Nothing to over-engineer</small></div>
-          <div><span>Checked</span><strong>Errors at line:col</strong><small>And lint for silent failures</small></div>
-          <div><span>Executable</span><strong>Actions → transactions</strong><small>Queries → Datalog</small></div>
-          <div><span>Portable</span><strong>One JSON IR</strong><small>From Forma or TypeScript</small></div>
+          <div><i aria-hidden="true">{ }</i><span>Closed</span><strong>4 declarations, 4 changes</strong><small>Nothing to over-engineer</small></div>
+          <div><i aria-hidden="true">✓</i><span>Checked</span><strong>Errors at line:col</strong><small>And lint for silent failures</small></div>
+          <div><i aria-hidden="true">▶</i><span>Executable</span><strong>Actions → transactions</strong><small>Queries → Datalog</small></div>
+          <div><i aria-hidden="true">IR</i><span>Portable</span><strong>One JSON IR</strong><small>From Forma or TypeScript</small></div>
         </section>
 
         <section id="language" class="oo-section" aria-labelledby="language-title">
           <div class="oo-head">
-            <p class="oo-overline">01 / The language</p>
+            <p class="oo-overline"><span>01</span>The language</p>
             <h2 id="language-title">Four declarations. Four changes. That is the whole language.</h2>
             <p>A closed vocabulary is easier to write correctly and easier for the person to review. It also leaves no room to invent structure the business does not have. If they know Palantir Foundry's Ontology, it is the same core (objects, links, actions) as an open file they own.</p>
           </div>
 
           <div class="oo-decls">
-            <article>
+            <article class="oo-decl--entity">
               <header><span>Nouns</span><h3>define-entity</h3></header>
               <p>A thing the business tracks, with namespaced fields. A field typed as another entity is a reference.</p>
 <pre><code class="lang-lisp">(define-entity Ticket
@@ -126,14 +130,14 @@
   (:field [ticket/customer Customer {:required true}])
   (:field [ticket/priority Int {:required true}]))</code></pre>
             </article>
-            <article>
+            <article class="oo-decl--relation">
               <header><span>Connections</span><h3>define-relation</h3></header>
               <p>A typed edge between two entities that carries its own facts, such as when or why.</p>
 <pre><code class="lang-lisp">(define-relation escalated-to Ticket Engineer
   (:field [escalated-to/reason String {:required true}])
   (:field [escalated-to/at Instant {:required true}]))</code></pre>
             </article>
-            <article>
+            <article class="oo-decl--action">
               <header><span>Verbs</span><h3>define-action</h3></header>
               <p>Something a person does. Its typed inputs are decoded first, and its changes commit as one transaction.</p>
 <pre><code class="lang-lisp">(define-action close-ticket
@@ -143,7 +147,7 @@
     (clear ticket :ticket/status)
     (set ticket :ticket/status "closed"))))</code></pre>
             </article>
-            <article>
+            <article class="oo-decl--query">
               <header><span>Questions</span><h3>define-datalog-query</h3></header>
               <p>A named question over the same facts, with joins, negation, ordering and aggregates.</p>
 <pre><code class="lang-lisp">(define-datalog-query tickets-by-status
@@ -166,7 +170,7 @@
 
         <section id="procedure" class="oo-section" aria-labelledby="procedure-title">
           <div class="oo-head">
-            <p class="oo-overline">02 / The procedure</p>
+            <p class="oo-overline"><span>02</span>The procedure</p>
             <h2 id="procedure-title">From a conversation to a checked model.</h2>
             <p>The same seven steps work for any domain. The agent does the translating, and the person only has to confirm what they recognize.</p>
           </div>
@@ -200,7 +204,7 @@
 
         <section id="check" class="oo-section" aria-labelledby="check-title">
           <div class="oo-head">
-            <p class="oo-overline">03 / Check</p>
+            <p class="oo-overline"><span>03</span>Check</p>
             <h2 id="check-title">Errors with line numbers. Warnings for what compiles but misbehaves.</h2>
             <p><code>pnpm model:check</code> elaborates a <code>.lisp</code> or <code>.ts</code> model and applies the runtime's naming and input rules. It also lints for the mistakes that fail silently: a misspelled attribute, a value that is never replaced, an input that can't be omitted. Add <code>--json</code> for machine-readable output.</p>
           </div>
@@ -239,7 +243,7 @@ ok examples/support-desk/model.lisp (model@0.1.0)
 
         <section id="run" class="oo-section" aria-labelledby="run-title">
           <div class="oo-head">
-            <p class="oo-overline">04 / Run</p>
+            <p class="oo-overline"><span>04</span>Run</p>
             <h2 id="run-title">What happens when an action runs.</h2>
             <p>The field-service example seeds three facts, invokes <code>assign-work-order</code> on behalf of a dispatcher, and asks <code>assigned-work</code>. Each step below is the real behavior of the v0.1 runtime on the in-memory Triplex host.</p>
           </div>
@@ -299,7 +303,7 @@ ok examples/support-desk/model.lisp (model@0.1.0)
 
         <section id="ir" class="oo-section" aria-labelledby="ir-title">
           <div class="oo-head">
-            <p class="oo-overline">05 / Portable</p>
+            <p class="oo-overline"><span>05</span>Portable</p>
             <h2 id="ir-title">Two syntaxes. One JSON contract.</h2>
             <p>Forma is compact, and its errors point at a line and column. The TypeScript DSL type-checks queries against declared properties. Both compile to the same IR, and the test suite asserts that the two field-service models produce identical JSON. Store it, diff it, or hand it to another tool.</p>
           </div>
@@ -333,7 +337,7 @@ ok examples/support-desk/model.lisp (model@0.1.0)
 
         <section id="limits" class="oo-section" aria-labelledby="limits-title">
           <div class="oo-head">
-            <p class="oo-overline">06 / Limits</p>
+            <p class="oo-overline"><span>06</span>Limits</p>
             <h2 id="limits-title">What v0.1 does not do. Say so before you promise it.</h2>
             <p>The model is the part that carries forward. The runtime today is a local check, and the list on the right is what the next checkpoint adds.</p>
           </div>
@@ -375,7 +379,7 @@ ok examples/support-desk/model.lisp (model@0.1.0)
 
         <section id="start" class="oo-section oo-start" aria-labelledby="start-title">
           <div class="oo-head">
-            <p class="oo-overline">07 / Start</p>
+            <p class="oo-overline"><span>07</span>Start</p>
             <h2 id="start-title">Clone, check, run.</h2>
             <p>The package is not on npm yet, so work inside a clone. Put a new model at <code>examples/&lt;domain&gt;/model.lisp</code> and copy <code>examples/support-desk/run.ts</code> next to it.</p>
           </div>
@@ -401,7 +405,7 @@ pnpm example:support-desk</code></pre>
         <section id="community" class="oo-community" aria-labelledby="community-title">
           <div class="oo-community__mark"><svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></div>
           <div class="oo-community__copy">
-            <p class="oo-overline">08 / Community</p>
+            <p class="oo-overline"><span>08</span>Community</p>
             <h2 id="community-title">Help shape v0.2 on Discord.</h2>
             <p>Bring the domain you are modeling, the form you wished existed, or the limit you hit. The roadmap follows what real models need.</p>
           </div>
@@ -410,7 +414,7 @@ pnpm example:support-desk</code></pre>
       </main>
 
       <footer class="oo-footer">
-        <span>Open Ontology · The ontology, not the empire.</span>
+        <span class="oo-footer__brand"><b>Open Ontology</b> The ontology, not the empire.</span>
         <nav aria-label="Footer navigation">
           <a href="/llms.txt">llms.txt</a>
           <a href="/llms-full.txt">Agent guide</a>
