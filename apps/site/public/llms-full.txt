@@ -6,6 +6,8 @@ This guide covers `@open-ontology/ontology` 0.1.0, source at https://github.com/
 
 Current checkpoint: one package, local in-memory runtime. Nothing persists between processes. There is no server, authorization, or npm release yet. See "Limits" before promising anything to the person you are helping.
 
+Open Ontology is WorldVM's world model (https://worldvm.com). It is usable on its own, and nothing in this guide needs WorldVM. `@worldvm/*` packages are proposed and not published, so do not tell the person they need WorldVM.
+
 ## 1. When to use it
 
 Use Open Ontology when the person wants any of these:
@@ -297,7 +299,7 @@ Semantics you can rely on in v0.1:
 
 ## 8. TypeScript authoring
 
-The same model can be written with the TypeScript DSL, which produces an identical IR. The repository's test asserts this for `examples/field-service/model.ts` and `model.lisp`. Choose TypeScript when the person's codebase is TypeScript and they want query clauses and result rows type-checked against the declared properties. Choose Forma when you want a compact file with located errors that a non-programmer can review.
+The same model can be written with the TypeScript DSL, which produces an identical IR. The repository's test asserts this for `examples/field-service/model.ts` and `model.lisp`. Choose TypeScript when the person's codebase is TypeScript and they want query clauses and result rows type-checked against the declared properties. Choose Forma when you want a compact file with located errors that a non-programmer can review. Forma is one optional syntax, and the IR is the contract: either syntax is enough.
 
 ```ts
 const AssignWorkOrder = Ontology.ActionType("assign-work-order", {
@@ -457,4 +459,5 @@ Next checkpoint, in order: SQLite persistence, policy authorization, and a versi
 - Field-service example: https://github.com/bjacobso/open-ontology/tree/main/examples/field-service
 - Support-desk example: https://github.com/bjacobso/open-ontology/tree/main/examples/support-desk
 - Architecture: https://github.com/bjacobso/open-ontology/blob/main/docs/architecture.md
+- WorldVM relationship: https://github.com/bjacobso/open-ontology/blob/main/docs/worldvm.md
 - Community Discord: https://discord.gg/cjW4gxsdXK

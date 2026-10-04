@@ -2,6 +2,8 @@
 
 > A small, closed language for domain models, built to be written by agents and owned by people. It has four declarations (entities, relations, actions, queries) and four changes (create, set, clear, link). A model compiles to one portable JSON IR and runs actions as transactions and queries as Datalog on Triplex. v0.1: one package, local in-memory runtime, not on npm.
 
+Open Ontology is WorldVM's world model (https://worldvm.com). It works without WorldVM: it runs on Triplex directly, and `@worldvm/*` packages are not published yet.
+
 If you are an agent modeling a domain for someone, read the agent guide first. It is one plain-text file with the full grammar, a modeling procedure, the check command, the runtime semantics and the limits, and it is tested against v0.1.
 
 ## Docs
@@ -9,6 +11,7 @@ If you are an agent modeling a domain for someone, read the agent guide first. I
 - [Agent guide](/llms-full.txt): everything needed to write, check and run a model
 - [README](https://github.com/bjacobso/open-ontology/blob/main/README.md): install, scripts and package boundary
 - [Architecture](https://github.com/bjacobso/open-ontology/blob/main/docs/architecture.md): TypeScript/Forma → IR → Triplex adapter
+- [WorldVM](https://github.com/bjacobso/open-ontology/blob/main/docs/worldvm.md): how the IR, actions and queries map onto WorldVM's proposed kernel
 
 ## Examples
 

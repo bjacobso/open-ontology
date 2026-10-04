@@ -23,7 +23,8 @@
         "codeRepository": "https://github.com/bjacobso/open-ontology",
         "programmingLanguage": ["TypeScript", "Lisp"],
         "license": "https://opensource.org/licenses/MIT",
-        "version": "0.1.0"
+        "version": "0.1.0",
+        "isPartOf": { "@type": "SoftwareSourceCode", "name": "WorldVM", "url": "https://worldvm.com" }
       }
     </script>
   </head>
@@ -73,6 +74,7 @@
             <p class="oo-meta">
               <span>MIT licensed</span>
               <span>Forma or TypeScript</span>
+              <a href="https://worldvm.com">Part of WorldVM ↗</a>
               <a href="https://github.com/bjacobso/open-ontology">Source ↗</a>
               <a href="https://discord.gg/cjW4gxsdXK">Discord ↗</a>
             </p>
@@ -305,7 +307,7 @@ ok examples/support-desk/model.lisp (model@0.1.0)
           <div class="oo-head">
             <p class="oo-overline"><span>05</span>Portable</p>
             <h2 id="ir-title">Two syntaxes. One JSON contract.</h2>
-            <p>Forma is compact, and its errors point at a line and column. The TypeScript DSL type-checks queries against declared properties. Both compile to the same IR, and the test suite asserts that the two field-service models produce identical JSON. Store it, diff it, or hand it to another tool.</p>
+            <p>The IR is the contract, and either syntax is enough to write a model. Forma, used on this page, is compact, and its errors point at a line and column. It is optional. The TypeScript DSL type-checks queries against declared properties. Both compile to the same IR, and the test suite asserts that the two field-service models produce identical JSON. Store it, diff it, or hand it to another tool.</p>
           </div>
           <div class="oo-ir">
             <div class="oo-panel">
@@ -333,6 +335,7 @@ ok examples/support-desk/model.lisp (model@0.1.0)
     { "key": ":work-order/status", … } ] }</code></pre>
             </div>
           </div>
+          <p class="oo-note">Open Ontology is the world model of <a href="https://worldvm.com">WorldVM</a>, a TypeScript runtime and standard library for software that models the world, reasons about it, and acts on it. Open Ontology answers “What exists?” It works on its own today: it runs on Triplex directly and needs nothing from WorldVM, whose packages are not published yet. <a href="https://github.com/bjacobso/open-ontology/blob/main/docs/worldvm.md">How the IR maps onto WorldVM</a>.</p>
         </section>
 
         <section id="limits" class="oo-section" aria-labelledby="limits-title">
@@ -422,6 +425,7 @@ pnpm example:support-desk</code></pre>
           <a href="https://github.com/bjacobso/open-ontology">Source ↗</a>
           <a href="https://github.com/bjacobso/forma">Forma ↗</a>
           <a href="https://github.com/bjacobso/triplex">Triplex ↗</a>
+          <a href="https://worldvm.com">WorldVM ↗</a>
           <a href="https://github.com/bjacobso/open-ontology-legacy">History ↗</a>
         </nav>
       </footer>

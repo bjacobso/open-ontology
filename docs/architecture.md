@@ -8,6 +8,10 @@ TypeScript DSL ──┐
 Forma source ───┘
 ```
 
+TypeScript and Forma are interchangeable authoring surfaces. Either one is enough to write a model, and Forma is optional. The IR is the contract.
+
 The package does not own an HTTP server or UI. The initial example uses Triplex's in-memory `KvTriples.layer` only. It is not durable and does not enforce a product policy. Those host responsibilities are required for the next checkpoint.
 
 The Forma bridge uses its reader and descriptor/elaboration API. The checked-in Lisp preludes provide the ontology-specific forms needed to bootstrap that bridge. The adapter accepts `define-entity`, `define-relation`, `define-action`, `define-mutation`, and `define-datalog-query`; unsupported recognized forms are rejected. Parser and ontology validation errors expose source locations through `error.loc` where available.
+
+Open Ontology is WorldVM's world model and is usable without WorldVM. [WorldVM](worldvm.md) maps the IR, actions, and queries onto WorldVM's proposed kernel primitives and proposes the package relationship.

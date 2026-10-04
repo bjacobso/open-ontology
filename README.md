@@ -24,6 +24,12 @@ pnpm model:check examples/support-desk/model.lisp
 
 `pnpm model:check <model.lisp | model.ts>` elaborates a model, applies the runtime's naming and input-schema rules, and reports errors with `file:line:col`. It also warns about models that compile but misbehave: queries that match undeclared attributes or find unbound variables, optional inputs used by changes, single-valued fields set without a preceding `clear`, and changes that target a fixed object id. Pass `--json` for machine-readable output.
 
+## Part of WorldVM
+
+Open Ontology is WorldVM's world model. [WorldVM](https://worldvm.com) is a TypeScript runtime and standard library for software that models the world, reasons about it, and acts on it. Inside it, Open Ontology answers "What exists?", and Triplex, WorldVM's temporal fact store, answers "What is/was true?"
+
+Open Ontology is usable without WorldVM. It keeps the `@open-ontology/*` scope, runs on Triplex directly, and depends on nothing from WorldVM, whose `@worldvm/*` packages are not published yet. TypeScript and Forma are two authoring syntaxes for the same IR, and Forma is optional. See [WorldVM](docs/worldvm.md) for how the IR, actions, and queries map onto WorldVM's proposed kernel, the proposed package relationship, and open questions.
+
 ## Package boundary
 
 The package exports the TypeScript DSL, portable IR, Forma elaborator, and Triplex runtime adapter. The checked-in Forma preludes are loaded at runtime and included in the package tarball. See [architecture](docs/architecture.md) for the boundary and current operational limits.
