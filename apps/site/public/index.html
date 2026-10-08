@@ -57,14 +57,13 @@
         <!-- Hero -->
         <section class="oo-hero" aria-labelledby="hero-title">
           <div class="oo-hero__copy">
-            <p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Config as code for any platform · built on Forma 0.4</p>
-            <div class="oo-wordmark" aria-hidden="true">open/ontology</div>
-            <h1 id="hero-title">Your stack is one program. <em>Nothing checks it.</em></h1>
-            <p class="oo-lead">A Stripe price feeds a Salesforce picklist. An Okta group decides a GitHub team. A Palantir action reads both. Each piece lives in its own dashboard, so when someone renames a field, the reference breaks without a word.</p>
-            <p class="oo-detail">Open Ontology is <strong>config as code for every platform</strong>. Each platform is a Forma prelude that speaks its own vocabulary and elaborates to its own native config. They share a standard library of domain types (people, organizations, teams, money), so every reference between your projects is type-checked before anything deploys.</p>
+            <p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Open Ontology · Configuration as code for every platform</p>
+            <h1 id="hero-title">Configuration for every platform, <em>checked as one program.</em></h1>
+            <p class="oo-lead">Salesforce objects, Stripe prices, Okta groups, and GitHub teams already depend on one another. Today those dependencies are implicit: copied by hand between dashboards, and verified by no one.</p>
+            <p class="oo-detail">Open Ontology describes each platform with a <strong>Forma prelude</strong> that elaborates to its native configuration. Preludes share a <strong>standard library of domain types</strong>, so every reference between projects is type-checked before anything is deployed.</p>
             <div class="oo-actions">
-              <a class="oo-primary" href="#across">See a cross-project error <span aria-hidden="true">↓</span></a>
-              <a class="oo-secondary" href="#preludes">Browse the preludes <span aria-hidden="true">↓</span></a>
+              <a class="oo-primary" href="#std">Read the standard library <span aria-hidden="true">↓</span></a>
+              <a class="oo-secondary" href="#across">See cross-project checking <span aria-hidden="true">↓</span></a>
             </div>
             <p class="oo-meta">
               <span>MIT licensed</span>
@@ -76,7 +75,7 @@
 
           <figure class="oo-hero__side">
             <div class="oo-repl" role="img" aria-label="A terminal session: oo add installs the salesforce, stripe, and okta preludes. oo check passes billing and finds one error in identity/apps.forma, where a Salesforce profile was renamed. oo elaborate prints the Salesforce metadata files the sales project produces.">
-              <div class="oo-repl__bar" aria-hidden="true"><span></span><span></span><span></span><b>~/acme</b><em>oo 0.2 preview</em></div>
+              <div class="oo-repl__bar" aria-hidden="true"><span></span><span></span><span></span><b>~/acme</b><em>v0.2 design</em></div>
 <pre class="oo-typer" aria-hidden="true"><code><span class="oo-line" data-cmd><span class="oo-prompt">$</span> oo add @ontology/salesforce @ontology/stripe @ontology/okta</span>
 <span class="oo-line"><span class="oo-ok">+</span> @ontology/salesforce 0.1.0  <span class="oo-dim">→ Metadata API</span></span>
 <span class="oo-line"><span class="oo-ok">+</span> @ontology/stripe     0.1.0  <span class="oo-dim">→ Stripe API</span></span>
@@ -106,8 +105,8 @@
         <section id="hidden" class="oo-section" aria-labelledby="hidden-title">
           <div class="oo-head">
             <p class="oo-overline"><span>00</span>The hidden graph</p>
-            <h2 id="hidden-title">Your platforms already point at each other. Nobody wrote it down.</h2>
-            <p>X-ray almost any company and you'll find config in one system quietly depending on config in another. Copied ids, mirrored picklists, groups that must match teams. That graph is your company's real <strong>ontology</strong>. Open Ontology makes it typed.</p>
+            <h2 id="hidden-title">Your platforms already depend on each other. Nothing records it.</h2>
+            <p>In almost any company, configuration in one system quietly depends on configuration in another. Copied ids, mirrored picklists, groups that must match teams. That graph is your company's real <strong>ontology</strong>. Open Ontology makes it typed.</p>
           </div>
           <ol class="oo-xray" aria-label="Cross-platform references that nothing checks, and the prelude that types each one">
             <li class="oo-xray__root" aria-hidden="true">acme/</li>
@@ -487,7 +486,7 @@ POST /v1/prices          { "lookup_key": "pro_overage",
         <section id="across" class="oo-section" aria-labelledby="across-title">
           <div class="oo-head">
             <p class="oo-overline"><span>09</span>Type-checked across projects</p>
-            <h2 id="across-title">Rename a profile in Salesforce. Watch Okta fail to compile.</h2>
+            <h2 id="across-title">A rename in Salesforce is an error in Okta, before deploy.</h2>
             <p>Each project is a package with its own prelude, and projects import each other like modules. <code>oo check</code> elaborates the whole graph at once. A break in one platform's config is reported where another platform's config depends on it, before either one is deployed.</p>
           </div>
           <div class="oo-together">
@@ -560,8 +559,8 @@ POST /v1/prices          { "lookup_key": "pro_overage",
         <!-- 10 · Checked -->
         <section id="check" class="oo-section" aria-labelledby="check-title">
           <div class="oo-head">
-            <p class="oo-overline"><span>11</span>Checked, for real</p>
-            <h2 id="check-title">The checker is real. Run it today.</h2>
+            <p class="oo-overline"><span>11</span>Available today</p>
+            <h2 id="check-title">The ontology checker ships today.</h2>
             <p>The default prelude's checker ships in v0.1 as <code>pnpm model:check</code>. It reports errors with line numbers, applies the runtime's naming and input rules, and lints for mistakes that fail silently, like a misspelled attribute or a value that's never replaced. The output below is real. In v0.1 the default prelude is spelled <code>define-entity</code>, <code>define-relation</code>, <code>define-action</code>, and <code>define-datalog-query</code>.</p>
           </div>
           <div class="oo-terms">
@@ -592,8 +591,8 @@ ok examples/support-desk/draft.lisp (draft@0.1.0)
         <!-- 11 · Notes -->
         <section id="notes" class="oo-section" aria-labelledby="notes-title">
           <div class="oo-head">
-            <p class="oo-overline"><span>12</span>Before you bet on it</p>
-            <h2 id="notes-title">What runs today, and what this page is promising.</h2>
+            <p class="oo-overline"><span>12</span>Status</p>
+            <h2 id="notes-title">What exists today, and what is designed.</h2>
             <p>Your config is the part that carries forward. Here's exactly which parts exist.</p>
           </div>
           <div class="oo-limits">
