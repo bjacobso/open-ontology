@@ -6,7 +6,8 @@ import {
   normalizeForm,
   recognizeForms,
 } from "@formalang/ts/descriptor";
-import { parse, toSExprMany } from "@formalang/ts/reader";
+import { expandFormaImports } from "./forma-libraries.js";
+export { formaLibrarySources } from "./forma-libraries.js";
 import type {
   ActionChangeIR,
   ActionInputIR,
@@ -342,10 +343,10 @@ const declarationFromPrelude = (value: unknown): OntologyDeclarationIR => {
   }
 };
 
-type SourceLocation = { readonly start: number; readonly end: number; readonly line: number; readonly col: number };
+type SourceLocation = { readonly start: number; readonly end: number; readonly line: number; readonly col: number; readonly source?: string };
 
 const locatedError = (message: string, loc?: SourceLocation): TypeError =>
-  Object.assign(new TypeError(message), { loc });
+  Object.assign(new TypeError(message), { loc, ...(loc?.source === undefined ? {} : { source: loc.source }) });
 
 const validateIR = (ir: OntologyIR, locations: ReadonlyMap<string, SourceLocation>): OntologyIR => {
   const errorAt = (name: string, message: string): never => {
@@ -414,21 +415,23 @@ export const elaborateFormaOntology = (
   source: string,
   options: { readonly name: string; readonly version?: string },
 ): OntologyIR => {
-  const parsed = parse(source);
-  if (parsed.errors.length > 0) throw parsed.errors[0];
-  const expressions = toSExprMany(parsed.redTree);
-  const recognized = recognizeForms(expressions, formaForms);
-  if (recognized.length !== expressions.length) {
-    throw new TypeError(
-      "Source contains a form that is not part of the vendored Forma ontology DSL",
-    );
-  }
-
-  const forms = recognized.map((form) => normalizeForm(form, formaForms));
+  const forms = expandFormaImports(source).map(({ expression, library }) => {
+    const loc = { ...expression.loc, ...(library === undefined ? {} : { source: library }) };
+    const [recognized] = recognizeForms([expression], formaForms);
+    if (!recognized) {
+      throw locatedError("Source contains a form that is not part of the vendored Forma ontology DSL", loc);
+    }
+    try {
+      return { ...normalizeForm(recognized, formaForms), loc };
+    } catch (error) {
+      if (error instanceof Error) throw locatedError(error.message, loc);
+      throw error;
+    }
+  });
   const semanticEnv = new SimpleSemanticEnvironment();
   for (const form of forms) {
     if (!supportedForms.has(form.formName)) {
-      throw new TypeError(`${form.formName} is not yet supported by the Triplex ontology adapter`);
+      throw locatedError(`${form.formName} is not yet supported by the Triplex ontology adapter`, form.loc);
     }
     const name = form.identifiers.get("name");
     if (name) semanticEnv.declareGlobal(name, form.formName);

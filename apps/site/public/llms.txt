@@ -9,11 +9,13 @@ If you are an agent modeling a domain for someone, read the agent guide first. I
 - [Agent guide](https://open-ontology.com/llms-full.txt): everything needed to write, check and run a model
 - [README](https://raw.githubusercontent.com/bjacobso/open-ontology/main/README.md): install, scripts and package boundary
 - [Architecture](https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/architecture.md): TypeScript/Forma → IR → Triplex adapter
+- [Git libraries](https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/git-libraries.md): bundled /std/git and /github vocabularies, imports and provider extension
 
 ## Examples
 
 - [Support desk](https://github.com/bjacobso/open-ontology/tree/main/examples/support-desk): create, clear+set, references, relations, negation, ordering, aggregates
 - [Field service](https://github.com/bjacobso/open-ontology/tree/main/examples/field-service): the same model in TypeScript and Forma, checked for identical IR
+- [GitHub](https://github.com/bjacobso/open-ontology/tree/main/examples/github): shared Git graph, forks, dependencies, cross-fork PRs and issue references
 
 ## Source
 

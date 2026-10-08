@@ -23,6 +23,7 @@ export interface Diagnostic {
   readonly message: string;
   readonly line?: number;
   readonly col?: number;
+  readonly source?: string;
 }
 
 export interface ModelCheckResult {
@@ -158,11 +159,14 @@ const lint = (ir: OntologyIR, source?: string): Diagnostic[] => {
 const failure = (error: unknown, source?: string): ModelCheckResult => {
   const message = error instanceof Error ? error.message : String(error);
   const loc = (error as { loc?: { line?: number; col?: number } } | undefined)?.loc;
+  const sourceName = (error as { source?: string } | undefined)?.source;
   const received = /received (\S+)$/.exec(message)?.[1];
   const position = loc?.line !== undefined
     ? { line: loc.line, ...(loc.col === undefined ? {} : { col: loc.col }) }
     : received ? locate(source, received) : {};
-  return { ok: false, summary: [], diagnostics: [{ severity: "error", message, ...position }] };
+  return { ok: false, summary: [], diagnostics: [{ severity: "error", message, ...position,
+    ...(sourceName === undefined ? {} : { source: sourceName }),
+  }] };
 };
 
 const verified = (ir: OntologyIR, source?: string): ModelCheckResult => {
@@ -263,7 +267,8 @@ const main = async (args: readonly string[]): Promise<number> => {
     return result.ok ? 0 : 1;
   }
   const where = (diagnostic: Diagnostic) =>
-    diagnostic.line === undefined ? file : `${file}:${diagnostic.line}:${diagnostic.col ?? 1}`;
+    diagnostic.line === undefined ? (diagnostic.source ?? file)
+      : `${diagnostic.source ?? file}:${diagnostic.line}:${diagnostic.col ?? 1}`;
   for (const diagnostic of result.diagnostics) {
     console.error(`${where(diagnostic)}: ${diagnostic.severity}: ${diagnostic.message}`);
   }
