@@ -4,14 +4,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f6f5ef" />
-    <meta name="description" content="Open Ontology is a small, closed language for domain models: entities, relations, actions, and queries. Agents write it, a checker verifies it, and it runs as transactions and Datalog. Agent guide: /llms-full.txt" />
-    <title>Open Ontology: domain models agents can write, check, and run</title>
+    <meta name="description" content="Open Ontology is config as code for any platform. Each platform is a Forma prelude that elaborates to its native config, preludes share a standard library of domain types, and references across projects are type-checked. Agent guide: /llms-full.txt" />
+    <title>Open Ontology: config as code for every platform, type-checked across all of them</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate" type="text/plain" href="/llms-full.txt" title="Open Ontology agent guide" />
     <link rel="alternate" type="text/plain" href="/llms.txt" title="Open Ontology llms.txt index" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/site.css" />
     <script defer src="/site.js"></script>
     <script type="application/ld+json">
@@ -19,7 +19,7 @@
         "@context": "https://schema.org",
         "@type": "SoftwareSourceCode",
         "name": "Open Ontology",
-        "description": "A small, closed language for domain models (entities, relations, actions, queries) that compiles to portable JSON IR and runs on Triplex.",
+        "description": "Config as code for any platform. Platform preludes are Forma packages that elaborate to native config, share a standard library of domain types, and are type-checked across projects.",
         "codeRepository": "https://github.com/bjacobso/open-ontology",
         "programmingLanguage": ["TypeScript", "Lisp"],
         "license": "https://opensource.org/licenses/MIT",
@@ -39,10 +39,10 @@
           <span>Open Ontology</span>
         </a>
         <nav aria-label="Main navigation">
-          <a class="oo-nav__section" href="#language">Language</a>
-          <a class="oo-nav__section" href="#procedure">Procedure</a>
-          <a class="oo-nav__section" href="#check">Check &amp; run</a>
-          <a class="oo-nav__section" href="#limits">Limits</a>
+          <a class="oo-nav__section" href="#std">Standard library</a>
+          <a class="oo-nav__section" href="#preludes">Preludes</a>
+          <a class="oo-nav__section" href="#across">Cross-project</a>
+          <a class="oo-nav__section" href="#notes">Status</a>
           <a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a>
           <a class="oo-nav__discord" href="https://discord.gg/cjW4gxsdXK"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg><span>Discord</span></a>
           <a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a>
@@ -50,166 +50,518 @@
       </header>
 
       <aside class="oo-agentbar" aria-label="Note for AI agents">
-        <p><strong>For agents</strong> Skip the HTML. <a href="/llms-full.txt">/llms-full.txt</a> is the complete authoring guide in one plain-text file, tested against v0.1. The index is at <a href="/llms.txt">/llms.txt</a>.</p>
+        <p><strong>For agents</strong> Skip the HTML. <a href="/llms-full.txt">/llms-full.txt</a> is the complete authoring guide for the default ontology prelude in one plain-text file, tested against v0.1. The index is at <a href="/llms.txt">/llms.txt</a>.</p>
       </aside>
 
-      <main id="main" class="oo-main">
+      <main id="main">
+        <!-- Hero -->
         <section class="oo-hero" aria-labelledby="hero-title">
           <div class="oo-hero__copy">
-            <p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> v0.1 · experimental · Local in-memory runtime</p>
-            <h1 id="hero-title">Turn how a business works into a model that <em>runs.</em></h1>
-            <p class="oo-lead">Open Ontology is a small, closed language for domain models. It covers the things a business tracks, how they connect, what people do to them, and the questions they ask. Agents write the model, a checker verifies it, and people own the result: one plain file that compiles to portable JSON and runs.</p>
-
-            <div class="oo-forAgents">
-              <p class="oo-forAgents__label">Modeling for someone?</p>
-              <p class="oo-forAgents__text">Everything you need is one fetch away: grammar, a seven-step procedure, the check command, runtime semantics and limits.</p>
-              <div class="oo-forAgents__fetch">
-                <code>GET /llms-full.txt</code>
-                <button type="button" class="oo-copy" data-copy-url="/llms-full.txt" hidden>Copy URL</button>
-              </div>
-            </div>
-
+            <p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Open Ontology · Configuration as code for every platform</p>
+            <h1 id="hero-title">Configuration for every platform, <em>checked as one program.</em></h1>
+            <p class="oo-lead">Salesforce objects, Stripe prices, Okta groups, and GitHub teams already depend on one another. Today those dependencies are implicit: copied by hand between dashboards, and verified by no one.</p>
+            <p class="oo-detail">Open Ontology describes each platform with a <strong>Forma prelude</strong> that elaborates to its native configuration. Preludes share a <strong>standard library of domain types</strong>, so every reference between projects is type-checked before anything is deployed.</p>
             <div class="oo-actions">
-              <a class="oo-primary" href="/llms-full.txt">Read the agent guide <span aria-hidden="true">→</span></a>
-              <a class="oo-secondary" href="#check">See it check and run <span aria-hidden="true">↓</span></a>
+              <a class="oo-primary" href="#std">Read the standard library <span aria-hidden="true">↓</span></a>
+              <a class="oo-secondary" href="#across">See cross-project checking <span aria-hidden="true">↓</span></a>
             </div>
             <p class="oo-meta">
               <span>MIT licensed</span>
-              <span>Forma or TypeScript</span>
+              <span>Standard library included</span>
               <a href="https://github.com/bjacobso/open-ontology">Source ↗</a>
               <a href="https://discord.gg/cjW4gxsdXK">Discord ↗</a>
             </p>
           </div>
 
-          <figure class="oo-specimen" aria-labelledby="specimen-caption">
-            <div class="oo-window" aria-hidden="true"><span></span><span></span><span></span><b>field-service</b><em>the job</em></div>
-            <div class="oo-specimen__step">
-              <span class="oo-specimen__label">01 · The person says</span>
-              <blockquote>“Dispatchers assign open work orders to technicians. I need to see who is on what.”</blockquote>
+          <figure class="oo-hero__side">
+            <div class="oo-repl" role="img" aria-label="A terminal session: oo add installs the salesforce, stripe, and okta preludes. oo check passes billing and finds one error in identity/apps.forma, where a Salesforce profile was renamed. oo elaborate prints the Salesforce metadata files the sales project produces.">
+              <div class="oo-repl__bar" aria-hidden="true"><span></span><span></span><span></span><b>~/acme</b><em>v0.2 design</em></div>
+<pre class="oo-typer" aria-hidden="true"><code><span class="oo-line" data-cmd><span class="oo-prompt">$</span> oo add @ontology/salesforce @ontology/stripe @ontology/okta</span>
+<span class="oo-line"><span class="oo-ok">+</span> @ontology/salesforce 0.1.0  <span class="oo-dim">→ Metadata API</span></span>
+<span class="oo-line"><span class="oo-ok">+</span> @ontology/stripe     0.1.0  <span class="oo-dim">→ Stripe API</span></span>
+<span class="oo-line"><span class="oo-ok">+</span> @ontology/okta       0.1.0  <span class="oo-dim">→ Okta API</span></span>
+<span class="oo-line" data-cmd><span class="oo-prompt">$</span> oo check</span>
+<span class="oo-line"><span class="oo-ok">ok</span>    @acme/billing   <span class="oo-dim">stripe · 3 prices · 1 meter</span></span>
+<span class="oo-line"><span class="oo-err">error</span> identity/apps.forma:6:12</span>
+<span class="oo-line">      @acme/sales has no profile SalesUser</span>
+<span class="oo-line">      <span class="oo-dim">renamed in sales/profiles.forma:3:10</span></span>
+<span class="oo-line" data-cmd><span class="oo-prompt">$</span> oo elaborate @acme/sales</span>
+<span class="oo-line">objects/Opportunity/fields/Plan__c.field-meta.xml</span>
+<span class="oo-line">flows/Mark_Customer.flow-meta.xml</span></code></pre>
             </div>
-            <div class="oo-specimen__step oo-specimen__step--code">
-              <span class="oo-specimen__label">02 · You write <b>examples/field-service/model.lisp</b></span>
-<pre><code class="lang-lisp">(define-relation assigned-to WorkOrder Technician
-  (:field [assigned-to/assigned-at Instant {:required true}]))
-
-(define-action assign-work-order
-  (:input [workOrder String {:required true}])
-  (:input [technician String {:required true}])
-  (:returns String)
-  (:do (changes
-    (clear workOrder :work-order/status)
-    (set workOrder :work-order/status "assigned")
-    (link assigned-to workOrder technician
-      {:assigned-to/assigned-at now}))))</code></pre>
-            </div>
-            <div class="oo-specimen__step oo-specimen__step--out">
-              <span class="oo-specimen__label">03 · It runs <b>pnpm example</b></span>
-<pre><code>[{ "?title": "Repair cooling pump", "?technician": "Ada" }]</code></pre>
-            </div>
-            <figcaption id="specimen-caption" class="oo-sr">A request in plain language, the Forma model that captures it, and the query result after the action runs.</figcaption>
+            <figcaption class="oo-hero__note">↑ a scripted session of the v0.2 design · <a href="#notes">what runs today</a></figcaption>
           </figure>
         </section>
 
-        <section class="oo-strip" aria-label="What the language guarantees">
-          <div><i aria-hidden="true">{ }</i><span>Closed</span><strong>4 declarations, 4 changes</strong><small>Nothing to over-engineer</small></div>
-          <div><i aria-hidden="true">✓</i><span>Checked</span><strong>Errors at line:col</strong><small>And lint for silent failures</small></div>
-          <div><i aria-hidden="true">▶</i><span>Executable</span><strong>Actions → transactions</strong><small>Queries → Datalog</small></div>
-          <div><i aria-hidden="true">IR</i><span>Portable</span><strong>One JSON IR</strong><small>From Forma or TypeScript</small></div>
+        <div class="oo-main">
+        <section class="oo-strip" aria-label="What Open Ontology guarantees">
+          <div><i aria-hidden="true">{ }</i><span>Any platform</span><strong>One prelude per platform</strong><small>In that platform's own words</small></div>
+          <div><i aria-hidden="true">::</i><span>Typed across projects</span><strong>References between platforms are checked</strong><small>Rename once, see every break</small></div>
+          <div><i aria-hidden="true">std</i><span>Shared vocabulary</span><strong>A standard library of domain types</strong><small>Person, Organization, Team, Money</small></div>
+          <div><i aria-hidden="true">&lt;/&gt;</i><span>Native output</span><strong>Elaborates to real config</strong><small>Metadata XML, API payloads, ontology IR</small></div>
         </section>
 
-        <section id="language" class="oo-section" aria-labelledby="language-title">
+        <!-- 00 · The hidden graph -->
+        <section id="hidden" class="oo-section" aria-labelledby="hidden-title">
           <div class="oo-head">
-            <p class="oo-overline"><span>01</span>The language</p>
-            <h2 id="language-title">Four declarations. Four changes. That is the whole language.</h2>
-            <p>A closed vocabulary is easier to write correctly and easier for the person to review. It also leaves no room to invent structure the business does not have. If they know Palantir Foundry's Ontology, it is the same core (objects, links, actions) as an open file they own.</p>
+            <p class="oo-overline"><span>00</span>The hidden graph</p>
+            <h2 id="hidden-title">Your platforms already depend on each other. Nothing records it.</h2>
+            <p>In almost any company, configuration in one system quietly depends on configuration in another. Copied ids, mirrored picklists, groups that must match teams. That graph is your company's real <strong>ontology</strong>. Open Ontology makes it typed.</p>
           </div>
-
-          <div class="oo-decls">
-            <article class="oo-decl--entity">
-              <header><span>Nouns</span><h3>define-entity</h3></header>
-              <p>A thing the business tracks, with namespaced fields. A field typed as another entity is a reference.</p>
-<pre><code class="lang-lisp">(define-entity Ticket
-  (:field [ticket/title String {:required true}])
-  (:field [ticket/customer Customer {:required true}])
-  (:field [ticket/priority Int {:required true}]))</code></pre>
-            </article>
-            <article class="oo-decl--relation">
-              <header><span>Connections</span><h3>define-relation</h3></header>
-              <p>A typed edge between two entities that carries its own facts, such as when or why.</p>
-<pre><code class="lang-lisp">(define-relation escalated-to Ticket Engineer
-  (:field [escalated-to/reason String {:required true}])
-  (:field [escalated-to/at Instant {:required true}]))</code></pre>
-            </article>
-            <article class="oo-decl--action">
-              <header><span>Verbs</span><h3>define-action</h3></header>
-              <p>Something a person does. Its typed inputs are decoded first, and its changes commit as one transaction.</p>
-<pre><code class="lang-lisp">(define-action close-ticket
-  (:input [ticket String {:required true}])
-  (:returns String)
-  (:do (changes
-    (clear ticket :ticket/status)
-    (set ticket :ticket/status "closed"))))</code></pre>
-            </article>
-            <article class="oo-decl--query">
-              <header><span>Questions</span><h3>define-datalog-query</h3></header>
-              <p>A named question over the same facts, with joins, negation, ordering and aggregates.</p>
-<pre><code class="lang-lisp">(define-datalog-query tickets-by-status
-  (:query
-    {:find ["?status" "?count"]
-     :where [["?t" ":ticket/status" "?status"]]
-     :aggregate [["count" "?t" "?count"]]}))</code></pre>
-            </article>
-          </div>
-
-          <div class="oo-changes" role="table" aria-label="Action changes">
-            <div role="row" class="oo-changes__head"><span role="columnheader">Change</span><span role="columnheader">Syntax</span><span role="columnheader">Effect</span></div>
-            <div role="row"><span role="cell"><b>create</b></span><code role="cell">(create Entity id {:ns/field value})</code><span role="cell">Asserts each listed field on object <code>id</code>.</span></div>
-            <div role="row"><span role="cell"><b>set</b></span><code role="cell">(set object :ns/field value)</code><span role="cell">Adds a value. It does not remove the old one.</span></div>
-            <div role="row"><span role="cell"><b>clear</b></span><code role="cell">(clear object :ns/field)</code><span role="cell">Retracts every value. Put it before <code>set</code> to replace.</span></div>
-            <div role="row"><span role="cell"><b>link</b></span><code role="cell">(link relation from to {:rel/field value})</code><span role="cell">Creates the link object between <code>from</code> and <code>to</code>.</span></div>
-          </div>
-          <p class="oo-note">A value is an input name, <code>now</code>, or a quoted literal. Nothing else: no conditions, no computed values. Full grammar, types and naming rules are in <a href="/llms-full.txt">the agent guide, section 5</a>.</p>
+          <ol class="oo-xray" aria-label="Cross-platform references that nothing checks, and the prelude that types each one">
+            <li class="oo-xray__root" aria-hidden="true">acme/</li>
+            <li><a href="#stripe"><span class="oo-xray__branch" aria-hidden="true">├──</span><span class="oo-xray__where">stripe</span><code>customer.metadata.sf_account_id</code><span class="oo-xray__what">← a Salesforce Account Id, pasted by hand</span><span class="oo-xray__flag">unchecked</span></a></li>
+            <li><a href="#salesforce"><span class="oo-xray__branch" aria-hidden="true">├──</span><span class="oo-xray__where">salesforce</span><code>Opportunity.Plan__c  (picklist)</code><span class="oo-xray__what">← a copy of Stripe's lookup keys</span><span class="oo-xray__flag">unchecked</span></a></li>
+            <li><a href="#more-preludes"><span class="oo-xray__branch" aria-hidden="true">├──</span><span class="oo-xray__where">okta</span><code>app assignment → "Sales User"</code><span class="oo-xray__what">← a Salesforce profile name</span><span class="oo-xray__flag">unchecked</span></a></li>
+            <li><a href="#more-preludes"><span class="oo-xray__branch" aria-hidden="true">├──</span><span class="oo-xray__where">github</span><code>team @acme/billing-eng</code><span class="oo-xray__what">← should match an Okta group</span><span class="oo-xray__flag">unchecked</span></a></li>
+            <li><a href="#more-preludes"><span class="oo-xray__branch" aria-hidden="true">├──</span><span class="oo-xray__where">pagerduty</span><code>schedule billing-oncall</code><span class="oo-xray__what">← whoever is on that team today</span><span class="oo-xray__flag">unchecked</span></a></li>
+            <li><a href="#palantir"><span class="oo-xray__branch" aria-hidden="true">└──</span><span class="oo-xray__where">palantir</span><code>action sync-renewal</code><span class="oo-xray__what">← reads Stripe and Salesforce both</span><span class="oo-xray__flag">unchecked</span></a></li>
+          </ol>
         </section>
 
-        <section id="procedure" class="oo-section" aria-labelledby="procedure-title">
+        <!-- 01 · Standard library -->
+        <section id="std" class="oo-section" aria-labelledby="std-title">
           <div class="oo-head">
-            <p class="oo-overline"><span>02</span>The procedure</p>
-            <h2 id="procedure-title">From a conversation to a checked model.</h2>
-            <p>The same seven steps work for any domain. The agent does the translating, and the person only has to confirm what they recognize.</p>
+            <p class="oo-overline"><span>01</span>The standard library</p>
+            <h2 id="std-title">The ontology is a standard library of domain types.</h2>
+            <p><code>@ontology/std</code> defines the concepts every business shares: people, organizations, teams, money, and email. It's written in the Palantir-style ontology prelude as interfaces and value types. Platform preludes don't rebuild these. They say which of their own types <strong>implement</strong> them, so a project can accept “any organization” without caring which platform it came from.</p>
           </div>
-          <div class="oo-procedure">
-            <ol class="oo-steps">
-              <li><b>Draft before interrogating.</b> Write a first model from whatever the person gave you. Ask only about the gaps.</li>
-              <li><b>Fill gaps by area:</b> things, facts, connections, verbs, questions.</li>
-              <li><b>Map words to forms</b> using the table alongside.</li>
-              <li><b>Name things by the rules:</b> PascalCase entities, kebab-case everything else, <code>namespace/field</code> keys.</li>
-              <li><b>Check:</b> run <code>pnpm model:check model.lisp</code> until it reports <code>0 warnings</code>.</li>
-              <li><b>Run a scenario:</b> seed facts, invoke actions, compare the query rows with what the person expects.</li>
-              <li><b>Hand back</b> the file, the check summary, the scenario output, and what v0.1 cannot express yet.</li>
-            </ol>
-            <div class="oo-map">
-              <table>
-                <caption>When the person says… write…</caption>
-                <thead><tr><th scope="col">The person says</th><th scope="col">You write</th></tr></thead>
-                <tbody>
-                  <tr><td>“We track customers and tickets.”</td><td><code>define-entity</code> ×2</td></tr>
-                  <tr><td>“Each ticket belongs to one customer.”</td><td>Reference field <code>[ticket/customer Customer]</code></td></tr>
-                  <tr><td>“We escalate to an engineer and note why.”</td><td><code>define-relation</code> with a <code>reason</code> field</td></tr>
-                  <tr><td>“Status is open, escalated or closed.”</td><td><code>String</code> field, replaced with <code>clear</code> + <code>set</code></td></tr>
-                  <tr><td>“Support opens a ticket.”</td><td><code>define-action</code> with <code>create</code></td></tr>
-                  <tr><td>“How many per status?”</td><td>Query with <code>:aggregate count</code></td></tr>
-                  <tr><td>“Show Acme's tickets.”</td><td>No query parameters in v0.1: return the customer column</td></tr>
-                </tbody>
-              </table>
+          <div class="oo-std">
+            <div class="oo-panel">
+              <div class="oo-panel__head"><span>@ontology/std/src/business.forma</span><span>std</span></div>
+<pre><code class="lang-lisp">(export Email Currency Money
+        Person Organization Team member-of)
+
+(value-type Email String :pattern "^[^@]+@[^@]+$")
+(value-type Currency (Enum :usd :eur :gbp :jpy))
+(value-type Money {:amount Int :currency Currency})
+
+(interface Person {:name String :email Email})
+(interface Organization {:name String :domain (Option String)})
+(interface Team {:name String})
+
+(link-type member-of Person Team)</code></pre>
+            </div>
+            <div class="oo-std__side">
+              <div class="oo-panel">
+                <div class="oo-panel__head"><span>@ontology/salesforce/src/std.forma</span><span>salesforce</span></div>
+<pre><code class="lang-lisp">(import "@ontology/std" :as std)
+
+(implements std/Organization Account
+  {:name Name :domain Website})
+(implements std/Person Contact
+  {:name Name :email Email})</code></pre>
+              </div>
+              <div class="oo-panel">
+                <div class="oo-panel__head"><span>ops/renewals.forma</span><span>palantir</span></div>
+<pre><code class="lang-lisp">(object-type Renewal
+  {:customer (Id std/Organization) ; Account or Customer
+   :owner (Id std/Person)
+   :amount std/Money})</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="oo-rosetta-wrap">
+            <table class="oo-rosetta">
+              <caption class="oo-sr">Which platform types implement each standard library type</caption>
+              <thead>
+                <tr>
+                  <th scope="col" class="oo-rosetta__kernel">@ontology/std</th>
+                  <th scope="col" data-col="salesforce"><a href="#salesforce">salesforce</a></th>
+                  <th scope="col" data-col="stripe"><a href="#stripe">stripe</a></th>
+                  <th scope="col" data-col="okta"><a href="#more-preludes">okta</a></th>
+                  <th scope="col" data-col="github"><a href="#more-preludes">github</a></th>
+                  <th scope="col" data-col="pagerduty"><a href="#more-preludes">pagerduty</a></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">Person</th><td data-col="salesforce">Contact, User</td><td data-col="stripe">Customer (individual)</td><td data-col="okta">User</td><td data-col="github">User</td><td data-col="pagerduty">User</td></tr>
+                <tr><th scope="row">Organization</th><td data-col="salesforce">Account</td><td data-col="stripe">Customer (business)</td><td data-col="okta">—</td><td data-col="github">Organization</td><td data-col="pagerduty">—</td></tr>
+                <tr><th scope="row">Team</th><td data-col="salesforce">Public Group</td><td data-col="stripe">—</td><td data-col="okta">Group</td><td data-col="github">Team</td><td data-col="pagerduty">Team</td></tr>
+                <tr><th scope="row">member-of</th><td data-col="salesforce">Group Member</td><td data-col="stripe">—</td><td data-col="okta">group membership</td><td data-col="github">team membership</td><td data-col="pagerduty">team member</td></tr>
+                <tr><th scope="row">Money</th><td data-col="salesforce">Currency field</td><td data-col="stripe">amount + currency</td><td data-col="okta">—</td><td data-col="github">—</td><td data-col="pagerduty">—</td></tr>
+                <tr><th scope="row">Email</th><td data-col="salesforce">Email field</td><td data-col="stripe">email</td><td data-col="okta">login</td><td data-col="github">email</td><td data-col="pagerduty">email</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="oo-note">A dash means the platform has no such concept, and that's fine. Preludes implement what they actually have. The standard library is a package too: versioned, open to proposals, and swappable for an industry-specific one.</p>
+        </section>
+
+        <!-- 02–07 · Preludes -->
+        <section id="preludes" class="oo-section" aria-labelledby="preludes-title">
+          <div class="oo-head">
+            <p class="oo-overline"><span>02–07</span>The preludes</p>
+            <h2 id="preludes-title">Every platform keeps its own words. They just share a type checker.</h2>
+            <p>A prelude doesn't squeeze Salesforce into someone else's model. It teaches Forma Salesforce's own forms and elaborates them to the Metadata API's own files. Preludes share only Forma's types and the standard library, so a value in one project can refer to a declaration in another.</p>
+          </div>
+
+          <div class="oo-spreads">
+            <article id="palantir" class="oo-spread oo-spread--palantir" aria-labelledby="palantir-name">
+              <div class="oo-spread__copy">
+                <p class="oo-spread__index"><span>02</span>The default prelude</p>
+                <h3 id="palantir-name" class="oo-pkg">@ontology/palantir</h3>
+                <p class="oo-spread__title">Objects, links, actions, and queries: the language the standard library is written in.</p>
+                <p class="oo-status oo-status--today">runs today · v0.1</p>
+                <div class="oo-story">
+                  <span>The renewal</span>
+                  <p>Your operational model took a year to build and lives inside one vendor's UI. When the contract comes up, the model is the one thing you can't take with you.</p>
+                </div>
+                <p class="oo-spread__does">The ontology prelude is where Open Ontology started, and it's what <code>@ontology/std</code> is written in. Use it to model your own operations too: object types, link types that carry their own facts, actions that commit as one transaction, and named Datalog queries. It's the same core as Palantir Foundry's Ontology, as a plain file you own, and it elaborates to a portable IR that runs on Triplex.</p>
+                <ul class="oo-uses" aria-label="Elaborates to">
+                  <li>→ ontology IR</li>
+                  <li>actions → Triplex transactions</li>
+                  <li>queries → Datalog</li>
+                </ul>
+                <code class="oo-install">oo add @ontology/palantir</code>
+              </div>
+              <div class="oo-spread__code">
+                <div class="oo-panel">
+                  <div class="oo-panel__head"><span>field-service/model.forma</span><span>palantir</span></div>
+<pre><code class="lang-lisp">(object-type WorkOrder {:title String :status String})
+(object-type Technician {:name String})
+
+(link-type assigned-to WorkOrder Technician
+  {:assigned-at Instant})
+
+(: assign (-> (Id WorkOrder) (Id Technician) (Action Bool)))
+(define assign [order tech]
+  (do! [_ (update! order {:status "assigned"})
+        _ (link! assigned-to order tech {:assigned-at (now)})]
+    true))
+
+(query assigned-work
+  :from WorkOrder
+  :where (= status "assigned")
+  :select [title])</code></pre>
+                </div>
+                <div class="oo-panel oo-panel--out">
+                  <div class="oo-panel__head"><span>runtime.query("assigned-work")</span><span>Triplex</span></div>
+<pre><code>[{ "title": "Repair cooling pump" }]</code></pre>
+                </div>
+              </div>
+            </article>
+
+            <article id="salesforce" class="oo-spread oo-spread--salesforce" aria-labelledby="salesforce-name">
+              <div class="oo-spread__copy">
+                <p class="oo-spread__index"><span>03</span>CRM metadata</p>
+                <h3 id="salesforce-name" class="oo-pkg">@ontology/salesforce</h3>
+                <p class="oo-spread__title">Org metadata you can review, in Salesforce's own vocabulary.</p>
+                <p class="oo-status oo-status--preview">preview</p>
+                <div class="oo-story">
+                  <span>The sandbox refresh</span>
+                  <p>Billing launched a new plan. Nobody added it to the Plan picklist, so the flow that depends on it fails in UAT. The only diff tool is a 40,000-line XML retrieve.</p>
+                </div>
+                <p class="oo-spread__does">Objects, fields, picklists, validation rules, and record-triggered flows. They're checked at line:col and elaborated to the same <code>-meta.xml</code> files the Metadata API deploys. Here the picklist's values aren't typed in. They're the lookup keys from the billing project.</p>
+                <ul class="oo-uses" aria-label="Elaborates to">
+                  <li><code>object</code> → CustomObject</li>
+                  <li><code>field</code> → CustomField</li>
+                  <li><code>record-flow</code> → Flow</li>
+                  <li><code>validation-rule</code> → ValidationRule</li>
+                </ul>
+                <code class="oo-install">oo add @ontology/salesforce</code>
+              </div>
+              <div class="oo-spread__code">
+                <div class="oo-panel">
+                  <div class="oo-panel__head"><span>sales/opportunity.forma</span><span>salesforce</span></div>
+<pre><code class="lang-lisp">(import "@acme/billing" :as billing)
+
+(object Opportunity
+  (field Plan__c (picklist-of billing/prices :by :lookup-key))
+  (field Seats__c (Number :precision 6)))
+
+(validation-rule seats-required Opportunity
+  (and (= StageName "Closed Won") (blank? Seats__c))
+  "Closed deals need a seat count.")
+
+(record-flow mark-customer Opportunity
+  :when (= StageName "Closed Won")
+  (update! Account {:Type "Customer"}))</code></pre>
+                </div>
+                <div class="oo-panel oo-panel--out">
+                  <div class="oo-panel__head"><span>objects/Opportunity/fields/Plan__c.field-meta.xml</span><span>Metadata API</span></div>
+<pre><code>&lt;CustomField xmlns="http://soap.sforce.com/2006/04/metadata"&gt;
+  &lt;fullName&gt;Plan__c&lt;/fullName&gt;
+  &lt;type&gt;Picklist&lt;/type&gt;
+  &lt;valueSet&gt;&lt;valueSetDefinition&gt;
+    &lt;value&gt;&lt;fullName&gt;pro_monthly&lt;/fullName&gt;&lt;/value&gt;  <span class="oo-dim">← billing</span>
+    &lt;value&gt;&lt;fullName&gt;pro_overage&lt;/fullName&gt;&lt;/value&gt;  <span class="oo-dim">← billing</span>
+  &lt;/valueSetDefinition&gt;&lt;/valueSet&gt;
+&lt;/CustomField&gt;</code></pre>
+                </div>
+              </div>
+            </article>
+
+            <article id="stripe" class="oo-spread oo-spread--stripe" aria-labelledby="stripe-name">
+              <div class="oo-spread__copy">
+                <p class="oo-spread__index"><span>04</span>Billing config</p>
+                <h3 id="stripe-name" class="oo-pkg">@ontology/stripe</h3>
+                <p class="oo-spread__title">Your price book is a program. Write it like one.</p>
+                <p class="oo-status oo-status--preview">preview</p>
+                <div class="oo-story">
+                  <span>The pricing launch</span>
+                  <p>New pricing ships from a spreadsheet. Someone clicks through the dashboard creating fourteen prices and mistypes one tier. The first overage invoice is off by 100×.</p>
+                </div>
+                <p class="oo-spread__does">Products, prices, tiers, and meters elaborate to the exact Stripe API requests that would create them. Tier order, currencies, and meter references are checked first. The project exports <code>prices</code> as a typed value, so other projects can depend on the price book instead of copying it.</p>
+                <ul class="oo-uses" aria-label="Elaborates to">
+                  <li><code>product</code> → /v1/products</li>
+                  <li><code>price</code> → /v1/prices</li>
+                  <li><code>meter</code> → /v1/billing/meters</li>
+                </ul>
+                <code class="oo-install">oo add @ontology/stripe</code>
+              </div>
+              <div class="oo-spread__code">
+                <div class="oo-panel">
+                  <div class="oo-panel__head"><span>billing/pricing.forma</span><span>stripe</span></div>
+<pre><code class="lang-lisp">(export prices)
+
+(product pro "Pro")
+
+(price pro-monthly pro
+  :lookup-key "pro_monthly" :currency :usd
+  :recurring :month :unit-amount 2900)
+
+(meter api-requests :event "api_request" :aggregate :sum)
+
+(price pro-overage pro
+  :lookup-key "pro_overage" :currency :usd
+  :metered api-requests :tiers [[10000 0] [:inf 20]])
+
+(define prices [pro-monthly pro-overage])</code></pre>
+                </div>
+                <div class="oo-panel oo-panel--out">
+                  <div class="oo-panel__head"><span>oo elaborate @acme/billing</span><span>Stripe API</span></div>
+<pre><code>POST /v1/products        { "id": "pro", "name": "Pro" }
+POST /v1/billing/meters  { "event_name": "api_request",
+                           "default_aggregation": { "formula": "sum" } }
+POST /v1/prices          { "lookup_key": "pro_monthly",
+                           "product": "pro", "currency": "usd",
+                           "unit_amount": 2900,
+                           "recurring": { "interval": "month" } }
+POST /v1/prices          { "lookup_key": "pro_overage",
+                           "billing_scheme": "tiered", … }</code></pre>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div id="more-preludes" class="oo-cards">
+            <article class="oo-card">
+              <p class="oo-spread__index"><span>05</span>Identity</p>
+              <h3 class="oo-pkg">@ontology/okta</h3>
+              <p class="oo-card__title">Access that matches the org chart.</p>
+              <p class="oo-card__story">An app assignment names a Salesforce profile as a string. Someone renames the profile, and new hires get no CRM access for two weeks.</p>
+<pre><code class="lang-lisp">(import "@acme/sales" :as sales)
+
+(group sales-eng
+  :rule (= user.dept
+           "Sales"))
+
+(app-assignment salesforce
+  sales-eng
+  :profile sales/SalesUser)</code></pre>
+              <p class="oo-card__lowers">→ Okta groups, rules, app assignments</p>
+              <p class="oo-status oo-status--sketch">sketch</p>
+            </article>
+            <article class="oo-card">
+              <p class="oo-spread__index"><span>06</span>Source control</p>
+              <h3 class="oo-pkg">@ontology/github</h3>
+              <p class="oo-card__title">Teams that come from identity.</p>
+              <p class="oo-card__story">CODEOWNERS names a team that was retired last quarter. Every pricing change now merges without a billing review.</p>
+<pre><code class="lang-lisp">(import "@acme/identity" :as id)
+
+(team billing-eng
+  :members (members id/billing))
+
+(repo billing-service
+  :codeowners
+    {"/pricing/" billing-eng}
+  :protect "main"
+    {:reviews 2})</code></pre>
+              <p class="oo-card__lowers">→ GitHub teams, CODEOWNERS, rulesets</p>
+              <p class="oo-status oo-status--sketch">sketch</p>
+            </article>
+            <article class="oo-card">
+              <p class="oo-spread__index"><span>07</span>Incident response</p>
+              <h3 class="oo-pkg">@ontology/pagerduty</h3>
+              <p class="oo-card__title">On-call follows the team.</p>
+              <p class="oo-card__story">The billing rotation still pages someone who moved to another team in March. They mute it. The invoice outage waits until morning.</p>
+<pre><code class="lang-lisp">(import "@acme/eng" :as eng)
+
+(schedule billing-oncall
+  :users (members
+           eng/billing-eng)
+  :rotation :weekly)
+
+(escalation billing
+  billing-oncall :after 15m)</code></pre>
+              <p class="oo-card__lowers">→ PagerDuty schedules, escalation policies</p>
+              <p class="oo-status oo-status--sketch">sketch</p>
+            </article>
+            <article class="oo-card oo-card--yours">
+              <p class="oo-spread__index"><span>··</span>Your platform here</p>
+              <h3 class="oo-pkg">@you/anything</h3>
+              <p class="oo-card__title">HubSpot. NetSuite. Workato. Your internal admin.</p>
+              <p class="oo-card__story">If a platform has config, it can have a prelude. Write its forms in Forma, say what each one elaborates to, and publish it for everyone.</p>
+<pre><code><span class="oo-prompt">$</span> oo init --prelude @you/anything
+<span class="oo-prompt">$</span> oo check
+<span class="oo-prompt">$</span> oo publish</code></pre>
+              <a class="oo-card__cta" href="https://discord.gg/cjW4gxsdXK">Propose one on Discord ↗</a>
+            </article>
+          </div>
+        </section>
+
+        <!-- 07 · How a prelude works -->
+        <section id="elaboration" class="oo-section" aria-labelledby="elaboration-title">
+          <div class="oo-head">
+            <p class="oo-overline"><span>08</span>How a prelude works</p>
+            <h2 id="elaboration-title">A prelude is a Forma file. Elaboration is a typed function.</h2>
+            <p>Since Forma 0.4, a form declares its syntax, its typed holes, its checks, and the IR it produces, all in one definition. Declarations become types that other projects can import. Follow one Stripe price from the prelude that defines it to the Salesforce project that depends on it.</p>
+          </div>
+
+          <div class="oo-stages" data-stages>
+            <div class="oo-stages__rail" role="tablist" aria-label="Elaboration stages" hidden>
+              <button type="button" role="tab" data-stage="0" aria-selected="true"><span>01</span>The prelude defines</button>
+              <button type="button" role="tab" data-stage="1"><span>02</span>You write</button>
+              <button type="button" role="tab" data-stage="2"><span>03</span>It elaborates to</button>
+              <button type="button" role="tab" data-stage="3"><span>04</span>Other projects see</button>
+            </div>
+            <div class="oo-stage" data-stage-panel="0" role="tabpanel">
+              <div class="oo-stage__note"><b>01 · The prelude defines</b><p>The pattern sets the syntax and <code>:types</code> sets the holes. <code>(Declares Price)</code> makes each price a declaration that other files can refer to. The body is pure Forma that builds Stripe's request. Nothing in it can reach the network or the disk.</p></div>
+              <div class="oo-panel">
+                <div class="oo-panel__head"><span>@ontology/stripe/src/prices.forma</span><span>prelude</span></div>
+<pre><code class="lang-lisp">(export price Price PriceParams)
+
+(form (price name product {:keys [lookup-key currency
+                                  unit-amount recurring
+                                  metered tiers]})
+  "A Stripe price."
+  :types {:name (Declares Price)
+          :product (Refers Product)
+          :lookup-key String
+          :currency Currency
+          :metered (Option (Refers Meter))
+          :tiers (Option (List Tier))}
+  :check stripe/check-tiers
+  :ir PriceParams
+  (stripe/price-params name product lookup-key …))</code></pre>
+              </div>
+            </div>
+            <div class="oo-stage" data-stage-panel="1" role="tabpanel">
+              <div class="oo-stage__note"><b>02 · You write</b><p>Stripe's words, in a file you can diff and review. An unknown option, a missing currency, or a tier out of order is an error at line:col.</p></div>
+              <div class="oo-panel">
+                <div class="oo-panel__head"><span>billing/pricing.forma</span><span>source</span></div>
+<pre><code class="lang-lisp">(price pro-monthly pro
+  :lookup-key "pro_monthly" :currency :usd
+  :recurring :month :unit-amount 2900)</code></pre>
+              </div>
+            </div>
+            <div class="oo-stage" data-stage-panel="2" role="tabpanel">
+              <div class="oo-stage__note"><b>03 · It elaborates to</b><p>Stripe's native request, with a source span on every value. Nothing gets squeezed into a shared model on the way. A reconciler such as Schematics can plan it against the live account.</p></div>
+              <div class="oo-panel oo-panel--ir">
+                <div class="oo-panel__head"><span>oo elaborate @acme/billing --json</span><span>PriceParams</span></div>
+<pre><code>{ "kind": "stripe/price", "name": "pro-monthly",
+  "span": "billing/pricing.forma:3:1",
+  "request": { "method": "POST", "path": "/v1/prices",
+    "body": { "lookup_key": "pro_monthly", "product": "pro",
+              "currency": "usd", "unit_amount": 2900,
+              "recurring": { "interval": "month" } } } }</code></pre>
+              </div>
+            </div>
+            <div class="oo-stage" data-stage-panel="3" role="tabpanel">
+              <div class="oo-stage__note"><b>04 · Other projects see</b><p>The billing project's exports are a typed interface. To the sales project, <code>billing/prices</code> is a list of <code>Price</code> declarations, and <code>picklist-of</code> turns their lookup keys into the picklist's value type.</p></div>
+              <div class="oo-panel">
+                <div class="oo-panel__head"><span>oo interface @acme/billing</span><span>exports</span></div>
+<pre><code class="lang-lisp">(: prices (List stripe/Price))
+;; pro-monthly  :lookup-key "pro_monthly"
+;; pro-overage  :lookup-key "pro_overage"
+
+;; in @acme/sales, Plan__c gets the type
+;; (Union "pro_monthly" "pro_overage")</code></pre>
+              </div>
             </div>
           </div>
         </section>
 
+        <!-- 08 · Across projects -->
+        <section id="across" class="oo-section" aria-labelledby="across-title">
+          <div class="oo-head">
+            <p class="oo-overline"><span>09</span>Type-checked across projects</p>
+            <h2 id="across-title">A rename in Salesforce is an error in Okta, before deploy.</h2>
+            <p>Each project is a package with its own prelude, and projects import each other like modules. <code>oo check</code> elaborates the whole graph at once. A break in one platform's config is reported where another platform's config depends on it, before either one is deployed.</p>
+          </div>
+          <div class="oo-together">
+            <div class="oo-together__files">
+              <div class="oo-panel">
+                <div class="oo-panel__head"><span>sales/profiles.forma</span><span>salesforce · edited</span></div>
+<pre><code><span class="oo-del">-(profile SalesUser :license "Salesforce")</span>
+<span class="oo-add">+(profile Sales_Rep :license "Salesforce")</span></code></pre>
+              </div>
+              <div class="oo-term">
+                <div class="oo-term__head"><span>oo check</span><span>exit 1</span></div>
+<pre><code><span class="oo-prompt">$ oo check</span>
+<span class="oo-ok">ok</span>    @acme/billing   stripe
+<span class="oo-err">error</span> sales/opportunity.forma:14:18
+      "pro_annual" is not a Plan__c value. Plan__c values
+      come from @acme/billing prices: pro_monthly, pro_overage
+<span class="oo-err">error</span> identity/apps.forma:6:12
+      @acme/sales has no profile SalesUser
+      (renamed to Sales_Rep in sales/profiles.forma:3:10)
+2 errors in 2 projects · nothing elaborated, nothing deployed</code></pre>
+              </div>
+            </div>
+<pre class="oo-ascii" aria-label="The project graph. The ops project, written in the palantir prelude, imports sales and billing. Sales, in salesforce, imports billing, in stripe. Identity, in okta, imports sales. Eng, in github, imports identity. On-call, in pagerduty, imports eng. Every edge is type-checked."><code>acme/                         <span class="oo-dim">ontology.json · oo.lock</span>
+
+<b>@acme/billing</b>   <span class="oo-hi">stripe</span>
+   ▲ prices
+<b>@acme/sales</b>     <span class="oo-hi">salesforce</span>
+   ▲ profiles            ▲ Account
+<b>@acme/identity</b>  <span class="oo-hi">okta</span>      <b>@acme/ops</b>  <span class="oo-hi">palantir</span>
+   ▲ groups                 └─ also imports billing
+<b>@acme/eng</b>       <span class="oo-hi">github</span>
+   ▲ teams
+<b>@acme/oncall</b>    <span class="oo-hi">pagerduty</span>
+
+<span class="oo-dim">every ▲ is an import, and every import is typed</span>
+<span class="oo-dim">$ oo why @acme/sales.SalesUser</span>
+<span class="oo-dim">  used by identity/apps.forma:6:12</span></code></pre>
+          </div>
+        </section>
+
+        <!-- 09 · Packages -->
+        <section id="packages" class="oo-section" aria-labelledby="packages-title">
+          <div class="oo-head">
+            <p class="oo-overline"><span>10</span>The package manager</p>
+            <h2 id="packages-title">Preludes and projects are both packages.</h2>
+            <p>A prelude package publishes a platform's language. A project package publishes your config for that platform, along with its typed exports. The standard library is a package as well. All of them get versions, a lockfile, and a registry entry, and anyone can post a prelude.</p>
+          </div>
+          <div class="oo-pm">
+            <div class="oo-panel">
+              <div class="oo-panel__head"><span>sales/ontology.json</span><span>manifest</span></div>
+<pre><code>{ "name": "@acme/sales",
+  "version": "0.3.1",
+  "prelude": "@ontology/salesforce@^0.1",
+  "std": "@ontology/std@^0.1",
+  "entry": "src/",
+  "dependencies": {
+    "@acme/billing": "^0.1"
+  } }</code></pre>
+            </div>
+            <dl class="oo-commands">
+              <div><dt><code>oo add</code></dt><dd>Install a prelude or a project and pin it in <code>oo.lock</code> with a content hash.</dd></div>
+              <div><dt><code>oo check</code></dt><dd>Elaborate the whole project graph. Errors at <code>file:line:col</code>, plus <code>--json</code>.</dd></div>
+              <div><dt><code>oo elaborate</code></dt><dd>Print a project's native config: metadata files, API requests, or ontology IR.</dd></div>
+              <div><dt><code>oo plan</code></dt><dd>Diff the elaborated config against the live platform through a reconciler.</dd></div>
+              <div><dt><code>oo publish</code></dt><dd>Check, pack, and add a prelude or project to the registry index.</dd></div>
+            </dl>
+          </div>
+        </section>
+
+        <!-- 10 · Checked -->
         <section id="check" class="oo-section" aria-labelledby="check-title">
           <div class="oo-head">
-            <p class="oo-overline"><span>03</span>Check</p>
-            <h2 id="check-title">Errors with line numbers. Warnings for what compiles but misbehaves.</h2>
-            <p><code>pnpm model:check</code> elaborates a <code>.lisp</code> or <code>.ts</code> model and applies the runtime's naming and input rules. It also lints for the mistakes that fail silently: a misspelled attribute, a value that is never replaced, an input that can't be omitted. Add <code>--json</code> for machine-readable output.</p>
+            <p class="oo-overline"><span>11</span>Available today</p>
+            <h2 id="check-title">The ontology checker ships today.</h2>
+            <p>The default prelude's checker ships in v0.1 as <code>pnpm model:check</code>. It reports errors with line numbers, applies the runtime's naming and input rules, and lints for mistakes that fail silently, like a misspelled attribute or a value that's never replaced. The output below is real. In v0.1 the default prelude is spelled <code>define-entity</code>, <code>define-relation</code>, <code>define-action</code>, and <code>define-datalog-query</code>.</p>
           </div>
           <div class="oo-terms">
             <div class="oo-term">
@@ -222,169 +574,67 @@
   which no object or link declares; it will match nothing
 ok examples/support-desk/draft.lisp (draft@0.1.0)
   …
-  object  Ticket  :ticket/title string!, :ticket/customer Customer!, …
-  link    escalated-to  Ticket -&gt; Engineer  :escalated-to/reason string!, …
-  …
-  action  close-ticket(ticket string!)  set :ticket/status
-  …
-  query   tickets-by-status  find ?status ?count
 2 warnings</code></pre>
             </div>
-            <div class="oo-term">
-              <div class="oo-term__head"><span>A broken reference</span><span>exit 1</span></div>
-<pre><code><span class="oo-prompt">$ pnpm model:check examples/support-desk/draft.lisp</span>
-<span class="oo-err">draft.lisp:15:1: error:</span> Link escalated-to has unknown
-  endpoints Ticket -&gt; Engneer</code></pre>
-              <div class="oo-term__head"><span>The fixed model</span><span>exit 0</span></div>
-<pre><code><span class="oo-prompt">$ pnpm model:check examples/support-desk/model.lisp</span>
-ok examples/support-desk/model.lisp (model@0.1.0)
-  …
-0 warnings</code></pre>
+            <div class="oo-forAgents">
+              <p class="oo-forAgents__label">Modeling for someone?</p>
+              <p class="oo-forAgents__text">Everything an agent needs for the default prelude is one fetch away: the grammar, a seven-step procedure, the check command, runtime semantics, and limits. Every Forma block in it is checked in CI.</p>
+              <div class="oo-forAgents__fetch">
+                <code>GET /llms-full.txt</code>
+                <button type="button" class="oo-copy" data-copy-url="/llms-full.txt" hidden>Copy URL</button>
+              </div>
+              <a class="oo-primary" href="/llms-full.txt">Read the agent guide <span aria-hidden="true">→</span></a>
             </div>
           </div>
         </section>
 
-        <section id="run" class="oo-section" aria-labelledby="run-title">
+        <!-- 11 · Notes -->
+        <section id="notes" class="oo-section" aria-labelledby="notes-title">
           <div class="oo-head">
-            <p class="oo-overline"><span>04</span>Run</p>
-            <h2 id="run-title">What happens when an action runs.</h2>
-            <p>The field-service example seeds three facts, invokes <code>assign-work-order</code> on behalf of a dispatcher, and asks <code>assigned-work</code>. Each step below is the real behavior of the v0.1 runtime on the in-memory Triplex host.</p>
-          </div>
-          <ol class="oo-timeline">
-            <li>
-              <span class="oo-timeline__n">1</span>
-              <div>
-                <h3>Facts exist</h3>
-                <p>The scenario seeds what is true before anyone acts.</p>
-                <table class="oo-facts">
-                  <thead><tr><th scope="col">entity</th><th scope="col">attribute</th><th scope="col">value</th></tr></thead>
-                  <tbody>
-                    <tr><td>technician:ada</td><td>:technician/name</td><td>"Ada"</td></tr>
-                    <tr><td>work-order:42</td><td>:work-order/title</td><td>"Repair cooling pump"</td></tr>
-                    <tr><td>work-order:42</td><td>:work-order/status</td><td>"open"</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </li>
-            <li>
-              <span class="oo-timeline__n">2</span>
-              <div>
-                <h3>Someone acts</h3>
-                <p>The input is decoded against the action's schema before anything is written. <code>actor</code> is recorded on every fact, and reusing a <code>commandId</code> fails with <code>CommandAlreadyCommittedError</code>.</p>
-<pre class="oo-inline-code"><code>runtime.invoke("assign-work-order",
-  { workOrder: "work-order:42", technician: "technician:ada" },
-  { actor: "dispatcher:grace", commandId: "assign:42", now: 1_800_000_000_000 })</code></pre>
-              </div>
-            </li>
-            <li>
-              <span class="oo-timeline__n">3</span>
-              <div>
-                <h3>One transaction commits</h3>
-                <p>The three changes become five operations, and they commit together or not at all.</p>
-                <table class="oo-facts">
-                  <thead><tr><th scope="col">op</th><th scope="col">entity</th><th scope="col">attribute</th><th scope="col">value</th></tr></thead>
-                  <tbody>
-                    <tr class="oo-retract"><td>retract</td><td>work-order:42</td><td>:work-order/status</td><td>*</td></tr>
-                    <tr><td>assert</td><td>work-order:42</td><td>:work-order/status</td><td>"assigned"</td></tr>
-                    <tr><td>assert</td><td>link:assigned-to:work-order:42:technician:ada</td><td>:assigned-to/from</td><td>ref work-order:42</td></tr>
-                    <tr><td>assert</td><td>link:assigned-to:work-order:42:technician:ada</td><td>:assigned-to/to</td><td>ref technician:ada</td></tr>
-                    <tr><td>assert</td><td>link:assigned-to:work-order:42:technician:ada</td><td>:assigned-to/assigned-at</td><td>1800000000000</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </li>
-            <li>
-              <span class="oo-timeline__n">4</span>
-              <div>
-                <h3>The question is answered</h3>
-                <p><code>runtime.query("assigned-work")</code> joins the work order, the link and the technician. It returns rows keyed by variable:</p>
-<pre class="oo-inline-code"><code>[{ "?title": "Repair cooling pump", "?technician": "Ada" }]</code></pre>
-              </div>
-            </li>
-          </ol>
-        </section>
-
-        <section id="ir" class="oo-section" aria-labelledby="ir-title">
-          <div class="oo-head">
-            <p class="oo-overline"><span>05</span>Portable</p>
-            <h2 id="ir-title">Two syntaxes. One JSON contract.</h2>
-            <p>Forma is compact, and its errors point at a line and column. The TypeScript DSL type-checks queries against declared properties. Both compile to the same IR, and the test suite asserts that the two field-service models produce identical JSON. Store it, diff it, or hand it to another tool.</p>
-          </div>
-          <div class="oo-ir">
-            <div class="oo-panel">
-              <div class="oo-panel__head"><span>model.lisp</span><span>Forma</span></div>
-<pre><code class="lang-lisp">(define-entity WorkOrder
-  (:field [work-order/title String {:required true}])
-  (:field [work-order/status String {:required true}]))</code></pre>
-            </div>
-            <div class="oo-panel">
-              <div class="oo-panel__head"><span>model.ts</span><span>TypeScript</span></div>
-<pre><code>const WorkOrder = Ontology.ObjectType("WorkOrder", {
-  properties: {
-    title: Property.make(":work-order/title", Schema.String).required(),
-    status: Property.make(":work-order/status", Schema.String).required(),
-  },
-});</code></pre>
-            </div>
-            <div class="oo-panel oo-panel--ir">
-              <div class="oo-panel__head"><span>OntologyIR</span><span>identical from both</span></div>
-<pre><code>{ "kind": "object-type", "name": "WorkOrder",
-  "properties": [
-    { "key": ":work-order/title", "name": "title",
-      "valueType": { "kind": "string" },
-      "required": true, "cardinality": "one", "unique": false },
-    { "key": ":work-order/status", … } ] }</code></pre>
-            </div>
-          </div>
-        </section>
-
-        <section id="limits" class="oo-section" aria-labelledby="limits-title">
-          <div class="oo-head">
-            <p class="oo-overline"><span>06</span>Limits</p>
-            <h2 id="limits-title">What v0.1 does not do. Say so before you promise it.</h2>
-            <p>The model is the part that carries forward. The runtime today is a local check, and the list on the right is what the next checkpoint adds.</p>
+            <p class="oo-overline"><span>12</span>Status</p>
+            <h2 id="notes-title">What exists today, and what is designed.</h2>
+            <p>Your config is the part that carries forward. Here's exactly which parts exist.</p>
           </div>
           <div class="oo-limits">
             <div>
-              <h3>Works today</h3>
+              <h3>Runs today · v0.1</h3>
               <ul class="oo-yes">
-                <li>Authoring in Forma or TypeScript, compiled to one JSON IR</li>
-                <li>Located errors, naming rules and lint with <code>pnpm model:check</code></li>
+                <li>The Palantir-style ontology prelude, in Forma or TypeScript, compiled to one JSON IR</li>
+                <li>Located errors, naming rules, and lint with <code>pnpm model:check</code></li>
                 <li>Actions as atomic, attributed, idempotent Triplex transactions</li>
-                <li>Named Datalog queries: joins, <code>not</code>, comparisons, aggregates, ordering, limit and offset</li>
-                <li>Two runnable examples: field service and support desk</li>
+                <li>Named Datalog queries with joins, negation, aggregates, and ordering</li>
+                <li>Local in-memory runtime, with field-service and support-desk examples</li>
               </ul>
             </div>
             <div>
-              <h3>Not yet</h3>
+              <h3>Preview · v0.2 design</h3>
               <ul class="oo-no">
-                <li>Persistence: in-memory host only, so nothing survives the process</li>
-                <li>Authorization: <code>actor</code> is recorded, not checked</li>
-                <li>HTTP, OpenAPI or UI surfaces, and an npm release</li>
-                <li>Query parameters, deletes, unlinks, conditional actions</li>
-                <li>Write-time enforcement of <code>required</code> and cardinality</li>
+                <li>The salesforce, stripe, okta, github, and pagerduty preludes. Their syntax will change</li>
+                <li><code>@ontology/std</code>, <code>implements</code>, cross-project imports, and type checking</li>
+                <li>The <code>oo</code> CLI, manifests, lockfile, and registry</li>
+                <li><code>oo plan</code> against live platforms, persistence, and an npm release</li>
               </ul>
             </div>
             <div class="oo-roadmap">
-              <h3>Next checkpoint</h3>
+              <h3>Ground rules</h3>
               <ol>
-                <li>SQLite persistence</li>
-                <li>Policy authorization</li>
-                <li>Versioned config release and deploy</li>
-                <li>Restart and historical-query tests</li>
-                <li>Attribution and idempotency verification</li>
-                <li>Migration or rebuild procedure</li>
+                <li>Preludes are pure Forma, with no install scripts</li>
+                <li>Platform types implement the standard library; they don't replace it</li>
+                <li>Each prelude elaborates to its platform's native config</li>
+                <li>Every reference between projects is typed and checked before deploy</li>
+                <li>Every elaborated value records its source span</li>
               </ol>
-              <p>Then HTTP reflection and OpenAPI.</p>
+              <p>Palantir, Foundry, Salesforce, Stripe, Okta, GitHub, and PagerDuty are trademarks of their owners. Preludes are community-built and modeled on public APIs. Open Ontology isn't affiliated with or endorsed by any of them.</p>
             </div>
           </div>
         </section>
 
+        <!-- 11 · Start -->
         <section id="start" class="oo-section oo-start" aria-labelledby="start-title">
           <div class="oo-head">
-            <p class="oo-overline"><span>07</span>Start</p>
+            <p class="oo-overline"><span>13</span>Start</p>
             <h2 id="start-title">Clone, check, run.</h2>
-            <p>The package is not on npm yet, so work inside a clone. Put a new model at <code>examples/&lt;domain&gt;/model.lisp</code> and copy <code>examples/support-desk/run.ts</code> next to it.</p>
+            <p>The package isn't on npm yet, so work inside a clone. Put a new model at <code>examples/&lt;domain&gt;/model.lisp</code> and copy <code>examples/support-desk/run.ts</code> next to it.</p>
           </div>
           <div class="oo-term oo-term--start">
             <div class="oo-term__head"><span>terminal</span><span>Node 22+ · pnpm 10.11</span></div>
@@ -400,7 +650,7 @@ pnpm example:support-desk</code></pre>
             <a href="/llms.txt">llms.txt <span>index</span></a>
             <a href="https://github.com/bjacobso/open-ontology/tree/main/examples/support-desk">Support-desk example <span>↗</span></a>
             <a href="https://github.com/bjacobso/open-ontology/tree/main/examples/field-service">Field-service example <span>↗</span></a>
-            <a href="https://github.com/bjacobso/open-ontology/blob/main/src/ir.ts">IR types <span>↗</span></a>
+            <a href="https://github.com/bjacobso/open-ontology/blob/main/src/ir.ts">Kernel IR types <span>↗</span></a>
             <a href="https://github.com/bjacobso/open-ontology/blob/main/docs/architecture.md">Architecture <span>↗</span></a>
           </nav>
         </section>
@@ -408,11 +658,34 @@ pnpm example:support-desk</code></pre>
         <section id="community" class="oo-community" aria-labelledby="community-title">
           <div class="oo-community__mark"><svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></div>
           <div class="oo-community__copy">
-            <p class="oo-overline"><span>08</span>Community</p>
-            <h2 id="community-title">Help shape v0.2 on Discord.</h2>
-            <p>Bring the domain you are modeling, the form you wished existed, or the limit you hit. The roadmap follows what real models need.</p>
+            <p class="oo-overline"><span>14</span>Community</p>
+            <h2 id="community-title">Bring the platform you wish had a prelude.</h2>
+            <p>Tell us which platform's config you're tired of clicking through, which domain type the standard library is missing, or which limit you hit. The first registry preludes will be the ones people ask for.</p>
           </div>
           <a class="oo-primary oo-community__cta" href="https://discord.gg/cjW4gxsdXK">Join the Discord <span aria-hidden="true">↗</span></a>
+        </section>
+        </div>
+
+        <!-- Family -->
+        <section class="oo-family" id="family" aria-labelledby="family-title">
+          <div class="oo-family__inner">
+            <div class="oo-family__head">
+              <div>
+                <p class="oo-overline"><span>15</span>Part of the WorldVM family</p>
+                <h2 id="family-title">Small experiments. Bigger worlds.</h2>
+              </div>
+              <p>Open Ontology is one thread in a family of open experiments in software that can describe, remember, coordinate, and explain itself. WorldVM is where they meet: a runtime for operational worlds of entities, rules, goals, and actions.</p>
+            </div>
+            <ul class="oo-family__grid">
+              <li style="--project: #c6bed9"><a href="https://github.com/bjacobso/forma"><span class="oo-swatch" aria-hidden="true"></span><strong>Forma ↗</strong><em>Little language. Big ideas.</em><span>The typed Lisp every prelude is written in.</span></a></li>
+              <li style="--project: #edba73"><a href="https://triplex.build"><span class="oo-swatch" aria-hidden="true"></span><strong>Triplex ↗</strong><em>A memory for your world.</em><span>The fact database the kernel runs on.</span></a></li>
+              <li style="--project: #e2d6b4"><a href="https://schematics.run"><span class="oo-swatch" aria-hidden="true"></span><strong>Schematics ↗</strong><em>Let your schemas tell you more.</em><span>The plan and apply loop for config that preludes elaborate.</span></a></li>
+              <li style="--project: #9dbbbb"><a href="https://foldworks.dev"><span class="oo-swatch" aria-hidden="true"></span><strong>Foldworks ↗</strong><em>Give the machinery a face.</em><span>Components and application primitives for Foldkit.</span></a></li>
+              <li style="--project: #e9a08b"><a href="https://github.com/bjacobso/runfold"><span class="oo-swatch" aria-hidden="true"></span><strong>Runfold ↗</strong><em>Work that keeps unfolding.</em><span>Typed programs as data, for durable work.</span></a></li>
+              <li class="oo-family__here" style="--project: #b7c8a4"><div><span class="oo-swatch" aria-hidden="true"></span><strong>Open Ontology</strong><em>Name the things. Check the links.</em><span>You are here: typed config as code for every platform.</span></div></li>
+            </ul>
+            <a class="oo-family__cta" href="https://worldvm.com/">Meet the whole family at worldvm.com ↗</a>
+          </div>
         </section>
       </main>
 
