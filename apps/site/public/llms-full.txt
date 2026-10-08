@@ -219,7 +219,17 @@ Queries take no parameters. `model:check` warns when a pattern names an attribut
 
 ### 5.8 Rejected forms
 
-The adapter accepts only `define-entity`, `define-relation`, `define-action`, `define-mutation` and `define-datalog-query`. Other Forma forms (`define-view`, `define-role`, `define-permission`, `define-process`, `define-query`, …) are recognized and rejected with "`<form>` is not yet supported by the Triplex ontology adapter". Unknown change operations, such as `delete`, are rejected too.
+The adapter accepts declarations `define-entity`, `define-relation`, `define-action`, `define-mutation` and `define-datalog-query`, plus bundled `import` forms described below. Other Forma forms (`define-view`, `define-role`, `define-permission`, `define-process`, `define-query`, …) are recognized and rejected with "`<form>` is not yet supported by the Triplex ontology adapter". Unknown change operations, such as `delete`, are rejected too.
+
+### 5.9 Bundled domain libraries
+
+```lisp
+(import "/github")
+```
+
+`/github` imports `/std/git` and adds GitHub accounts, repository hosting records, issues, pull requests, memberships, collaborators, and issue references. `/std/git` alone supplies provider-neutral repositories, branches, commits, parent relations, forks, dependencies, actions, and queries. A hosting record references a shared Git repository; PR base/head references point to shared branches and support cross-fork PRs. A future `/gitlab` can reuse those Git types; it is not bundled yet.
+
+Imports take one string, load each bundled library once per model, and flatten into ordinary IR declarations. Relative files, URLs, and aliases are unsupported. Imported names cannot be redefined. These libraries describe local facts with no API synchronization or permission enforcement. Run `pnpm model:check examples/github/model.lisp` and `pnpm example:github`. Vocabulary and id conventions: https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/git-libraries.md
 
 ## 6. Checking a model
 

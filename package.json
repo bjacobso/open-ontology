@@ -7,6 +7,7 @@
   "files": [
     "dist",
     "preludes",
+    "libraries",
     "docs",
     "README.md"
   ],
@@ -27,7 +28,8 @@
       "types": "./dist/runtime.d.ts",
       "import": "./dist/runtime.js"
     },
-    "./preludes/*": "./preludes/*"
+    "./preludes/*": "./preludes/*",
+    "./libraries/*": "./libraries/*"
   },
   "scripts": {
     "check": "pnpm typecheck && pnpm test && pnpm build && pnpm site:check",
@@ -36,6 +38,7 @@
     "test": "vitest run",
     "example": "tsx examples/field-service/run.ts",
     "example:support-desk": "tsx examples/support-desk/run.ts",
+    "example:github": "tsx examples/github/run.ts",
     "model:check": "tsx scripts/check-model.ts",
     "site:check": "node apps/site/check.mjs",
     "site:dev": "wrangler dev --config apps/site/wrangler.jsonc",

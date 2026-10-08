@@ -355,8 +355,8 @@ export const materializeOntology = (ir: OntologyIR): OntologyDefinition => {
 
   const declarations: OntologyDeclaration[] = [...objects.values(), ...links.values()];
   for (const action of ir.actionTypes) {
-    declarations.push(
-      Ontology.ActionType(action.name, {
+    declarations.push({
+      ...Ontology.ActionType(action.name, {
         input: (action.inputSchema
           ? SchemaRepresentation.fromJsonSchemaDocument(action.inputSchema, { patterns: "apply" })
           : actionSchemaFromFields(action.input)) as unknown as Schema.Schema<
@@ -367,7 +367,10 @@ export const materializeOntology = (ir: OntologyIR): OntologyDefinition => {
         changes: action.changes.map((change) => changeFromIR(change, objects, links)),
         ...(action.description === undefined ? {} : { description: action.description }),
       }),
-    );
+      // Restoring JSON Schema can change its AST representation. Keep the portable
+      // field types (including reference targets and cardinality) from the input IR.
+      inputFields: action.input,
+    });
   }
   for (const query of ir.queryTypes) {
     declarations.push(

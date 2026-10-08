@@ -5,5 +5,5 @@ export type { ActionChange, ActionTypeDefinition, ActionValue, LinkTypeDefinitio
 export type { ActionChangeIR, ActionInputIR, ActionTypeIR, ActionValueIR, DatalogQueryIR, DatalogValueIR, LinkTypeIR, ObjectTypeIR, OntologyDeclarationIR, OntologyIR, OntologyScalarTypeIR, OntologyValueTypeIR, PropertyIR, QueryTypeIR } from "./ir.js";
 export { isOntologyIR } from "./ir.js";
 export { materializeOntology, ontologyToIR } from "./materialize.js";
-export { compileFormaOntology, elaborateFormaOntology, formaForms, ontologyElaboration, ontologyElaborationDescriptors, ontologyPreludeSources, ontologyPreludeStats } from "./forma.js";
+export { compileFormaOntology, elaborateFormaOntology, formaForms, formaLibrarySources, ontologyElaboration, ontologyElaborationDescriptors, ontologyPreludeSources, ontologyPreludeStats } from "./forma.js";
 export { makeOntologyRuntime, toTriplexConfig, type ActionInvocationOptions, type OntologyQueryResponse, type OntologyRuntime } from "./runtime.js";
