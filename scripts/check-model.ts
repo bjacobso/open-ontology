@@ -17,6 +17,9 @@ import {
   type OntologyValueTypeIR,
   type PropertyIR,
 } from "../src/index.js";
+import { checkSkills } from "../src/experimental/skills.js";
+import { splitSkillForms } from "../src/experimental/skills-forma.js";
+import type { SkillModelIR } from "../src/experimental/skills-ir.js";
 
 export interface Diagnostic {
   readonly severity: "error" | "warning";
@@ -30,6 +33,8 @@ export interface ModelCheckResult {
   readonly diagnostics: readonly Diagnostic[];
   readonly summary: readonly string[];
   readonly ir?: OntologyIR;
+  /** Present only with the explicit experimentalSkills option. */
+  readonly skills?: SkillModelIR["skills"];
 }
 
 const OPERATORS = new Set([">", ">=", "<", "<=", "=", "!="]);
@@ -175,13 +180,34 @@ const verified = (ir: OntologyIR, source?: string): ModelCheckResult => {
   return { ok: true, ir, summary: summarize(ir), diagnostics: lint(ir, source) };
 };
 
+const verifiedSkills = (model: SkillModelIR, source?: string): ModelCheckResult => {
+  const result = verified(model.ontology, source);
+  if (!result.ok) return result;
+  try {
+    const errors: Diagnostic[] = checkSkills(model).map(({ name, message }) => ({
+      severity: "error", message, ...locate(source, name),
+    }));
+    return {
+      ...result, ok: errors.length === 0, skills: model.skills,
+      diagnostics: [...result.diagnostics, ...errors],
+      summary: [...result.summary, ...model.skills.map((skill) =>
+        `skill   ${skill.name}  ${skill.steps.length} steps (experimental)`)],
+    };
+  } catch (error) { return failure(error, source); }
+};
+
 /** Check Forma source text. */
 export const checkFormaSource = (
   source: string,
-  options: { readonly name: string; readonly version?: string },
+  options: { readonly name: string; readonly version?: string; readonly experimentalSkills?: boolean },
 ): ModelCheckResult => {
   let ir: OntologyIR;
   try {
+    if (options.experimentalSkills) {
+      const { coreSource, skills } = splitSkillForms(source);
+      const ontology = elaborateFormaOntology(coreSource, options);
+      return verifiedSkills({ kind: "experimental-skill-model", formatVersion: 1, ontology, skills }, source);
+    }
     ir = elaborateFormaOntology(source, options);
   } catch (error) {
     return failure(error, source);
@@ -197,7 +223,7 @@ const isOntologyDefinition = (value: unknown): value is OntologyDefinition =>
 /** Check a `.lisp` Forma file or a `.ts` module that exports a `defineOntology(...)` result. */
 export const checkModelFile = async (
   path: string,
-  options: { readonly name?: string; readonly version?: string } = {},
+  options: { readonly name?: string; readonly version?: string; readonly experimentalSkills?: boolean } = {},
 ): Promise<ModelCheckResult> => {
   if (extname(path) === ".ts") {
     let module: Record<string, unknown>;
@@ -205,6 +231,13 @@ export const checkModelFile = async (
       module = await import(pathToFileURL(resolve(path)).href);
     } catch (error) {
       return failure(error);
+    }
+    if (options.experimentalSkills) {
+      const model = Object.values(module).find((value): value is SkillModelIR =>
+        typeof value === "object" && value !== null && "kind" in value &&
+        value.kind === "experimental-skill-model" && "formatVersion" in value && value.formatVersion === 1);
+      if (!model) return failure(new Error("The module exports no experimental defineSkillModel(...) result"));
+      return verifiedSkills(model);
     }
     const ontology = Object.values(module).find(isOntologyDefinition);
     if (!ontology) return failure(new Error("The module exports no defineOntology(...) result"));
@@ -223,10 +256,11 @@ export const checkModelFile = async (
   return checkFormaSource(source, {
     name: options.name ?? basename(path, extname(path)),
     ...(options.version === undefined ? {} : { version: options.version }),
+    ...(options.experimentalSkills ? { experimentalSkills: true } : {}),
   });
 };
 
-const usage = "Usage: pnpm model:check <model.lisp | model.ts> [--name <name>] [--version <version>] [--json]";
+const usage = "Usage: pnpm model:check <model.lisp | model.ts> [--name <name>] [--version <version>] [--json] [--experimental-skills]";
 
 const main = async (args: readonly string[]): Promise<number> => {
   const flags = new Map<string, string | true>();
@@ -234,6 +268,7 @@ const main = async (args: readonly string[]): Promise<number> => {
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index]!;
     if (arg === "--json") flags.set("json", true);
+    else if (arg === "--experimental-skills") flags.set("experimental-skills", true);
     else if (arg === "--name" || arg === "--version") {
       const value = args[index + 1];
       if (value === undefined) break;
@@ -254,12 +289,13 @@ const main = async (args: readonly string[]): Promise<number> => {
   const result = await checkModelFile(file, {
     ...(typeof name === "string" ? { name } : {}),
     ...(typeof version === "string" ? { version } : {}),
+    ...(flags.has("experimental-skills") ? { experimentalSkills: true } : {}),
   });
 
   if (flags.has("json")) {
     // Diagnostics lead so a truncated read still sees them; the IR is last.
-    const { ok, diagnostics, summary, ir } = result;
-    console.log(JSON.stringify({ file, ok, diagnostics, summary, ir }, null, 2));
+    const { ok, diagnostics, summary, ir, skills } = result;
+    console.log(JSON.stringify({ file, ok, diagnostics, summary, ir, ...(skills ? { skills } : {}) }, null, 2));
     return result.ok ? 0 : 1;
   }
   const where = (diagnostic: Diagnostic) =>
