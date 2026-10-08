@@ -1,0 +1,9 @@
+"$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
+
+[scripts]
+setup = "pnpm install --frozen-lockfile"
+
+[scripts.run.check]
+command = "pnpm check"
+default = true
+icon = "test-tube"

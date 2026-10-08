@@ -1,6 +1,8 @@
 # Open Ontology
 
-`@open-ontology/ontology` defines a portable ontology model, compiles TypeScript and Forma sources to the same JSON-safe IR, and runs actions and named Datalog queries on Triplex. This repository starts with one package and one executable field-service example.
+`@open-ontology/ontology` defines a portable ontology model, compiles TypeScript and Forma sources to the same JSON-safe IR, and runs actions and named Datalog queries on Triplex.
+
+Maturity: **experimental (v0.1)**. One package, two executable examples, and a local in-memory runtime; no durable server or npm release yet.
 
 The selected implementation was adapted from the [historical Open Ontology repository](https://github.com/bjacobso/open-ontology-legacy) at [commit `7c2ff8a`](https://github.com/bjacobso/open-ontology-legacy/commit/7c2ff8a614b9f06a6e530aa80d0c7311dc81a323), especially its `packages/ontology` directory. The current code removes its server convenience method and does not bring over the old workspace or runtime.
 
@@ -11,10 +13,10 @@ Join the community on [Discord](https://discord.gg/cjW4gxsdXK).
 Requires Node 22 or later and pnpm 10.11.0.
 
 ```sh
+git clone https://github.com/bjacobso/open-ontology.git
+cd open-ontology
 pnpm install --frozen-lockfile
-pnpm build
-pnpm typecheck
-pnpm test
+pnpm check
 pnpm example
 pnpm example:support-desk
 pnpm model:check examples/support-desk/model.lisp
@@ -39,3 +41,5 @@ The dependency lockfile resolves `@formalang/ts@0.3.0`, `@triplex-build/triplex@
 ## Next checkpoint
 
 The executable example is a local, in-memory contract check. Before presenting a server as a product host, add SQLite persistence, policy authorization, versioned config release/deploy, restart and historical-query tests, attribution and idempotency verification, and a local migration or rebuild procedure. HTTP reflection and OpenAPI follow that runtime checkpoint.
+
+MIT licensed; see [LICENSE](LICENSE). Part of the [WorldVM](https://worldvm.com) family of experiments.

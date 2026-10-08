@@ -23,10 +23,7 @@ jobs:
           node-version: "24"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm typecheck
-      - run: pnpm test
-      - run: pnpm build
-      - run: pnpm site:check
+      - run: pnpm check
       - name: Deploy static site
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         env:

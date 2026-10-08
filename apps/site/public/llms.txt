@@ -1,14 +1,14 @@
 # Open Ontology
 
-> A small, closed language for domain models, built to be written by agents and owned by people. It has four declarations (entities, relations, actions, queries) and four changes (create, set, clear, link). A model compiles to one portable JSON IR and runs actions as transactions and queries as Datalog on Triplex. v0.1: one package, local in-memory runtime, not on npm.
+> Open Ontology is an experimental (v0.1) language for domain models, built to be written by agents and owned by people. TypeScript and Forma compile to one portable JSON IR; actions and Datalog queries run on a local in-memory Triplex runtime. No npm release yet: clone https://github.com/bjacobso/open-ontology and run `pnpm install --frozen-lockfile`, then `pnpm check`.
 
 If you are an agent modeling a domain for someone, read the agent guide first. It is one plain-text file with the full grammar, a modeling procedure, the check command, the runtime semantics and the limits, and it is tested against v0.1.
 
 ## Docs
 
-- [Agent guide](/llms-full.txt): everything needed to write, check and run a model
-- [README](https://github.com/bjacobso/open-ontology/blob/main/README.md): install, scripts and package boundary
-- [Architecture](https://github.com/bjacobso/open-ontology/blob/main/docs/architecture.md): TypeScript/Forma → IR → Triplex adapter
+- [Agent guide](https://open-ontology.com/llms-full.txt): everything needed to write, check and run a model
+- [README](https://raw.githubusercontent.com/bjacobso/open-ontology/main/README.md): install, scripts and package boundary
+- [Architecture](https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/architecture.md): TypeScript/Forma → IR → Triplex adapter
 
 ## Examples
 

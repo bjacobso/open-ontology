@@ -9,4 +9,4 @@ pnpm site:check
 pnpm site:dev
 ```
 
-The deployment target is `open-ontology-site.bjacobso.workers.dev`, separate from the historical production Worker and custom domain. After `main` checks pass, `.github/workflows/deploy-site.yml` deploys the site with Wrangler. Configure the two GitHub Actions secrets described in the root README before enabling the first deployment.
+The `open-ontology-site` Worker serves https://open-ontology.com. After `main` checks pass, `.github/workflows/deploy-site.yml` deploys the site with Wrangler. The two GitHub Actions secrets are described in the root README. There is no site build: `public/` is the deployment artifact, including the plain-text agent files. `pnpm check` includes the site checks.

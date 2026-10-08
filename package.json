@@ -30,6 +30,7 @@
     "./preludes/*": "./preludes/*"
   },
   "scripts": {
+    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm site:check",
     "build": "tsdown",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

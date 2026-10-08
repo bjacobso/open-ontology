@@ -2,7 +2,7 @@
 
 > Open Ontology is a small, closed language for domain models. It has four declarations (entities, relations, actions, queries) and four kinds of change (create, set, clear, link). A model compiles to one portable JSON IR and runs actions as transactions and queries as Datalog on Triplex. This file is everything an agent needs to turn a person's description of their domain into a checked, running model.
 
-This guide covers `@open-ontology/ontology` 0.1.0, source at https://github.com/bjacobso/open-ontology. Every `lisp` block below is elaborated, checked with zero warnings, and (for the worked example) executed by the repository's test suite. If this file and the code disagree, the code wins. Report the mismatch as an issue or on Discord: https://discord.gg/cjW4gxsdXK
+This guide covers experimental `@open-ontology/ontology` 0.1.0, source at https://github.com/bjacobso/open-ontology. Every `lisp` block below is elaborated, checked with zero warnings, and (for the worked example) executed by the repository's test suite. If this file and the code disagree, the code wins. Report the mismatch as an issue or on Discord: https://discord.gg/cjW4gxsdXK
 
 Current checkpoint: one package, local in-memory runtime. Nothing persists between processes. There is no server, authorization, or npm release yet. See "Limits" before promising anything to the person you are helping.
 
