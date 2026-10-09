@@ -6,6 +6,8 @@ This static site preserves the layout and palette of the historical Open Ontolog
 
 `public/onboarded/index.html` serves the `/onboarded` domain explorer. Its JSON artifact is exported from `examples/onboarded/model.ts`, a synthetic local Triplex scenario, property flags, and `onboarded-views.json` with `pnpm site:export-onboarded`; tests check that it stays in sync and every modeled object appears in a view. Four graph views separate people/work, forms/versions, account/access, and policy/scope configuration. The page distinguishes the executable v0.1 model from illustrative I-9 form helpers and proposed permission scopes. `check.mjs` discovers HTML pages recursively and checks links to directory index routes as well as files.
 
+`public/onboarded/northwind-study.json` contains selected excerpts and authored expectations from a supplied Northwind account sketch. Its browser controls browse the proposal; they do not compile Forma or run journeys. Status labels refer to the separate TypeScript account DSL described by the sheet, not implemented features in this package.
+
 ```sh
 pnpm site:check
 pnpm site:dev

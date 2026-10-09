@@ -299,3 +299,52 @@ function setupPermissionScope(properties) {
   select.addEventListener("change", evaluateScope);
   evaluateScope();
 }
+
+async function loadNorthwindStudy() {
+  const response = await fetch("/onboarded/northwind-study.json");
+  if (!response.ok) throw new Error(`Study returned HTTP ${response.status}`);
+  const study = await response.json();
+  function showSection(section) {
+    for (const button of document.querySelectorAll("[data-northwind-section]")) {
+      button.setAttribute("aria-pressed", String(button.dataset.northwindSection === section.id));
+    }
+    $("#northwind-description").replaceChildren(
+      make("span", "ob-label", `[${section.status}] in the supplied sketch`),
+      make("h3", "", section.title), make("p", "", section.summary),
+      make("p", "ob-small", study.statusLegend[section.status]),
+      make("p", "ob-small", section.note),
+    );
+    $("#northwind-resource").textContent = `Target resource: ${section.resource}`;
+    $("#northwind-source").textContent = section.source;
+  }
+  for (const section of study.sections) {
+    const button = make("button", "", section.title);
+    button.type = "button";
+    button.dataset.northwindSection = section.id;
+    button.addEventListener("click", () => showSection(section));
+    $("#northwind-tabs").append(button);
+  }
+  for (const item of study.cases) {
+    const option = make("option", "", item.label);
+    option.value = item.id;
+    $("#northwind-case").append(option);
+  }
+  function showCase() {
+    const item = study.cases.find((item) => item.id === $("#northwind-case").value);
+    $("#northwind-case-note").textContent = item.note;
+    $("#northwind-case-output").textContent = JSON.stringify({ given: item.given, authoredExpectations: item.expects }, null, 2);
+  }
+  $("#northwind-case").addEventListener("change", showCase);
+  showSection(study.sections.find((section) => section.id === "policies"));
+  showCase();
+  $("#northwind-program").hidden = false;
+  $("#northwind-cases").hidden = false;
+  $("#northwind-load-status").hidden = true;
+}
+
+loadNorthwindStudy().catch(() => {
+  $("#northwind-load-status").replaceChildren(
+    document.createTextNode("The Northwind study could not load. "),
+    Object.assign(make("a", "", "Read its selected excerpts and authored expectations ↗"), { href: "/onboarded/northwind-study.json" }),
+  );
+});

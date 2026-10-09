@@ -40,6 +40,8 @@ Forma models can write `(import "/std/git")` for shared repositories, branches, 
 
 After changing the model, scenario, or graph views, run `pnpm site:export-onboarded` to refresh the checked-in browser artifact. Tests verify that its ontology, transcript, property flags, and views match the checked-in sources.
 
+The page's Northwind study browses selected Forma source excerpts and authored journey expectations from a supplied account-program sketch, including a three-state unknown outcome. Its `onboarded` prelude is unimplemented; its status markers refer to the separate account DSL described in that sketch. Those expectations are not runtime results.
+
 ## Package boundary
 
 The package exports the TypeScript DSL, portable IR, Forma elaborator, and Triplex runtime adapter. The checked-in Forma preludes and domain libraries are loaded at runtime and included in the package tarball. See [architecture](docs/architecture.md) for the boundary and current operational limits.

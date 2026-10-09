@@ -23,6 +23,7 @@
         <a class="oo-brand" href="/"><img src="/favicon.svg" width="24" height="24" alt="" />Open Ontology</a>
         <nav aria-label="Main navigation">
           <a href="#explorer">Explorer</a>
+          <a href="#northwind">Northwind</a>
           <a href="#forms">Form rules</a>
           <a href="#scope">Account scope</a>
           <a class="oo-nav__guide" href="/llms-full.txt">Agent guide ↗</a>
@@ -92,8 +93,23 @@
           </div>
         </section>
 
+        <section id="northwind" class="ob-section" aria-labelledby="northwind-title">
+          <div class="ob-section-head"><div><span class="ob-label">02 / Northwind account study</span><h2 id="northwind-title">A whole account.<br /><em>One proposed program.</em></h2></div><p>The supplied Northwind sheet connects attributes, helpers, three forms, policies, automations, access, integrations, and journeys in one Forma program. It is a target for an <code>onboarded</code> prelude that does not exist yet.</p></div>
+          <div class="ob-northwind-status"><strong>Design sketch · nothing elaborates yet</strong><p><code>[built]</code> means the separate TypeScript account DSL described in the sketch has that feature. <code>[proposed]</code> means a design proposal. <code>[unsupported]</code> marks an adapter limit. None of those labels mean this Forma program runs in Open Ontology v0.1.</p></div>
+          <div class="ob-northwind-program" id="northwind-program" hidden>
+            <div class="ob-northwind-tabs" id="northwind-tabs" role="group" aria-label="Northwind program section"></div>
+            <div class="ob-northwind-panel"><div class="ob-northwind-description" id="northwind-description" aria-live="polite"></div><div class="ob-code-panel"><div class="ob-code-bar"><span id="northwind-resource">Target account resource IR</span><span>Source excerpt · not elaborated</span></div><pre><code id="northwind-source"></code></pre></div></div>
+          </div>
+          <p id="northwind-load-status" class="ob-fallback" role="status">The sketch distinguishes build-time helper arithmetic from runtime form formulas, policies from form deadlines, and task-trigger facts from placement-trigger facts. <a href="/onboarded/northwind-study.json" download="northwind-study.json">Read selected source excerpts and authored expectations ↗</a></p>
+          <div class="ob-northwind-cases" id="northwind-cases" hidden>
+            <div><span class="ob-label">Authored journey expectations</span><h3>Missing is a state of its own.</h3><p>Browse the four placement cases written in the sheet. These expectations have not been executed. A missing union local is asserted as <strong>unknown</strong> in the three-state case.</p><label for="northwind-case">Placement case</label><select id="northwind-case"></select><p class="ob-small" id="northwind-case-note"></p></div>
+            <div class="ob-code-panel"><div class="ob-code-bar"><span>Given → expected</span><span>Authored · not run</span></div><pre><code id="northwind-case-output"></code></pre></div>
+          </div>
+          <p class="ob-small ob-northwind-limit">The reminder waits until a task’s due date plus two days. The story’s “complete on day ten, then advance thirty days” expectation depends on a proposed 30-day release option. Byte-identical account-resource IR snapshots would be the prelude’s acceptance check; those snapshots and that account DSL are not included here.</p>
+        </section>
+
         <section id="forms" class="ob-section" aria-labelledby="forms-title">
-          <div class="ob-section-head"><div><span class="ob-label">02 / Forms &amp; helpers</span><h2 id="forms-title">The simplification is in the helper.<br /><em>TypeScript can have it, too.</em></h2></div><p>Repeating a passport condition six times makes a form harder to maintain. Naming the shared condition removes that repetition in either language. A shorter translation is not, by itself, a reason to switch.</p></div>
+          <div class="ob-section-head"><div><span class="ob-label">03 / Forms &amp; helpers</span><h2 id="forms-title">The simplification is in the helper.<br /><em>TypeScript can have it, too.</em></h2></div><p>Repeating a passport condition six times makes a form harder to maintain. Naming the shared condition removes that repetition in either language. A shorter translation is not, by itself, a reason to switch.</p></div>
           <div class="ob-rules">
             <div class="ob-code-panel"><div class="ob-code-bar"><span>list-a-choice.ts</span><span>Illustrative form DSL</span></div>
 <pre><code>const listAChoice = (
@@ -125,7 +141,7 @@ listAChoice(passportStatuses, listAType, "us_passport");</code></pre>
         </section>
 
         <section id="scope" class="ob-section" aria-labelledby="scope-title">
-          <div class="ob-section-head"><div><span class="ob-label">03 / Account configuration</span><h2 id="scope-title">Where Forma could<br /><em>earn its place.</em></h2></div><p>The interesting boundary is which facts configuration may read, who can author it, and how a workbench edits it. These are potential requirements, separate from making form code shorter.</p></div>
+          <div class="ob-section-head"><div><span class="ob-label">04 / Account configuration</span><h2 id="scope-title">Where Forma could<br /><em>earn its place.</em></h2></div><p>The interesting boundary is which facts configuration may read, who can author it, and how a workbench edits it. These are potential requirements, separate from making form code shorter.</p></div>
           <div class="ob-scope-grid">
             <div class="ob-scope-study"><div class="ob-code-bar"><span>Permission scope</span><span>Design sketch · not enforced in v0.1</span></div><h3>Make the permitted vocabulary explicit.</h3><p>The supplied context includes user-group access rules and a permission-scope flag on custom properties. A future authoring checker could connect them: access rules may read properties marked for permission scope.</p><label for="scope-read">Property read by a hypothetical access rule</label><select id="scope-read" disabled><option>Load the example model to explore property flags</option></select><div class="ob-scope-facts" id="scope-facts"><span class="ob-label">Synthetic property definitions</span><code>CustomProperty.isPermissionScope</code></div><div id="scope-result" class="ob-scope-result" role="status"><strong>A flag is a modeling boundary</strong><span>The example records permission-scope metadata without enforcing an access rule.</span></div><p class="ob-small">This browser demonstration reads synthetic property flags. It is not the Forma compiler or an authorization check.</p></div>
             <div class="ob-reasons"><article><span>01</span><div><h3>Scope as a check</h3><p>Turn an undeclared fact read into a source diagnostic, rather than a package issue discovered after a build.</p><small>Potential account-layer requirement</small></div></article><article><span>02</span><div><h3>Controlled authoring</h3><p>A pure language could matter when customers or agents author configuration that you build and run. TypeScript builders can execute arbitrary code.</p><small>Requires a defined execution boundary</small></div></article><article><span>03</span><div><h3>Machine editing</h3><p>A lossless syntax tree could make workbench patches easier. Editing one field that uses a helper still means deciding whether to change or break the abstraction.</p><small>Requires a round-trip editing design</small></div></article></div>

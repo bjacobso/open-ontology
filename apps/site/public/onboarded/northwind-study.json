@@ -1,0 +1,181 @@
+{
+  "name": "Northwind account sketch",
+  "status": "Design only: no onboarded Forma prelude; syntax and journeys unverified.",
+  "statusLegend": {
+    "built": "Supported by the separate TypeScript account DSL described in the supplied sketch; not implemented by a Forma prelude in this package.",
+    "proposed": "A design proposal, not built in either language in the supplied context.",
+    "unsupported": "A resource that the supplied sketch says today’s platform adapter cannot support."
+  },
+  "sections": [
+    {
+      "id": "package",
+      "title": "Package & types",
+      "status": "built",
+      "resource": "package manifest + external form reference + choice vocabulary",
+      "summary": "The package sets a key namespace, requires the compliance library’s W-4 by reference, and declares closed choice vocabularies.",
+      "note": "Declarations and their imports would form the package. Proposed citations and clauses would attach provenance to resource specs; that resource format is separate from this package’s OntologyIR.",
+      "source": "(package northwind\n  :version \"0.1.0\"\n  :publisher :organization)\n\n; [built] Account.requires. A form another package provides, referenced by key, never copied.\n; prelude: (Declares FormDef) bound to an external { kind: \"form\", key } reference. :check\n;          that the key is outside this package's namespace.\n(require-form w4 \"irs.w-4\" :from \"onboarded.compliance\")\n\n(choice UnionLocal {:local_42 \"Local 42\" :local_77 \"Local 77\" :none \"Not represented\"})\n(choice SiteType   {:warehouse \"Warehouse\" :office \"Office\"})\n(choice Region     {:west \"West\" :east \"East\"})\n(choice CertificationKind {:forklift \"Forklift\"})"
+    },
+    {
+      "id": "properties",
+      "title": "Properties",
+      "status": "built",
+      "resource": "property",
+      "summary": "Extend existing domain entities with typed, stable attribute paths. Permission scope is explicit on Client.region.",
+      "note": "Proposed derive and entity declarations go further: union_covered would be inlined when read; Certification is also marked unsupported by the adapter.",
+      "source": "(extend Client\n  {:region               (Enum Region :label \"Region\" :permission-scope true)\n   :requires_drug_screen (Boolean :label \"Requires drug screen\")})\n\n(extend Job\n  {:site_type   (Enum SiteType :label \"Site type\" :searchable true)\n   :hourly_rate (Decimal :label \"Hourly rate\")})"
+    },
+    {
+      "id": "extensions",
+      "title": "Extensions",
+      "status": "proposed",
+      "resource": "derived attribute + new entity type",
+      "summary": "A union_covered attribute derives a rule from union membership and weekly hours. A new Certification entity would reference an employee.",
+      "note": "Both are proposed; the sketch also labels the new entity unsupported by today’s adapter. These declarations do not add derived attributes or new platform entities through this site.",
+      "source": "(derive Placement union_covered\n  (Boolean :label \"Covered by the agreement\" :cites (clause cba \"art-3.1\"))\n  (all (neq Placement.union_local :none)\n       (gte Placement.weekly_hours 20)))\n\n; [proposed] [unsupported] A new entity type, for a future runtime.\n(entity Certification\n  {:holder     (Ref Employee :cardinality :one)\n   :kind       (Enum CertificationKind :label \"Kind\")\n   :expires_on (Date :label \"Expires on\")})"
+    },
+    {
+      "id": "forms",
+      "title": "Forms",
+      "status": "built",
+      "resource": "form",
+      "summary": "Three local forms, plus a W-4 reference to another package. Union card has employee and employer pages and Spanish text.",
+      "note": "dues-rate is build-time math; f/round is a runtime formula. The form’s 30-day release option is proposed, so the reminder/story depends on a release binding that does not exist here.",
+      "source": "(define dues-percent 1.5)\n(define dues-rate (/ dues-percent 100))\n\n(form union-card \"Union card\"\n  :locales [:en :es]\n  :reads [Job.hourly_rate Placement.weekly_hours]\n  :release {:task-due-in-days 30}   ; [proposed] lineage intent; today in releases/*.release.json\n  :pages\n    [(page \"Union membership\" {:assignee :employee}\n       [(checkbox has-card\n          {:label \"I already hold a union card\"\n           :i18n {:es {:label \"Ya tengo una tarjeta sindical\"}}})\n        (text Employee.union_card_number\n          {:label \"Union card number\" :required true\n           :rule (show (eq has-card true))})\n        (address Employee.mailing_address {:label \"Mailing address\" :required true})\n        ; Runtime math: renders to one =ROUND(...) spreadsheet formula, with the build-time\n        ; dues-rate inlined as 0.015.\n        (formula weekly-dues\n          {:label (str \"Estimated weekly dues (\" dues-percent \"% of gross)\")\n           :value (f/round (f/* (f/val Job.hourly_rate)\n                                (f/val Placement.weekly_hours)\n                                dues-rate)\n                           2)})\n        (sign-here :employee_signature)])\n     (page \"Steward review\" {:assignee :employer}\n       [(review (answer :steward_review Review)\n          {:label \"Review\" :rows [Employee.union_card_number weekly-dues]})\n        (sign-here :steward_signature)])])"
+    },
+    {
+      "id": "policies",
+      "title": "Policies",
+      "status": "built",
+      "resource": "policy",
+      "summary": "An explicit applies-when rule selects a policy, and a form-when rule makes the drug-screen consent conditional.",
+      "note": "The other policy reads a proposed derived union_covered attribute. The target IR would lower policies to purpose=policy automations; the local ontology runtime does not do this.",
+      "source": "(policy warehouse-onboarding\n  :name \"Warehouse onboarding\"\n  :applies-when at-warehouse\n  :requires [w4\n             site-safety\n             (form-when drug-screen-consent (eq Client.requires_drug_screen true))])"
+    },
+    {
+      "id": "automations",
+      "title": "Automations",
+      "status": "built",
+      "resource": "automation + manifest parameter",
+      "summary": "A task-triggered reminder waits until two days after its due date, then emails if still open. A placement-triggered flow can assign site safety.",
+      "note": "Trigger fact scopes differ: the task-triggered flow cannot read placement custom attributes. Email templates need a target-supplied parameter; nothing here sends email or runs a wait.",
+      "source": "(automation union-card-reminder\n  :name \"Union card reminder\"\n  :trigger (on-task :form union-card :events [:created])   ; lowers to a first condition on form.id\n  :rerun :restart_on_trigger\n  :flow\n    [(wait :two_days_after_due {:days 2 :after :task_due})\n     (condition :still_open (neq Task.status \"completed\")\n       {:yes [(send-email :remind_employee\n                {:to :employee\n                 :template overdue-template\n                 :subject \"Your union card is overdue\"\n                 :body \"Hi {{ employee.first_name }}, please complete your union card.\"})]})])"
+    },
+    {
+      "id": "access",
+      "title": "Access",
+      "status": "proposed",
+      "resource": "group",
+      "summary": "The West managers group reads Client.region, declared as a permission-scope property. Job.site_type is searchable but not in that scope.",
+      "note": "A proposed scope checker would reject a read of Job.site_type here. Type.member paths, slash keywords, and type metadata still need verification against Forma.",
+      "source": "(group west-managers\n  :label \"West region managers\"\n  :permissions [:placement/read :employee/read :task/read :task/edit]\n  :access (eq Client.region :west))"
+    },
+    {
+      "id": "integration",
+      "title": "Integration",
+      "status": "proposed",
+      "resource": "integration",
+      "summary": "Bind a provider revision, contract, and account-resolved connection reference. Credentials stay with the target account.",
+      "note": "This is configuration intent, not a provider connection or an integration supported by this package.",
+      "source": "(integration checkr\n  :provider \"@onboarded-platform/checkr\"\n  :revision \"1.4.0\"\n  :contract 1\n  :connection \"checkr\"   ; a reference the target resolves; never a credential\n  :settings {:package \"driver_pro\" :adjudication :manual})"
+    },
+    {
+      "id": "journeys",
+      "title": "Journeys",
+      "status": "built",
+      "resource": "journeys (outcome assertions target kind_version 2)",
+      "summary": "Placement cases state policy and form expectations; automation runs describe branches; a story describes progress over time.",
+      "note": "These are authored expectations, not executed results. The ten-day completion story depends on the proposed 30-day release option.",
+      "source": "(placement \"union local not recorded yet\"\n    :policy-evaluation :three_state\n    (given Job.site_type :office)\n    (given Placement.weekly_hours 32)\n    (expect-policies)\n    (expect-forms)\n    (expect-outcome union-card-obligation :unknown\n      :missing [Placement.union_local]\n      :forms [(form-outcome union-card :unknown :missing [Placement.union_local])])))"
+    }
+  ],
+  "cases": [
+    {
+      "id": "union",
+      "label": "Warehouse · Local 42",
+      "given": {
+        "Job.site_type": ":warehouse",
+        "Placement.union_local": ":local_42",
+        "Placement.weekly_hours": 32,
+        "Client.requires_drug_screen": false
+      },
+      "expects": {
+        "policies": [
+          "northwind.warehouse-onboarding",
+          "northwind.union-card-obligation"
+        ],
+        "forms": [
+          "irs.w-4",
+          "northwind.globex.site-safety",
+          "northwind.union-card"
+        ]
+      },
+      "note": "Includes the proposed union_covered derived attribute; it is not evaluated here."
+    },
+    {
+      "id": "drug-screen",
+      "label": "Warehouse · drug screen",
+      "given": {
+        "Job.site_type": ":warehouse",
+        "Placement.union_local": ":none",
+        "Client.requires_drug_screen": true
+      },
+      "expects": {
+        "policies": [
+          "northwind.warehouse-onboarding"
+        ],
+        "forms": [
+          "irs.w-4",
+          "northwind.globex.site-safety",
+          "northwind.drug-screen-consent"
+        ]
+      },
+      "note": "The supplied case expects conditional consent and excludes the union-card obligation."
+    },
+    {
+      "id": "office",
+      "label": "Office · not represented",
+      "given": {
+        "Job.site_type": ":office",
+        "Placement.union_local": ":none"
+      },
+      "expects": {
+        "policies": [],
+        "forms": []
+      },
+      "note": "The authored placement case expects no matching policy and no suggested form."
+    },
+    {
+      "id": "unknown",
+      "label": "Union local missing",
+      "given": {
+        "Job.site_type": ":office",
+        "Placement.weekly_hours": 32
+      },
+      "expects": {
+        "policyEvaluation": "three_state",
+        "policies": [],
+        "forms": [],
+        "outcomes": [
+          {
+            "policy": "northwind.union-card-obligation",
+            "outcome": "unknown",
+            "missing": [
+              "Placement.union_local"
+            ],
+            "forms": [
+              {
+                "form": "northwind.union-card",
+                "outcome": "unknown",
+                "missing": [
+                  "Placement.union_local"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "note": "Missing is unknown in this authored case, not false. No three-state engine runs in this browser demo."
+    }
+  ]
+}
