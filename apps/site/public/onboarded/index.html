@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f6f5ef" />
+    <meta name="description" content="Explore an illustrative Onboarded ontology: accounts, people, onboarding cases, documents, and review. A working TypeScript model, with an I-9 authoring design study." />
+    <title>Onboarded ontology explorer · Open Ontology</title>
+    <link rel="canonical" href="https://open-ontology.com/onboarded" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="text/plain" href="/llms-full.txt" title="Open Ontology agent guide" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/site.css" />
+    <link rel="stylesheet" href="/onboarded/explorer.css" />
+    <script type="module" src="/onboarded/explorer.js"></script>
+  </head>
+  <body>
+    <div class="oo ob">
+      <a class="oo-skip" href="#main">Skip to content</a>
+      <header class="oo-nav">
+        <a class="oo-brand" href="/"><img src="/favicon.svg" width="24" height="24" alt="" />Open Ontology</a>
+        <nav aria-label="Main navigation">
+          <a href="#explorer">Explorer</a>
+          <a href="#forms">Form rules</a>
+          <a href="#scope">Account scope</a>
+          <a class="oo-nav__guide" href="/llms-full.txt">Agent guide ↗</a>
+        </nav>
+      </header>
+
+      <main id="main" class="ob-main">
+        <div class="ob-breadcrumb"><a href="/">Open Ontology</a><span aria-hidden="true">/</span><span>Domain studies</span><span aria-hidden="true">/</span><strong>Onboarded</strong></div>
+        <section class="ob-hero" aria-labelledby="hero-title">
+          <div>
+            <p class="ob-eyebrow"><span class="ob-dot" aria-hidden="true"></span> An ontology, explored</p>
+            <h1 id="hero-title">Getting someone onboarded.<br /><em>Seeing how it all connects.</em></h1>
+            <p class="ob-lead">An account owns the context. A person starts a case. Documents and reviewers connect to it. Explore the model beneath the workflow—and where a different language would actually help.</p>
+          </div>
+          <aside class="ob-study">
+            <span class="ob-label">Study 01 / Onboarded</span>
+            <p>Keep forms in TypeScript.<br />Make the account model explicit.<br /><strong>Let the graph do the explaining.</strong></p>
+            <a href="https://github.com/bjacobso/open-ontology/blob/main/examples/onboarded/model.ts">Read the working model ↗</a>
+          </aside>
+        </section>
+        <p class="ob-disclosure"><strong>Illustrative example.</strong> Synthetic data and a working v0.1 TypeScript ontology; not Onboarded’s production configuration. Form rules and permission scopes below are design studies.</p>
+
+        <section id="explorer" class="ob-explorer" aria-labelledby="explorer-title">
+          <div class="ob-toolbar">
+            <div><span class="ob-label">01 / The model</span><h2 id="explorer-title">One workflow. A connected vocabulary.</h2></div>
+            <a class="ob-download" href="/onboarded/model.json" download="onboarded-model.json">↓ Model + transcript</a>
+          </div>
+          <div class="ob-workspace" id="workspace" hidden>
+            <aside class="ob-sidebar" aria-label="Ontology declarations">
+              <label class="ob-search"><span class="oo-sr">Search objects, links, actions, and queries</span><span aria-hidden="true">⌕</span><input id="model-search" type="search" placeholder="Find a concept…" autocomplete="off" /></label>
+              <div id="declaration-list"></div>
+              <p id="search-count" class="oo-sr" role="status"></p>
+              <p class="ob-sidebar-note">TypeScript → portable IR<br /><span>Local in-memory runtime · v0.1</span></p>
+            </aside>
+            <div class="ob-canvas">
+              <div class="ob-canvas-heading"><span class="ob-label">Domain graph</span><span id="model-counts"></span></div>
+              <div class="ob-graph" id="graph" aria-label="Connected ontology objects">
+                <svg id="graph-lines" viewBox="0 0 600 420" aria-hidden="true"><defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7" fill="currentColor" /></marker></defs><g id="edges"></g></svg>
+                <div id="graph-nodes"></div>
+              </div>
+              <div class="ob-legend"><span><i class="ob-key ob-key--account"></i> Account context</span><span><i class="ob-key ob-key--workflow"></i> Onboarding workflow</span><span>→ Reference or link</span></div>
+              <div class="ob-flow" aria-label="Inspect workflow declarations">
+                <button type="button" data-select="start-onboarding"><span>Action</span>start-onboarding</button><span aria-hidden="true">→</span>
+                <button type="button" data-select="request-review"><span>Action</span>request-review</button><span aria-hidden="true">→</span>
+                <button type="button" data-select="review-queue"><span>Query</span>review-queue</button>
+              </div>
+            </div>
+            <aside class="ob-inspector" aria-label="Selected declaration">
+              <div class="ob-inspector-top"><span class="ob-label">Inspector</span><span class="ob-live">From the model</span></div>
+              <div id="inspector-heading" aria-live="polite"></div>
+              <div class="ob-switch" role="group" aria-label="Inspector view"><button type="button" id="definition-button" aria-pressed="true">Definition</button><button type="button" id="ir-button" aria-pressed="false">Portable IR</button></div>
+              <div id="inspector-body"></div>
+            </aside>
+          </div>
+          <p id="model-load-status" role="status" class="ob-fallback">The model connects Account, Employee, Onboarding, Document, Reviewer, and Membership, with a reviewed-by link, two actions, and two queries. <a href="/onboarded/model.json">Read the model and runtime transcript as JSON ↗</a></p>
+          <noscript><p class="ob-fallback">Enable JavaScript to inspect the graph and explore the examples. All source files and the transcript are available through the links on this page.</p></noscript>
+        </section>
+
+        <section class="ob-transcript" aria-labelledby="transcript-title">
+          <div><span class="ob-label">A small, executable example</span><h2 id="transcript-title">Follow a case into review.</h2><p>The TypeScript model runs on local Triplex. These controls explore its recorded before-and-after query results.</p><code>pnpm example:onboarded</code></div>
+          <div class="ob-transcript-panel">
+            <div class="ob-transcript-bar"><span>Local runtime transcript</span><div role="group" aria-label="Recorded workflow state"><button type="button" data-state="before" aria-pressed="true" disabled>01 Draft</button><button type="button" data-state="after" aria-pressed="false" disabled>02 Review requested</button></div></div>
+            <p id="transcript-caption">start-onboarding creates a draft case; request-review replaces its status and adds a reviewer link.</p>
+            <pre><code id="transcript-output">Open /onboarded/model.json for the recorded query results.</code></pre>
+          </div>
+        </section>
+
+        <section id="forms" class="ob-section" aria-labelledby="forms-title">
+          <div class="ob-section-head"><div><span class="ob-label">02 / Forms &amp; helpers</span><h2 id="forms-title">The simplification is in the helper.<br /><em>TypeScript can have it, too.</em></h2></div><p>Repeating a passport condition six times makes a form harder to maintain. Naming the shared condition removes that repetition in either language. A shorter translation is not, by itself, a reason to switch.</p></div>
+          <div class="ob-rules">
+            <div class="ob-code-panel"><div class="ob-code-bar"><span>list-a-choice.ts</span><span>Illustrative form DSL</span></div>
+<pre><code>const listAChoice = (
+  statuses: ReadonlyArray&lt;CitizenshipStatus&gt;,
+  selector: Path.Ref,
+  doc: string,
+) =&gt; Rule.any(...statuses.map((status) =&gt;
+  Rule.all(
+    Rule.eq(p.citizenshipStatusCode, status),
+    Rule.eq(p.employeeEnteredDocumentPath, "list_a"),
+    Rule.eq(selector, doc),
+  ),
+));
+
+// Reuse the condition wherever it is needed.
+listAChoice(passportStatuses, listAType, "us_passport");</code></pre>
+              <p>Rule and Path represent the form DSL in the supplied discussion; they are not exports of Open Ontology v0.1.</p>
+            </div>
+            <div class="ob-rule-demo">
+              <span class="ob-label">Try the shared predicate</span><h3>When does this condition match?</h3><p>A synthetic, partial predicate—not a complete I-9 eligibility rule. This example’s status set contains <code>us_citizen</code> and <code>noncitizen_national</code>.</p>
+              <form id="rule-form">
+                <label>Citizenship status<select id="rule-status"><option value="us_citizen">US citizen</option><option value="noncitizen_national">Noncitizen national</option><option value="permanent_resident">Permanent resident</option><option value="other">Other status</option></select></label>
+                <div class="ob-rule-fields"><label>Document path<select id="rule-path"><option value="list_a">List A</option><option value="list_b_c">Lists B + C</option></select></label><label>Selected document<select id="rule-document"><option value="us_passport">US passport</option><option value="other_document">Other document</option></select></label></div>
+              </form>
+              <div class="ob-rule-result" id="rule-result" role="status"><strong>Condition matches</strong><span>The status is in the example set, the path is List A, and the selection is a US passport.</span></div>
+              <p class="ob-small">In a real refactor, compare the generated <code>i9.form.json</code> byte for byte. That production snapshot is not included here.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="scope" class="ob-section" aria-labelledby="scope-title">
+          <div class="ob-section-head"><div><span class="ob-label">03 / Account configuration</span><h2 id="scope-title">Where Forma could<br /><em>earn its place.</em></h2></div><p>The interesting boundary is which facts configuration may read, who can author it, and how a workbench edits it. These are potential requirements, separate from making form code shorter.</p></div>
+          <div class="ob-scope-grid">
+            <div class="ob-scope-study"><div class="ob-code-bar"><span>Permission scope</span><span>Design sketch · not enforced in v0.1</span></div><h3>A rule can only read what its scope loads.</h3><p>Switch the attribute a hypothetical access rule reads. A future scope checker could diagnose the unsupported read at its source location.</p><label for="scope-read">Attribute read by the rule</label><select id="scope-read"><option value=":membership/role">:membership/role</option><option value=":membership/account">:membership/account</option><option value=":document/type">:document/type</option></select><div class="ob-scope-facts"><span class="ob-label">Proposed loaded facts</span><code>:membership/role</code><code>:membership/account</code></div><div id="scope-result" class="ob-scope-result" role="status"><strong>Within the proposed scope</strong><span>:membership/role is a loaded permission fact.</span></div><p class="ob-small">This browser demonstration compares attribute names. It is not the Forma compiler or an authorization check.</p></div>
+            <div class="ob-reasons"><article><span>01</span><div><h3>Scope as a check</h3><p>Turn an undeclared fact read into a source diagnostic, rather than a package issue discovered after a build.</p><small>Potential account-layer requirement</small></div></article><article><span>02</span><div><h3>Controlled authoring</h3><p>A pure language could matter when customers or agents author configuration that you build and run. TypeScript builders can execute arbitrary code.</p><small>Requires a defined execution boundary</small></div></article><article><span>03</span><div><h3>Machine editing</h3><p>A lossless syntax tree could make workbench patches easier. Editing one field that uses a helper still means deciding whether to change or break the abstraction.</p><small>Requires a round-trip editing design</small></div></article></div>
+          </div>
+          <div class="ob-takeaway"><span class="ob-label">The practical choice</span><p>Refactor the forms in TypeScript. Preserve the generated snapshot. Revisit Forma for account configuration when scope checking, customer authoring, or UI round trips becomes a real requirement.</p></div>
+        </section>
+      </main>
+      <footer class="ob-footer"><a class="oo-brand" href="/">Open Ontology</a><p>Experimental v0.1 · Local in-memory runtime</p><a href="https://github.com/bjacobso/open-ontology/tree/main/examples/onboarded">Example source ↗</a></footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,444 @@
+{
+  "ontology": {
+    "kind": "ontology",
+    "name": "onboarded-example",
+    "version": "1",
+    "objectTypes": [
+      {
+        "kind": "object-type",
+        "name": "Account",
+        "description": "An employer account. Ownership is recorded here; authorization belongs to the host.",
+        "properties": [
+          {
+            "name": "name",
+            "key": ":account/name",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "Employee",
+        "description": "A person joining an employer, with an explicit reference to their account.",
+        "properties": [
+          {
+            "name": "name",
+            "key": ":employee/name",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "account",
+            "key": ":employee/account",
+            "valueType": {
+              "kind": "ref",
+              "target": "Account"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "Onboarding",
+        "description": "An onboarding case. Status is data, not an enforced state machine or an I-9 compliance decision.",
+        "properties": [
+          {
+            "name": "employee",
+            "key": ":onboarding/employee",
+            "valueType": {
+              "kind": "ref",
+              "target": "Employee"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "status",
+            "key": ":onboarding/status",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "started-at",
+            "key": ":onboarding/started-at",
+            "valueType": {
+              "kind": "datetime"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "Document",
+        "description": "Document metadata associated with a case. File storage and form validation are outside this model.",
+        "properties": [
+          {
+            "name": "onboarding",
+            "key": ":document/onboarding",
+            "valueType": {
+              "kind": "ref",
+              "target": "Onboarding"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "type",
+            "key": ":document/type",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "Reviewer",
+        "description": "An employer reviewer who can be assigned to a case. The model does not grant access.",
+        "properties": [
+          {
+            "name": "name",
+            "key": ":reviewer/name",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "Membership",
+        "description": "An account membership with a role. A future permission scope could load these facts; v0.1 does not enforce it.",
+        "properties": [
+          {
+            "name": "account",
+            "key": ":membership/account",
+            "valueType": {
+              "kind": "ref",
+              "target": "Account"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "reviewer",
+            "key": ":membership/reviewer",
+            "valueType": {
+              "kind": "ref",
+              "target": "Reviewer"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "role",
+            "key": ":membership/role",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      }
+    ],
+    "linkTypes": [
+      {
+        "kind": "link-type",
+        "name": "reviewed-by",
+        "from": "Onboarding",
+        "to": "Reviewer",
+        "description": "Records a case's assigned reviewer and assignment time. Reassignment policy is a host concern.",
+        "properties": [
+          {
+            "name": "assigned-at",
+            "key": ":reviewed-by/assigned-at",
+            "valueType": {
+              "kind": "datetime"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      }
+    ],
+    "actionTypes": [
+      {
+        "kind": "action-type",
+        "name": "start-onboarding",
+        "description": "Creates a case referencing an employee, with an initial status and timestamp.",
+        "input": [
+          {
+            "name": "onboarding",
+            "valueType": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "employee",
+            "valueType": {
+              "kind": "string"
+            }
+          }
+        ],
+        "inputSchema": {
+          "dialect": "draft-2020-12",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "onboarding": {
+                "type": "string"
+              },
+              "employee": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "onboarding",
+              "employee"
+            ],
+            "additionalProperties": false
+          },
+          "definitions": {}
+        },
+        "changes": [
+          {
+            "kind": "create-object",
+            "objectType": "Onboarding",
+            "id": {
+              "kind": "input",
+              "name": "onboarding"
+            },
+            "properties": {
+              ":onboarding/employee": {
+                "kind": "input",
+                "name": "employee"
+              },
+              ":onboarding/status": "draft",
+              ":onboarding/started-at": {
+                "kind": "now"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "action-type",
+        "name": "request-review",
+        "description": "Replaces the case status with awaiting-review and records a reviewer assignment. No permission or document checks are implied.",
+        "input": [
+          {
+            "name": "onboarding",
+            "valueType": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "reviewer",
+            "valueType": {
+              "kind": "string"
+            }
+          }
+        ],
+        "inputSchema": {
+          "dialect": "draft-2020-12",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "onboarding": {
+                "type": "string"
+              },
+              "reviewer": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "onboarding",
+              "reviewer"
+            ],
+            "additionalProperties": false
+          },
+          "definitions": {}
+        },
+        "changes": [
+          {
+            "kind": "clear-property",
+            "object": {
+              "kind": "input",
+              "name": "onboarding"
+            },
+            "property": ":onboarding/status"
+          },
+          {
+            "kind": "set-property",
+            "object": {
+              "kind": "input",
+              "name": "onboarding"
+            },
+            "property": ":onboarding/status",
+            "value": "awaiting-review"
+          },
+          {
+            "kind": "create-link",
+            "linkType": "reviewed-by",
+            "from": {
+              "kind": "input",
+              "name": "onboarding"
+            },
+            "to": {
+              "kind": "input",
+              "name": "reviewer"
+            },
+            "properties": {
+              ":reviewed-by/assigned-at": {
+                "kind": "now"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "queryTypes": [
+      {
+        "kind": "query-type",
+        "name": "onboarding-cases",
+        "description": "Joins cases to employees and employer accounts. Results are not permission-filtered.",
+        "query": {
+          "find": [
+            "?employeeName",
+            "?accountName",
+            "?status"
+          ],
+          "where": [
+            [
+              "?onboarding",
+              ":onboarding/employee",
+              "?employee"
+            ],
+            [
+              "?onboarding",
+              ":onboarding/status",
+              "?status"
+            ],
+            [
+              "?employee",
+              ":employee/name",
+              "?employeeName"
+            ],
+            [
+              "?employee",
+              ":employee/account",
+              "?account"
+            ],
+            [
+              "?account",
+              ":account/name",
+              "?accountName"
+            ]
+          ]
+        }
+      },
+      {
+        "kind": "query-type",
+        "name": "review-queue",
+        "description": "Finds cases awaiting review and their assigned reviewers. This is a data query, not an access rule.",
+        "query": {
+          "find": [
+            "?employeeName",
+            "?reviewerName"
+          ],
+          "where": [
+            [
+              "?onboarding",
+              ":onboarding/status",
+              "awaiting-review"
+            ],
+            [
+              "?onboarding",
+              ":onboarding/employee",
+              "?employee"
+            ],
+            [
+              "?employee",
+              ":employee/name",
+              "?employeeName"
+            ],
+            [
+              "?assignment",
+              ":reviewed-by/from",
+              "?onboarding"
+            ],
+            [
+              "?assignment",
+              ":reviewed-by/to",
+              "?reviewer"
+            ],
+            [
+              "?reviewer",
+              ":reviewer/name",
+              "?reviewerName"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  "scenario": {
+    "before": {
+      "cases": [
+        {
+          "?employeeName": "Ada Example",
+          "?accountName": "Example Co.",
+          "?status": "draft"
+        }
+      ],
+      "queue": []
+    },
+    "after": {
+      "cases": [
+        {
+          "?employeeName": "Ada Example",
+          "?accountName": "Example Co.",
+          "?status": "awaiting-review"
+        }
+      ],
+      "queue": [
+        {
+          "?employeeName": "Ada Example",
+          "?reviewerName": "Grace Example"
+        }
+      ]
+    }
+  }
+}

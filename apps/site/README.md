@@ -4,6 +4,8 @@ This static site preserves the layout and palette of the historical Open Ontolog
 
 `public/` is served directly as Cloudflare Worker static assets. No React app, old runtime, or workspace package is needed.
 
+`public/onboarded/index.html` serves the `/onboarded` domain explorer. Its JSON artifact is exported from `examples/onboarded/model.ts` and a synthetic local Triplex scenario with `pnpm site:export-onboarded`; tests check that it stays in sync. The page distinguishes the executable v0.1 model from illustrative I-9 form helpers and proposed permission scopes. `check.mjs` discovers HTML pages recursively and checks links to directory index routes as well as files.
+
 ```sh
 pnpm site:check
 pnpm site:dev
