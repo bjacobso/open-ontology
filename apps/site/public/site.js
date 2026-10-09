@@ -5,6 +5,7 @@ const escape = (text) => text.replace(/[&<>]/g, (char) => ({ "&": "&amp;", "<": 
 // Declaration forms across the flavors shown on the homepage.
 const FORMS = new Set([
   "define-entity", "define-relation", "define-action", "define-mutation", "define-datalog-query",
+  "define-form", "meta-fn",
   "object-type", "link-type", "query", "form", "import", "export", "define",
   "value-type", "interface", "implements",
   "object", "field", "validation-rule", "record-flow", "profile",
