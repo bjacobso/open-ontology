@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f6f5ef" />
-    <meta name="description" content="Explore an illustrative Onboarded ontology: accounts, people, onboarding cases, documents, and review. A working TypeScript model, with an I-9 authoring design study." />
+    <meta name="description" content="Explore an illustrative Onboarded ontology: organizations, accounts, placements, tasks, versioned forms, policies, and access configuration. A working TypeScript model with I-9 helper and scope studies." />
     <title>Onboarded ontology explorer · Open Ontology</title>
     <link rel="canonical" href="https://open-ontology.com/onboarded" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -35,7 +35,7 @@
           <div>
             <p class="ob-eyebrow"><span class="ob-dot" aria-hidden="true"></span> An ontology, explored</p>
             <h1 id="hero-title">Getting someone onboarded.<br /><em>Seeing how it all connects.</em></h1>
-            <p class="ob-lead">An account owns the context. A person starts a case. Documents and reviewers connect to it. Explore the model beneath the workflow—and where a different language would actually help.</p>
+            <p class="ob-lead">Organizations contain accounts. Placements describe employment context. Tasks run against versioned forms. Explore how the workflow connects to policies, user groups, and the properties those rules can read.</p>
           </div>
           <aside class="ob-study">
             <span class="ob-label">Study 01 / Onboarded</span>
@@ -43,7 +43,7 @@
             <a href="https://github.com/bjacobso/open-ontology/blob/main/examples/onboarded/model.ts">Read the working model ↗</a>
           </aside>
         </section>
-        <p class="ob-disclosure"><strong>Illustrative example.</strong> Synthetic data and a working v0.1 TypeScript ontology; not Onboarded’s production configuration. Form rules and permission scopes below are design studies.</p>
+        <p class="ob-disclosure"><strong>Illustrative example.</strong> Vocabulary informed directionally by supplied schema and API context; a selected, simplified model with synthetic facts. Form rules and permission scopes are design studies, not production behavior.</p>
 
         <section id="explorer" class="ob-explorer" aria-labelledby="explorer-title">
           <div class="ob-toolbar">
@@ -59,13 +59,15 @@
             </aside>
             <div class="ob-canvas">
               <div class="ob-canvas-heading"><span class="ob-label">Domain graph</span><span id="model-counts"></span></div>
+              <div class="ob-graph-views" id="graph-views" role="group" aria-label="Domain graph view"></div>
               <div class="ob-graph" id="graph" aria-label="Connected ontology objects">
-                <svg id="graph-lines" viewBox="0 0 600 420" aria-hidden="true"><defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7" fill="currentColor" /></marker></defs><g id="edges"></g></svg>
+                <svg id="graph-lines" viewBox="0 0 600 500" aria-hidden="true"><defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7" fill="currentColor" /></marker></defs><g id="edges"></g></svg>
                 <div id="graph-nodes"></div>
               </div>
-              <div class="ob-legend"><span><i class="ob-key ob-key--account"></i> Account context</span><span><i class="ob-key ob-key--workflow"></i> Onboarding workflow</span><span>→ Reference or link</span></div>
+              <div class="ob-legend"><span><i class="ob-key ob-key--account"></i> Domain records</span><span><i class="ob-key ob-key--workflow"></i> Configuration</span><span>→ Reference</span></div>
+              <p class="ob-graph-caption" id="graph-caption" aria-live="polite"></p>
               <div class="ob-flow" aria-label="Inspect workflow declarations">
-                <button type="button" data-select="start-onboarding"><span>Action</span>start-onboarding</button><span aria-hidden="true">→</span>
+                <button type="button" data-select="start-task"><span>Action</span>start-task</button><span aria-hidden="true">→</span>
                 <button type="button" data-select="request-review"><span>Action</span>request-review</button><span aria-hidden="true">→</span>
                 <button type="button" data-select="review-queue"><span>Query</span>review-queue</button>
               </div>
@@ -77,15 +79,15 @@
               <div id="inspector-body"></div>
             </aside>
           </div>
-          <p id="model-load-status" role="status" class="ob-fallback">The model connects Account, Employee, Onboarding, Document, Reviewer, and Membership, with a reviewed-by link, two actions, and two queries. <a href="/onboarded/model.json">Read the model and runtime transcript as JSON ↗</a></p>
+          <p id="model-load-status" role="status" class="ob-fallback">The model connects organizations and accounts, employees and placements, tasks and versioned forms, and policy/access configuration. <a href="/onboarded/model.json">Read the model and runtime transcript as JSON ↗</a></p>
           <noscript><p class="ob-fallback">Enable JavaScript to inspect the graph and explore the examples. All source files and the transcript are available through the links on this page.</p></noscript>
         </section>
 
         <section class="ob-transcript" aria-labelledby="transcript-title">
-          <div><span class="ob-label">A small, executable example</span><h2 id="transcript-title">Follow a case into review.</h2><p>The TypeScript model runs on local Triplex. These controls explore its recorded before-and-after query results.</p><code>pnpm example:onboarded</code></div>
+          <div><span class="ob-label">A small, executable example</span><h2 id="transcript-title">Follow a task into review.</h2><p>A task uses a concrete form template. These controls explore a recorded local Triplex scenario: employee input, employer review, and reassignment to another dashboard user. The demo actions do not call Onboarded’s API.</p><code>pnpm example:onboarded</code></div>
           <div class="ob-transcript-panel">
-            <div class="ob-transcript-bar"><span>Local runtime transcript</span><div role="group" aria-label="Recorded workflow state"><button type="button" data-state="before" aria-pressed="true" disabled>01 Draft</button><button type="button" data-state="after" aria-pressed="false" disabled>02 Review requested</button></div></div>
-            <p id="transcript-caption">start-onboarding creates a draft case; request-review replaces its status and adds a reviewer link.</p>
+            <div class="ob-transcript-bar"><span>Local runtime transcript</span><div role="group" aria-label="Recorded workflow state"><button type="button" data-state="before" aria-pressed="true" disabled>01 Employee input</button><button type="button" data-state="after" aria-pressed="false" disabled>02 Employer review</button><button type="button" data-state="reassigned" aria-pressed="false" disabled>03 Reassigned</button></div></div>
+            <p id="transcript-caption">start-task creates an employee task; request-review replaces its next action and employer assignee.</p>
             <pre><code id="transcript-output">Open /onboarded/model.json for the recorded query results.</code></pre>
           </div>
         </section>
@@ -125,7 +127,7 @@ listAChoice(passportStatuses, listAType, "us_passport");</code></pre>
         <section id="scope" class="ob-section" aria-labelledby="scope-title">
           <div class="ob-section-head"><div><span class="ob-label">03 / Account configuration</span><h2 id="scope-title">Where Forma could<br /><em>earn its place.</em></h2></div><p>The interesting boundary is which facts configuration may read, who can author it, and how a workbench edits it. These are potential requirements, separate from making form code shorter.</p></div>
           <div class="ob-scope-grid">
-            <div class="ob-scope-study"><div class="ob-code-bar"><span>Permission scope</span><span>Design sketch · not enforced in v0.1</span></div><h3>A rule can only read what its scope loads.</h3><p>Switch the attribute a hypothetical access rule reads. A future scope checker could diagnose the unsupported read at its source location.</p><label for="scope-read">Attribute read by the rule</label><select id="scope-read"><option value=":membership/role">:membership/role</option><option value=":membership/account">:membership/account</option><option value=":document/type">:document/type</option></select><div class="ob-scope-facts"><span class="ob-label">Proposed loaded facts</span><code>:membership/role</code><code>:membership/account</code></div><div id="scope-result" class="ob-scope-result" role="status"><strong>Within the proposed scope</strong><span>:membership/role is a loaded permission fact.</span></div><p class="ob-small">This browser demonstration compares attribute names. It is not the Forma compiler or an authorization check.</p></div>
+            <div class="ob-scope-study"><div class="ob-code-bar"><span>Permission scope</span><span>Design sketch · not enforced in v0.1</span></div><h3>Make the permitted vocabulary explicit.</h3><p>The supplied context includes user-group access rules and a permission-scope flag on custom properties. A future authoring checker could connect them: access rules may read properties marked for permission scope.</p><label for="scope-read">Property read by a hypothetical access rule</label><select id="scope-read" disabled><option>Load the example model to explore property flags</option></select><div class="ob-scope-facts" id="scope-facts"><span class="ob-label">Synthetic property definitions</span><code>CustomProperty.isPermissionScope</code></div><div id="scope-result" class="ob-scope-result" role="status"><strong>A flag is a modeling boundary</strong><span>The example records permission-scope metadata without enforcing an access rule.</span></div><p class="ob-small">This browser demonstration reads synthetic property flags. It is not the Forma compiler or an authorization check.</p></div>
             <div class="ob-reasons"><article><span>01</span><div><h3>Scope as a check</h3><p>Turn an undeclared fact read into a source diagnostic, rather than a package issue discovered after a build.</p><small>Potential account-layer requirement</small></div></article><article><span>02</span><div><h3>Controlled authoring</h3><p>A pure language could matter when customers or agents author configuration that you build and run. TypeScript builders can execute arbitrary code.</p><small>Requires a defined execution boundary</small></div></article><article><span>03</span><div><h3>Machine editing</h3><p>A lossless syntax tree could make workbench patches easier. Editing one field that uses a helper still means deciding whether to change or break the abstraction.</p><small>Requires a round-trip editing design</small></div></article></div>
           </div>
           <div class="ob-takeaway"><span class="ob-label">The practical choice</span><p>Refactor the forms in TypeScript. Preserve the generated snapshot. Revisit Forma for account configuration when scope checking, customer authoring, or UI round trips becomes a real requirement.</p></div>

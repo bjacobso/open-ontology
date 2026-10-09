@@ -6,12 +6,13 @@ const make = (tag, className, text) => {
   return node;
 };
 
-const positions = {
-  Account: [125, 65], Membership: [475, 65],
-  Employee: [125, 210], Onboarding: [300, 210], Reviewer: [475, 210],
-  Document: [300, 355],
+const recordTypes = new Set(["Organization", "Account", "User", "OrganizationMembership", "GroupMembership", "Employee", "Employer", "Placement", "Task"]);
+const graphLabels = {
+  OrganizationMembership: "Org. membership", GroupMembership: "Group membership", UserGroup: "User group",
+  TaskLineage: "Form lineage", TaskVersion: "Form version", TaskTemplate: "Task template",
+  SubtaskTemplate: "Page template", FieldTemplate: "Field template", CustomProperty: "Custom property",
+  PolicyForm: "Policy form", AuthzInferenceRule: "Inference rule",
 };
-const accountTypes = new Set(["Account", "Membership", "Reviewer"]);
 const groups = [
   ["Objects", "objectTypes", "◇"], ["Links", "linkTypes", "↗"],
   ["Actions", "actionTypes", "λ"], ["Queries", "queryTypes", "?"],
@@ -20,7 +21,7 @@ const groups = [
 async function loadExplorer() {
   const response = await fetch("/onboarded/model.json");
   if (!response.ok) throw new Error(`Model returned HTTP ${response.status}`);
-  const { ontology, scenario } = await response.json();
+  const { ontology, scenario, permissionProperties, views } = await response.json();
   const declarations = groups.flatMap(([, key]) => ontology[key]);
   const byName = new Map(declarations.map((item) => [item.name, item]));
   const edges = [
@@ -29,14 +30,33 @@ async function loadExplorer() {
       .map((property) => ({ from: item.name, to: property.valueType.target, name: property.name }))),
     ...ontology.linkTypes.map((item) => ({ from: item.from, to: item.to, name: item.name })),
   ];
-  let selected = "Onboarding";
+  let selected = "Task";
+  let currentView = "work";
   let showIR = false;
 
   function select(name) {
     if (!byName.has(name)) return;
     selected = name;
+    if (byName.get(name).kind === "object-type" && !views[currentView].positions[name]) {
+      currentView = Object.keys(views).find((view) => views[view].positions[name]);
+      renderGraph();
+    } else if (byName.get(name).kind !== "object-type") {
+      const preferredView = name === "form-versions" ? "forms" : "work";
+      if (currentView !== preferredView) {
+        currentView = preferredView;
+        renderGraph();
+      }
+    }
     for (const button of document.querySelectorAll("[data-select]")) {
       button.setAttribute("aria-pressed", String(button.dataset.select === name));
+    }
+    const list = $("#declaration-list");
+    const listButton = [...list.querySelectorAll("button")].find((button) => button.dataset.select === name);
+    if (listButton) {
+      const bounds = list.getBoundingClientRect();
+      const buttonBounds = listButton.getBoundingClientRect();
+      if (buttonBounds.top < bounds.top) list.scrollTop += buttonBounds.top - bounds.top;
+      else if (buttonBounds.bottom > bounds.bottom) list.scrollTop += buttonBounds.bottom - bounds.bottom;
     }
     const neighbors = new Set(edges.filter((edge) => edge.from === name || edge.to === name)
       .flatMap((edge) => [edge.from, edge.to]));
@@ -80,39 +100,52 @@ async function loadExplorer() {
   }
 
   function renderGraph() {
+    const { positions, caption, routes = {} } = views[currentView];
+    const visibleEdges = edges.filter((edge) => positions[edge.from] && positions[edge.to]);
+    $("#edges").replaceChildren();
+    $("#graph-nodes").replaceChildren();
+    for (const button of document.querySelectorAll("[data-view]")) {
+      button.setAttribute("aria-pressed", String(button.dataset.view === currentView));
+    }
+    $("#graph-caption").textContent = caption;
     const namespace = "http://www.w3.org/2000/svg";
-    for (const edge of edges) {
+    for (const edge of visibleEdges) {
       const [fromX, fromY] = positions[edge.from];
       const [toX, toY] = positions[edge.to];
-      const horizontal = fromY === toY;
-      const offsetX = horizontal ? Math.sign(toX - fromX) * 78 : 0;
-      const offsetY = horizontal ? 0 : Math.sign(toY - fromY) * 34;
+      const dx = toX - fromX;
+      const dy = toY - fromY;
+      const boundary = Math.min(73 / Math.abs(dx), 32 / Math.abs(dy));
+      const offsetX = dx * boundary;
+      const offsetY = dy * boundary;
       const group = document.createElementNS(namespace, "g");
       group.classList.add("ob-edge");
       Object.assign(group.dataset, edge);
+      const route = routes[`${edge.from}.${edge.name}`];
       const path = document.createElementNS(namespace, "path");
-      path.setAttribute("d", `M${fromX + offsetX} ${fromY + offsetY} L${toX - offsetX} ${toY - offsetY}`);
+      path.setAttribute("d", route
+        ? route.points.map(([x, y], i) => `${i ? "L" : "M"}${x} ${y}`).join(" ")
+        : `M${fromX + offsetX} ${fromY + offsetY} L${toX - offsetX} ${toY - offsetY}`);
       const label = document.createElementNS(namespace, "text");
-      label.setAttribute("x", String((fromX + toX) / 2 + (horizontal ? 0 : 8)));
-      label.setAttribute("y", String((fromY + toY) / 2 - (horizontal ? (fromY === 210 ? 44 : 10) : 0)));
-      label.setAttribute("text-anchor", horizontal ? "middle" : "start");
+      label.setAttribute("x", String(route?.label[0] ?? ((fromX + toX) / 2 + (dx === 0 ? 8 : 0))));
+      label.setAttribute("y", String(route?.label[1] ?? ((fromY + toY) / 2 - (dy === 0 ? 10 : 6))));
+      label.setAttribute("text-anchor", route?.anchor ?? (dx === 0 ? "start" : "middle"));
       label.textContent = edge.name;
       group.append(path, label);
       $("#edges").append(group);
     }
-    for (const item of ontology.objectTypes) {
+    for (const item of ontology.objectTypes.filter((item) => positions[item.name])) {
       const [x, y] = positions[item.name];
       const button = make("button", "ob-node");
       button.type = "button";
       button.dataset.select = item.name;
-      button.dataset.layer = accountTypes.has(item.name) ? "account" : "workflow";
+      button.dataset.layer = recordTypes.has(item.name) ? "record" : "config";
       button.style.left = `${x / 6}%`;
-      button.style.top = `${y / 4.2}%`;
+      button.style.top = `${y / 5}%`;
       button.setAttribute("aria-label", `Inspect ${item.name}, ${item.properties.length} properties`);
-      button.append(make("strong", "", item.name), make("span", "", `${item.properties.length} ${item.properties.length === 1 ? "property" : "properties"}`));
+      button.append(make("strong", "", graphLabels[item.name] ?? item.name), make("span", "", `${item.properties.length} ${item.properties.length === 1 ? "property" : "properties"}`));
       $("#graph-nodes").append(button);
     }
-    $("#model-counts").textContent = `${ontology.objectTypes.length} objects · ${edges.length} connections`;
+    $("#model-counts").textContent = `${Object.keys(positions).length} of ${ontology.objectTypes.length} objects · ${visibleEdges.length} connections`;
   }
 
   function propertyRows(properties) {
@@ -175,6 +208,17 @@ async function loadExplorer() {
     if (button) select(button.dataset.select);
   });
   $("#model-search").addEventListener("input", renderList);
+  for (const [key, view] of Object.entries(views)) {
+    const button = make("button", "", view.label);
+    button.type = "button";
+    button.dataset.view = key;
+    button.addEventListener("click", () => {
+      currentView = key;
+      renderGraph();
+      select(views[key].positions[selected] ? selected : view.focus);
+    });
+    $("#graph-views").append(button);
+  }
   for (const [id, value] of [["#definition-button", false], ["#ir-button", true]]) {
     $(id).addEventListener("click", () => {
       showIR = value;
@@ -189,9 +233,11 @@ async function loadExplorer() {
       button.disabled = false;
       button.setAttribute("aria-pressed", String(button.dataset.state === state));
     }
-    $("#transcript-caption").textContent = state === "before"
-      ? "After start-onboarding: a draft case exists; the review queue is empty."
-      : "After request-review: the status is awaiting-review; Grace Example is assigned.";
+    $("#transcript-caption").textContent = {
+      before: "After start-task: an employee task references Example form v1; the review queue is empty.",
+      after: "After request-review: the next action is employer-review; grace@example.invalid is assigned.",
+      reassigned: "After reassignment: lee@example.invalid replaces the previous employer assignee.",
+    }[state];
     $("#transcript-output").textContent = JSON.stringify(scenario[state], null, 2);
   }
   for (const button of document.querySelectorAll("[data-state]")) {
@@ -199,9 +245,10 @@ async function loadExplorer() {
   }
   renderList();
   renderGraph();
+  $("#workspace").hidden = false;
   select(selected);
   showTranscript("before");
-  $("#workspace").hidden = false;
+  setupPermissionScope(permissionProperties);
   $("#model-load-status").hidden = true;
 }
 
@@ -229,15 +276,26 @@ $("#rule-form").addEventListener("change", evaluateRule);
 $("#rule-form").addEventListener("submit", (event) => event.preventDefault());
 evaluateRule();
 
-const permissionFacts = new Set([":membership/role", ":membership/account"]);
-function evaluateScope() {
-  const attribute = $("#scope-read").value;
-  const loaded = permissionFacts.has(attribute);
-  const result = $("#scope-result");
-  result.dataset.match = String(loaded);
-  result.replaceChildren(make("strong", "", loaded ? "Within the proposed scope" : "Outside the proposed scope"), make("span", "", loaded
-    ? `${attribute} is a loaded permission fact.`
-    : `${attribute} is not loaded. A future checker could flag this read at its source location.`));
+function setupPermissionScope(properties) {
+  const select = $("#scope-read");
+  select.replaceChildren();
+  $("#scope-facts").replaceChildren(make("span", "ob-label", "Example properties flagged for permission scope"));
+  for (const property of properties) {
+    const option = make("option", "", property.path);
+    option.value = property.path;
+    select.append(option);
+    if (property.isPermissionScope) $("#scope-facts").append(make("code", "", property.path));
+  }
+  function evaluateScope() {
+    const property = properties.find((item) => item.path === select.value);
+    const allowed = property.isPermissionScope;
+    const result = $("#scope-result");
+    result.dataset.match = String(allowed);
+    result.replaceChildren(make("strong", "", allowed ? "Flagged for permission scope" : "Not a permission-scope property"), make("span", "", allowed
+      ? `${property.path} has isPermissionScope: true in the synthetic property definitions.`
+      : `${property.path} has isPermissionScope: false. A future authoring checker could flag this access-rule read.`));
+  }
+  select.disabled = false;
+  select.addEventListener("change", evaluateScope);
+  evaluateScope();
 }
-$("#scope-read").addEventListener("change", evaluateScope);
-evaluateScope();

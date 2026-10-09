@@ -2,16 +2,16 @@
   "ontology": {
     "kind": "ontology",
     "name": "onboarded-example",
-    "version": "1",
+    "version": "2",
     "objectTypes": [
       {
         "kind": "object-type",
-        "name": "Account",
-        "description": "An employer account. Ownership is recorded here; authorization belongs to the host.",
+        "name": "Organization",
+        "description": "The organization boundary for accounts, users, and shared configuration. Connected organizations are outside this example.",
         "properties": [
           {
             "name": "name",
-            "key": ":account/name",
+            "key": ":organization/name",
             "valueType": {
               "kind": "string"
             },
@@ -23,8 +23,197 @@
       },
       {
         "kind": "object-type",
+        "name": "Account",
+        "description": "An operational context inside an organization. An account is distinct from an employer; integrations and live/test modes are omitted here.",
+        "properties": [
+          {
+            "name": "organization",
+            "key": ":account/organization",
+            "valueType": {
+              "kind": "ref",
+              "target": "Organization"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "User",
+        "description": "A dashboard user who may belong to organizations and groups, and be an employer assignee on a task.",
+        "properties": [
+          {
+            "name": "email",
+            "key": ":user/email",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "OrganizationMembership",
+        "description": "Connects a user to an organization. This example records membership but grants no access.",
+        "properties": [
+          {
+            "name": "organization",
+            "key": ":organization-membership/organization",
+            "valueType": {
+              "kind": "ref",
+              "target": "Organization"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "user",
+            "key": ":organization-membership/user",
+            "valueType": {
+              "kind": "ref",
+              "target": "User"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "UserGroup",
+        "description": "An organization-scoped group with permission and access-rule configuration. Rules are opaque data; this runtime does not evaluate them.",
+        "properties": [
+          {
+            "name": "name",
+            "key": ":user-group/name",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "organization",
+            "key": ":user-group/organization",
+            "valueType": {
+              "kind": "ref",
+              "target": "Organization"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "permissions",
+            "key": ":user-group/permissions",
+            "valueType": {
+              "kind": "json"
+            },
+            "required": false,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "access-rules",
+            "key": ":user-group/access-rules",
+            "valueType": {
+              "kind": "json"
+            },
+            "required": false,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "GroupMembership",
+        "description": "Connects a dashboard user to a user group, separately from organization membership.",
+        "properties": [
+          {
+            "name": "user",
+            "key": ":group-membership/user",
+            "valueType": {
+              "kind": "ref",
+              "target": "User"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "user-group",
+            "key": ":group-membership/user-group",
+            "valueType": {
+              "kind": "ref",
+              "target": "UserGroup"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "CustomProperty",
+        "description": "A named domain attribute with a path, scalar type, and permission-scope flag. The flag is modeled as data, not an enforced authorization boundary.",
+        "properties": [
+          {
+            "name": "organization",
+            "key": ":custom-property/organization",
+            "valueType": {
+              "kind": "ref",
+              "target": "Organization"
+            },
+            "required": false,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "path",
+            "key": ":custom-property/path",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "scalar-type",
+            "key": ":custom-property/scalar-type",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "is-permission-scope",
+            "key": ":custom-property/is-permission-scope",
+            "valueType": {
+              "kind": "boolean"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
         "name": "Employee",
-        "description": "A person joining an employer, with an explicit reference to their account.",
+        "description": "An account-scoped person with placements and tasks. Personal details are reduced to a synthetic display name in this example.",
         "properties": [
           {
             "name": "name",
@@ -51,80 +240,25 @@
       },
       {
         "kind": "object-type",
-        "name": "Onboarding",
-        "description": "An onboarding case. Status is data, not an enforced state machine or an I-9 compliance decision.",
-        "properties": [
-          {
-            "name": "employee",
-            "key": ":onboarding/employee",
-            "valueType": {
-              "kind": "ref",
-              "target": "Employee"
-            },
-            "required": true,
-            "cardinality": "one",
-            "unique": false
-          },
-          {
-            "name": "status",
-            "key": ":onboarding/status",
-            "valueType": {
-              "kind": "string"
-            },
-            "required": true,
-            "cardinality": "one",
-            "unique": false
-          },
-          {
-            "name": "started-at",
-            "key": ":onboarding/started-at",
-            "valueType": {
-              "kind": "datetime"
-            },
-            "required": true,
-            "cardinality": "one",
-            "unique": false
-          }
-        ]
-      },
-      {
-        "kind": "object-type",
-        "name": "Document",
-        "description": "Document metadata associated with a case. File storage and form validation are outside this model.",
-        "properties": [
-          {
-            "name": "onboarding",
-            "key": ":document/onboarding",
-            "valueType": {
-              "kind": "ref",
-              "target": "Onboarding"
-            },
-            "required": true,
-            "cardinality": "one",
-            "unique": false
-          },
-          {
-            "name": "type",
-            "key": ":document/type",
-            "valueType": {
-              "kind": "string"
-            },
-            "required": true,
-            "cardinality": "one",
-            "unique": false
-          }
-        ]
-      },
-      {
-        "kind": "object-type",
-        "name": "Reviewer",
-        "description": "An employer reviewer who can be assigned to a case. The model does not grant access.",
+        "name": "Employer",
+        "description": "An employer record inside an account. It provides employment context and is separate from the organization that owns the account.",
         "properties": [
           {
             "name": "name",
-            "key": ":reviewer/name",
+            "key": ":employer/name",
             "valueType": {
               "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "account",
+            "key": ":employer/account",
+            "valueType": {
+              "kind": "ref",
+              "target": "Account"
             },
             "required": true,
             "cardinality": "one",
@@ -134,12 +268,12 @@
       },
       {
         "kind": "object-type",
-        "name": "Membership",
-        "description": "An account membership with a role. A future permission scope could load these facts; v0.1 does not enforce it.",
+        "name": "Placement",
+        "description": "Employment context for an employee, optionally with an employer. Client and job-type dimensions are omitted; tasks are not modeled as children of a placement.",
         "properties": [
           {
             "name": "account",
-            "key": ":membership/account",
+            "key": ":placement/account",
             "valueType": {
               "kind": "ref",
               "target": "Account"
@@ -149,19 +283,425 @@
             "unique": false
           },
           {
-            "name": "reviewer",
-            "key": ":membership/reviewer",
+            "name": "employee",
+            "key": ":placement/employee",
             "valueType": {
               "kind": "ref",
-              "target": "Reviewer"
+              "target": "Employee"
             },
             "required": true,
             "cardinality": "one",
             "unique": false
           },
           {
-            "name": "role",
-            "key": ":membership/role",
+            "name": "employer",
+            "key": ":placement/employer",
+            "valueType": {
+              "kind": "ref",
+              "target": "Employer"
+            },
+            "required": false,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "TaskLineage",
+        "description": "A form's identity across versions. Policies refer to this lineage, while a running task refers to a concrete template.",
+        "properties": [
+          {
+            "name": "name",
+            "key": ":task-lineage/name",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "TaskVersion",
+        "description": "A version of a form lineage, with a publication status. Publication, inheritance, and deployment behavior are not implemented here.",
+        "properties": [
+          {
+            "name": "task-lineage",
+            "key": ":task-version/task-lineage",
+            "valueType": {
+              "kind": "ref",
+              "target": "TaskLineage"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "status",
+            "key": ":task-version/status",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "TaskTemplate",
+        "description": "The concrete form definition for a version and lineage. A template contains page templates and is referenced by running tasks.",
+        "properties": [
+          {
+            "name": "name",
+            "key": ":task-template/name",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "task-lineage",
+            "key": ":task-template/task-lineage",
+            "valueType": {
+              "kind": "ref",
+              "target": "TaskLineage"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "task-version",
+            "key": ":task-template/task-version",
+            "valueType": {
+              "kind": "ref",
+              "target": "TaskVersion"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "SubtaskTemplate",
+        "description": "A page of a form, with an assignee type such as employee, employer, or system. Page ordering and options are simplified away.",
+        "properties": [
+          {
+            "name": "task-template",
+            "key": ":subtask-template/task-template",
+            "valueType": {
+              "kind": "ref",
+              "target": "TaskTemplate"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "assignee-type",
+            "key": ":subtask-template/assignee-type",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "FieldTemplate",
+        "description": "A field with a data path and an optional rule, normally on a page template. Rule evaluation, repeatable groups, and formula elaboration are outside this example.",
+        "properties": [
+          {
+            "name": "subtask-template",
+            "key": ":field-template/subtask-template",
+            "valueType": {
+              "kind": "ref",
+              "target": "SubtaskTemplate"
+            },
+            "required": false,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "path",
+            "key": ":field-template/path",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "required",
+            "key": ":field-template/required",
+            "valueType": {
+              "kind": "boolean"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "rule",
+            "key": ":field-template/rule",
+            "valueType": {
+              "kind": "json"
+            },
+            "required": false,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "Task",
+        "description": "A running instance of a form for an employee in an account, optionally scoped to an employer and assigned to a dashboard user. Demo actions and next-action values are illustrative.",
+        "properties": [
+          {
+            "name": "account",
+            "key": ":task/account",
+            "valueType": {
+              "kind": "ref",
+              "target": "Account"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "employee",
+            "key": ":task/employee",
+            "valueType": {
+              "kind": "ref",
+              "target": "Employee"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "employer",
+            "key": ":task/employer",
+            "valueType": {
+              "kind": "ref",
+              "target": "Employer"
+            },
+            "required": false,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "template",
+            "key": ":task/template",
+            "valueType": {
+              "kind": "ref",
+              "target": "TaskTemplate"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "employer-assignee",
+            "key": ":task/employer-assignee",
+            "valueType": {
+              "kind": "ref",
+              "target": "User"
+            },
+            "required": false,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "status",
+            "key": ":task/status",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "next-action",
+            "key": ":task/next-action",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": false,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "started-at",
+            "key": ":task/started-at",
+            "valueType": {
+              "kind": "datetime"
+            },
+            "required": false,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "Policy",
+        "description": "Configuration describing when forms should be required. Account ownership is optional to allow shared policies; policy evaluation is not implemented.",
+        "properties": [
+          {
+            "name": "name",
+            "key": ":policy/name",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "account",
+            "key": ":policy/account",
+            "valueType": {
+              "kind": "ref",
+              "target": "Account"
+            },
+            "required": false,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "rules",
+            "key": ":policy/rules",
+            "valueType": {
+              "kind": "json"
+            },
+            "required": false,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "PolicyForm",
+        "description": "Connects a policy to a form lineage, optionally with a form-specific rule. This records configuration without generating suggested tasks.",
+        "properties": [
+          {
+            "name": "policy",
+            "key": ":policy-form/policy",
+            "valueType": {
+              "kind": "ref",
+              "target": "Policy"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "task-lineage",
+            "key": ":policy-form/task-lineage",
+            "valueType": {
+              "kind": "ref",
+              "target": "TaskLineage"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "rule",
+            "key": ":policy-form/rule",
+            "valueType": {
+              "kind": "json"
+            },
+            "required": false,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "Automation",
+        "description": "A named automation with a trigger entity and optional account scope. Trigger facts, versioned actions, and execution traces are omitted; no automation engine is implied.",
+        "properties": [
+          {
+            "name": "name",
+            "key": ":automation/name",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "account",
+            "key": ":automation/account",
+            "valueType": {
+              "kind": "ref",
+              "target": "Account"
+            },
+            "required": false,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "trigger-entity",
+            "key": ":automation/trigger-entity",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          }
+        ]
+      },
+      {
+        "kind": "object-type",
+        "name": "AuthzInferenceRule",
+        "description": "Account configuration naming the entity types involved in an authorization inference. The example stores these names without enforcing the inference.",
+        "properties": [
+          {
+            "name": "account",
+            "key": ":authz-inference-rule/account",
+            "valueType": {
+              "kind": "ref",
+              "target": "Account"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "inferred-from-entity",
+            "key": ":authz-inference-rule/inferred-from-entity",
+            "valueType": {
+              "kind": "string"
+            },
+            "required": true,
+            "cardinality": "one",
+            "unique": false
+          },
+          {
+            "name": "applied-to-entity",
+            "key": ":authz-inference-rule/applied-to-entity",
             "valueType": {
               "kind": "string"
             },
@@ -172,35 +712,21 @@
         ]
       }
     ],
-    "linkTypes": [
-      {
-        "kind": "link-type",
-        "name": "reviewed-by",
-        "from": "Onboarding",
-        "to": "Reviewer",
-        "description": "Records a case's assigned reviewer and assignment time. Reassignment policy is a host concern.",
-        "properties": [
-          {
-            "name": "assigned-at",
-            "key": ":reviewed-by/assigned-at",
-            "valueType": {
-              "kind": "datetime"
-            },
-            "required": true,
-            "cardinality": "one",
-            "unique": false
-          }
-        ]
-      }
-    ],
+    "linkTypes": [],
     "actionTypes": [
       {
         "kind": "action-type",
-        "name": "start-onboarding",
-        "description": "Creates a case referencing an employee, with an initial status and timestamp.",
+        "name": "start-task",
+        "description": "Demo action creating an employee task against a concrete template. It does not call the supplied API or evaluate policy requirements.",
         "input": [
           {
-            "name": "onboarding",
+            "name": "task",
+            "valueType": {
+              "kind": "string"
+            }
+          },
+          {
+            "name": "account",
             "valueType": {
               "kind": "string"
             }
@@ -210,6 +736,12 @@
             "valueType": {
               "kind": "string"
             }
+          },
+          {
+            "name": "template",
+            "valueType": {
+              "kind": "string"
+            }
           }
         ],
         "inputSchema": {
@@ -217,16 +749,24 @@
           "schema": {
             "type": "object",
             "properties": {
-              "onboarding": {
+              "task": {
+                "type": "string"
+              },
+              "account": {
                 "type": "string"
               },
               "employee": {
                 "type": "string"
+              },
+              "template": {
+                "type": "string"
               }
             },
             "required": [
-              "onboarding",
-              "employee"
+              "task",
+              "account",
+              "employee",
+              "template"
             ],
             "additionalProperties": false
           },
@@ -235,18 +775,27 @@
         "changes": [
           {
             "kind": "create-object",
-            "objectType": "Onboarding",
+            "objectType": "Task",
             "id": {
               "kind": "input",
-              "name": "onboarding"
+              "name": "task"
             },
             "properties": {
-              ":onboarding/employee": {
+              ":task/account": {
+                "kind": "input",
+                "name": "account"
+              },
+              ":task/employee": {
                 "kind": "input",
                 "name": "employee"
               },
-              ":onboarding/status": "draft",
-              ":onboarding/started-at": {
+              ":task/template": {
+                "kind": "input",
+                "name": "template"
+              },
+              ":task/status": "requires_action",
+              ":task/next-action": "employee-input",
+              ":task/started-at": {
                 "kind": "now"
               }
             }
@@ -256,16 +805,16 @@
       {
         "kind": "action-type",
         "name": "request-review",
-        "description": "Replaces the case status with awaiting-review and records a reviewer assignment. No permission or document checks are implied.",
+        "description": "Demo action moving the next action to employer-review and replacing the employer assignee. It performs no permission, document, or completion checks.",
         "input": [
           {
-            "name": "onboarding",
+            "name": "task",
             "valueType": {
               "kind": "string"
             }
           },
           {
-            "name": "reviewer",
+            "name": "user",
             "valueType": {
               "kind": "string"
             }
@@ -276,16 +825,16 @@
           "schema": {
             "type": "object",
             "properties": {
-              "onboarding": {
+              "task": {
                 "type": "string"
               },
-              "reviewer": {
+              "user": {
                 "type": "string"
               }
             },
             "required": [
-              "onboarding",
-              "reviewer"
+              "task",
+              "user"
             ],
             "additionalProperties": false
           },
@@ -296,34 +845,37 @@
             "kind": "clear-property",
             "object": {
               "kind": "input",
-              "name": "onboarding"
+              "name": "task"
             },
-            "property": ":onboarding/status"
+            "property": ":task/next-action"
           },
           {
             "kind": "set-property",
             "object": {
               "kind": "input",
-              "name": "onboarding"
+              "name": "task"
             },
-            "property": ":onboarding/status",
-            "value": "awaiting-review"
+            "property": ":task/next-action",
+            "value": "employer-review"
           },
           {
-            "kind": "create-link",
-            "linkType": "reviewed-by",
-            "from": {
+            "kind": "clear-property",
+            "object": {
               "kind": "input",
-              "name": "onboarding"
+              "name": "task"
             },
-            "to": {
+            "property": ":task/employer-assignee"
+          },
+          {
+            "kind": "set-property",
+            "object": {
               "kind": "input",
-              "name": "reviewer"
+              "name": "task"
             },
-            "properties": {
-              ":reviewed-by/assigned-at": {
-                "kind": "now"
-              }
+            "property": ":task/employer-assignee",
+            "value": {
+              "kind": "input",
+              "name": "user"
             }
           }
         ]
@@ -332,24 +884,35 @@
     "queryTypes": [
       {
         "kind": "query-type",
-        "name": "onboarding-cases",
-        "description": "Joins cases to employees and employer accounts. Results are not permission-filtered.",
+        "name": "employee-tasks",
+        "description": "Joins running tasks to employees and concrete form templates. Results are not permission-filtered.",
         "query": {
           "find": [
             "?employeeName",
-            "?accountName",
-            "?status"
+            "?formName",
+            "?status",
+            "?nextAction"
           ],
           "where": [
             [
-              "?onboarding",
-              ":onboarding/employee",
+              "?task",
+              ":task/employee",
               "?employee"
             ],
             [
-              "?onboarding",
-              ":onboarding/status",
+              "?task",
+              ":task/template",
+              "?template"
+            ],
+            [
+              "?task",
+              ":task/status",
               "?status"
+            ],
+            [
+              "?task",
+              ":task/next-action",
+              "?nextAction"
             ],
             [
               "?employee",
@@ -357,14 +920,9 @@
               "?employeeName"
             ],
             [
-              "?employee",
-              ":employee/account",
-              "?account"
-            ],
-            [
-              "?account",
-              ":account/name",
-              "?accountName"
+              "?template",
+              ":task-template/name",
+              "?formName"
             ]
           ]
         }
@@ -372,21 +930,26 @@
       {
         "kind": "query-type",
         "name": "review-queue",
-        "description": "Finds cases awaiting review and their assigned reviewers. This is a data query, not an access rule.",
+        "description": "Demo query joining employee tasks needing employer review to their assigned dashboard users. It is not the production pending-employer-tasks API or an access rule.",
         "query": {
           "find": [
             "?employeeName",
-            "?reviewerName"
+            "?assigneeEmail"
           ],
           "where": [
             [
-              "?onboarding",
-              ":onboarding/status",
-              "awaiting-review"
+              "?task",
+              ":task/status",
+              "requires_action"
             ],
             [
-              "?onboarding",
-              ":onboarding/employee",
+              "?task",
+              ":task/next-action",
+              "employer-review"
+            ],
+            [
+              "?task",
+              ":task/employee",
               "?employee"
             ],
             [
@@ -395,19 +958,53 @@
               "?employeeName"
             ],
             [
-              "?assignment",
-              ":reviewed-by/from",
-              "?onboarding"
+              "?task",
+              ":task/employer-assignee",
+              "?user"
             ],
             [
-              "?assignment",
-              ":reviewed-by/to",
-              "?reviewer"
+              "?user",
+              ":user/email",
+              "?assigneeEmail"
+            ]
+          ]
+        }
+      },
+      {
+        "kind": "query-type",
+        "name": "form-versions",
+        "description": "Shows concrete templates alongside the form lineage and version status. No release or deployment operation is performed.",
+        "query": {
+          "find": [
+            "?lineageName",
+            "?formName",
+            "?status"
+          ],
+          "where": [
+            [
+              "?template",
+              ":task-template/task-version",
+              "?version"
             ],
             [
-              "?reviewer",
-              ":reviewer/name",
-              "?reviewerName"
+              "?version",
+              ":task-version/task-lineage",
+              "?lineage"
+            ],
+            [
+              "?version",
+              ":task-version/status",
+              "?status"
+            ],
+            [
+              "?lineage",
+              ":task-lineage/name",
+              "?lineageName"
+            ],
+            [
+              "?template",
+              ":task-template/name",
+              "?formName"
             ]
           ]
         }
@@ -415,30 +1012,225 @@
     ]
   },
   "scenario": {
+    "forms": [
+      {
+        "?lineageName": "Example onboarding form",
+        "?formName": "Example form v1",
+        "?status": "published"
+      }
+    ],
     "before": {
-      "cases": [
+      "tasks": [
         {
           "?employeeName": "Ada Example",
-          "?accountName": "Example Co.",
-          "?status": "draft"
+          "?formName": "Example form v1",
+          "?status": "requires_action",
+          "?nextAction": "employee-input"
         }
       ],
       "queue": []
     },
     "after": {
-      "cases": [
+      "tasks": [
         {
           "?employeeName": "Ada Example",
-          "?accountName": "Example Co.",
-          "?status": "awaiting-review"
+          "?formName": "Example form v1",
+          "?status": "requires_action",
+          "?nextAction": "employer-review"
         }
       ],
       "queue": [
         {
           "?employeeName": "Ada Example",
-          "?reviewerName": "Grace Example"
+          "?assigneeEmail": "grace@example.invalid"
         }
       ]
+    },
+    "reassigned": {
+      "queue": [
+        {
+          "?employeeName": "Ada Example",
+          "?assigneeEmail": "lee@example.invalid"
+        }
+      ]
+    }
+  },
+  "permissionProperties": [
+    {
+      "path": "employee.department",
+      "scalarType": "string",
+      "isPermissionScope": true
+    },
+    {
+      "path": "employee.work_location",
+      "scalarType": "string",
+      "isPermissionScope": true
+    },
+    {
+      "path": "employee.start_date",
+      "scalarType": "date",
+      "isPermissionScope": false
+    }
+  ],
+  "views": {
+    "work": {
+      "label": "People & work",
+      "focus": "Task",
+      "caption": "Placements describe employment context. Tasks share the employee/account context and run against a concrete form template; they are not children of a placement.",
+      "positions": {
+        "Account": [
+          110,
+          65
+        ],
+        "Employer": [
+          490,
+          65
+        ],
+        "Employee": [
+          110,
+          205
+        ],
+        "Placement": [
+          490,
+          205
+        ],
+        "Task": [
+          300,
+          345
+        ],
+        "TaskTemplate": [
+          110,
+          430
+        ],
+        "User": [
+          490,
+          430
+        ]
+      }
+    },
+    "forms": {
+      "label": "Forms & versions",
+      "focus": "TaskTemplate",
+      "caption": "A lineage identifies a form across versions. A version has a concrete task template; page and field templates describe its contents.",
+      "positions": {
+        "TaskLineage": [
+          110,
+          80
+        ],
+        "TaskVersion": [
+          490,
+          80
+        ],
+        "TaskTemplate": [
+          300,
+          210
+        ],
+        "SubtaskTemplate": [
+          300,
+          340
+        ],
+        "FieldTemplate": [
+          300,
+          445
+        ]
+      }
+    },
+    "access": {
+      "label": "Account & access",
+      "focus": "UserGroup",
+      "caption": "Accounts belong to organizations. Organization membership and group membership are separate records; group access rules remain opaque data in this runtime.",
+      "positions": {
+        "Account": [
+          110,
+          70
+        ],
+        "Organization": [
+          490,
+          70
+        ],
+        "OrganizationMembership": [
+          110,
+          230
+        ],
+        "UserGroup": [
+          490,
+          230
+        ],
+        "User": [
+          110,
+          420
+        ],
+        "GroupMembership": [
+          490,
+          420
+        ]
+      }
+    },
+    "configuration": {
+      "label": "Policy & scope",
+      "focus": "Policy",
+      "caption": "Policies connect to form lineages. Custom properties carry permission-scope metadata, while automations and authorization inference rules record account configuration.",
+      "positions": {
+        "Organization": [
+          110,
+          55
+        ],
+        "Account": [
+          490,
+          55
+        ],
+        "CustomProperty": [
+          110,
+          195
+        ],
+        "Policy": [
+          490,
+          195
+        ],
+        "TaskLineage": [
+          110,
+          340
+        ],
+        "PolicyForm": [
+          490,
+          340
+        ],
+        "Automation": [
+          110,
+          455
+        ],
+        "AuthzInferenceRule": [
+          490,
+          455
+        ]
+      },
+      "routes": {
+        "AuthzInferenceRule.account": {
+          "points": [
+            [
+              563,
+              455
+            ],
+            [
+              585,
+              455
+            ],
+            [
+              585,
+              55
+            ],
+            [
+              563,
+              55
+            ]
+          ],
+          "label": [
+            580,
+            275
+          ],
+          "anchor": "end"
+        }
+      }
     }
   }
 }

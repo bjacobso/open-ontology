@@ -1,0 +1,27 @@
+{
+  "work": {
+    "label": "People & work",
+    "focus": "Task",
+    "caption": "Placements describe employment context. Tasks share the employee/account context and run against a concrete form template; they are not children of a placement.",
+    "positions": { "Account": [110, 65], "Employer": [490, 65], "Employee": [110, 205], "Placement": [490, 205], "Task": [300, 345], "TaskTemplate": [110, 430], "User": [490, 430] }
+  },
+  "forms": {
+    "label": "Forms & versions",
+    "focus": "TaskTemplate",
+    "caption": "A lineage identifies a form across versions. A version has a concrete task template; page and field templates describe its contents.",
+    "positions": { "TaskLineage": [110, 80], "TaskVersion": [490, 80], "TaskTemplate": [300, 210], "SubtaskTemplate": [300, 340], "FieldTemplate": [300, 445] }
+  },
+  "access": {
+    "label": "Account & access",
+    "focus": "UserGroup",
+    "caption": "Accounts belong to organizations. Organization membership and group membership are separate records; group access rules remain opaque data in this runtime.",
+    "positions": { "Account": [110, 70], "Organization": [490, 70], "OrganizationMembership": [110, 230], "UserGroup": [490, 230], "User": [110, 420], "GroupMembership": [490, 420] }
+  },
+  "configuration": {
+    "label": "Policy & scope",
+    "focus": "Policy",
+    "caption": "Policies connect to form lineages. Custom properties carry permission-scope metadata, while automations and authorization inference rules record account configuration.",
+    "positions": { "Organization": [110, 55], "Account": [490, 55], "CustomProperty": [110, 195], "Policy": [490, 195], "TaskLineage": [110, 340], "PolicyForm": [490, 340], "Automation": [110, 455], "AuthzInferenceRule": [490, 455] },
+    "routes": { "AuthzInferenceRule.account": { "points": [[563, 455], [585, 455], [585, 55], [563, 55]], "label": [580, 275], "anchor": "end" } }
+  }
+}
