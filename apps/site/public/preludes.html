@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f6f5ef" />
+    <meta
+      name="description"
+      content="Explore the two bundled domain imports, default ontology language, and three compiler support sources in experimental Open Ontology v0.1."
+    />
+    <title>Preludes &amp; libraries · Open Ontology</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      rel="alternate"
+      type="text/plain"
+      href="/llms-full.txt"
+      title="Open Ontology agent guide"
+    />
+    <link
+      rel="alternate"
+      type="text/plain"
+      href="/llms.txt"
+      title="Open Ontology llms.txt index"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/site.css" />
+    <script defer src="/site.js"></script>
+  </head>
+  <body>
+    <aside class="worldvm-banner" aria-label="WorldVM incubation notice">
+      <p>
+        Open Ontology is an incubation project within
+        <a href="https://worldvm.com/">WorldVM</a>.
+      </p>
+    </aside>
+    <div class="oo oo-library-page">
+      <a class="oo-skip" href="#main">Skip to content</a>
+      <header class="oo-nav">
+        <a class="oo-brand" href="/" aria-label="Open Ontology home">
+          <span class="oo-mark" aria-hidden="true"
+            ><svg
+              viewBox="0 0 64 64"
+              fill="none"
+              width="20"
+              height="20"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+            >
+              <path
+                d="M32 8Q42 6 50.5 14.5Q58 22 55.5 33Q56 44 46 51Q32 58 18 51Q8 44 8.5 33Q6 22 13.5 14.5Q22 6 32 8M32 8Q40 28 46 51M50.5 14.5Q32 30 8.5 33M55.5 33Q30 38 18 51"
+              />
+              <g fill="currentColor" stroke="none">
+                <circle cx="32" cy="8" r="6" />
+                <circle cx="50.5" cy="14.5" r="6" />
+                <circle cx="55.5" cy="33" r="6" />
+                <circle cx="46" cy="51" r="6" />
+                <circle cx="18" cy="51" r="6" />
+                <circle cx="8.5" cy="33" r="6" />
+                <circle cx="13.5" cy="14.5" r="6" />
+              </g></svg
+          ></span>
+          <span>Open Ontology</span>
+        </a>
+        <nav aria-label="Main navigation">
+          <a class="oo-nav__catalog" href="/preludes.html" aria-current="page"
+            >Preludes</a
+          >
+          <a class="oo-nav__section" href="/#notes">Status</a>
+          <a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a>
+          <a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a>
+        </nav>
+      </header>
+      <main id="main" class="oo-main">
+        <section
+          class="oo-hero oo-library-hero"
+          aria-labelledby="catalog-title"
+        >
+          <div>
+            <p class="oo-eyebrow">
+              <span class="oo-pulse" aria-hidden="true"></span> The source
+              inventory · experimental v0.1
+            </p>
+            <h1 id="catalog-title">
+              Start with a vocabulary.<br /><em>Make it your model.</em>
+            </h1>
+            <p class="oo-lead">
+              Reusable domain models and the language behind them. Explore every
+              bundled library and prelude, with checked examples, documentation,
+              and the Lisp source.
+            </p>
+            <div class="oo-actions">
+              <a class="oo-primary" href="#modeling"
+                >Explore the libraries <span aria-hidden="true">↓</span></a
+              ><a class="oo-secondary" href="#compiler-support"
+                >Compiler sources <span aria-hidden="true">↓</span></a
+              >
+            </div>
+            <p class="oo-meta">
+              <span>2 domain imports</span><span>1 default language</span
+              ><span>3 support sources</span>
+            </p>
+          </div>
+          <aside
+            class="oo-library-inventory"
+            aria-label="Shipped source inventory"
+          >
+            <div class="oo-panel__head">
+              <span>In the repository</span><span>v0.1</span>
+            </div>
+            <a href="/preludes/git.html"
+              ><span>libraries/</span><strong>std/git.lisp</strong
+              ><small>import</small></a
+            ><a href="/preludes/github.html"
+              ><span>libraries/</span><strong>github.lisp</strong
+              ><small>import</small></a
+            ><a href="/preludes/ontology.html"
+              ><span>preludes/</span><strong>ontology.lisp</strong
+              ><small>default</small></a
+            ><a href="/preludes/compiler.html"
+              ><span>preludes/</span><strong>compiler.lisp</strong
+              ><small>support</small></a
+            ><a href="/preludes/ontology-compiler.html"
+              ><span>preludes/</span><strong>ontology-compiler.lisp</strong
+              ><small>support</small></a
+            ><a href="/preludes/viewspec-compiler.html"
+              ><span>preludes/</span><strong>viewspec-compiler.lisp</strong
+              ><small>support</small></a
+            >
+            <p>
+              All six sources ship with the package.<br />Modeling libraries run
+              on the local in-memory runtime.
+            </p>
+          </aside>
+        </section>
+        <section
+          id="modeling"
+          class="oo-catalog-section"
+          aria-labelledby="modeling-title"
+        >
+          <div class="oo-head">
+            <p class="oo-overline"><span>01</span>Build your model</p>
+            <h2 id="modeling-title">
+              Small libraries.<br />Useful starting points.
+            </h2>
+            <p>
+              Import a domain vocabulary, then add your own entities, actions,
+              and queries. Or start from the default ontology language. Each
+              path produces portable JSON IR.
+            </p>
+          </div>
+          <div class="oo-library-grid">
+            <a class="oo-library-card" href="/preludes/git.html"
+              ><div class="oo-library-card__top">
+                <span class="oo-library-number">01</span
+                ><span class="oo-status oo-status--today">Bundled import</span>
+              </div>
+              <p class="oo-overline">/std/git</p>
+              <h3>Git</h3>
+              <p>
+                Repositories, shared commit objects, branch tips, ordered
+                parents, forks, and project dependencies. A common graph for
+                your engineering models.
+              </p>
+              <span class="oo-library-card__link"
+                >Examples & documentation
+                <span aria-hidden="true">→</span></span
+              ></a
+            ><a class="oo-library-card" href="/preludes/github.html"
+              ><div class="oo-library-card__top">
+                <span class="oo-library-number">02</span
+                ><span class="oo-status oo-status--today">Bundled import</span>
+              </div>
+              <p class="oo-overline">/github</p>
+              <h3>GitHub</h3>
+              <p>
+                Accounts, hosting records, issues, pull requests, memberships,
+                collaborators, and issue references. Built on /std/git.
+              </p>
+              <span class="oo-library-card__link"
+                >Examples & documentation
+                <span aria-hidden="true">→</span></span
+              ></a
+            ><a class="oo-library-card" href="/preludes/ontology.html"
+              ><div class="oo-library-card__top">
+                <span class="oo-library-number">03</span
+                ><span class="oo-status oo-status--today"
+                  >Default language</span
+                >
+              </div>
+              <p class="oo-overline">ontology.lisp</p>
+              <h3>Ontology</h3>
+              <p>
+                The default language for your own models: entities, relations,
+                transactional actions, and named Datalog queries. No import
+                required.
+              </p>
+              <span class="oo-library-card__link"
+                >Examples & documentation
+                <span aria-hidden="true">→</span></span
+              ></a
+            >
+          </div>
+        </section>
+        <aside class="oo-library-callout" aria-label="Import contract">
+          <div>
+            <p class="oo-overline">One import, a shared graph</p>
+            <h3>GitHub brings Git with it.</h3>
+            <p>
+              <code>(import "/github")</code> loads
+              <code>/std/git</code> automatically, once per model. All
+              declarations share one namespace. Imports use bundled identifiers,
+              without filesystem or network resolution.
+            </p>
+          </div>
+          <a
+            href="https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/git-libraries.md"
+            >Read the import contract ↗</a
+          >
+        </aside>
+        <section
+          id="compiler-support"
+          class="oo-catalog-section"
+          aria-labelledby="support-title"
+        >
+          <div class="oo-head">
+            <p class="oo-overline"><span>02</span>Understand the language</p>
+            <h2 id="support-title">The compiler is<br />part of the source.</h2>
+            <p>
+              These three preludes support compiler bootstrap and elaboration.
+              They are loaded by the Forma adapter, not imported into your
+              model. Their pages explain the machinery with labeled source
+              excerpts.
+            </p>
+          </div>
+          <div class="oo-library-support-list">
+            <a class="oo-library-support" href="/preludes/compiler.html"
+              ><span class="oo-library-number">01</span>
+              <div>
+                <h3>compiler.lisp</h3>
+                <p>
+                  The meta layer: form descriptors, slots, identifiers, and
+                  compile-time hooks. Loaded during bootstrap, not a domain
+                  import.
+                </p>
+              </div>
+              <span class="oo-library-support__link"
+                >Read the source guide <span aria-hidden="true">→</span></span
+              ></a
+            ><a
+              class="oo-library-support"
+              href="/preludes/ontology-compiler.html"
+              ><span class="oo-library-number">02</span>
+              <div>
+                <h3>ontology-compiler.lisp</h3>
+                <p>
+                  Bindings, validation, result types, and construction hooks
+                  referenced by ontology.lisp. Compiler implementation, not a
+                  modeling library.
+                </p>
+              </div>
+              <span class="oo-library-support__link"
+                >Read the source guide <span aria-hidden="true">→</span></span
+              ></a
+            ><a
+              class="oo-library-support"
+              href="/preludes/viewspec-compiler.html"
+              ><span class="oo-library-number">03</span>
+              <div>
+                <h3>viewspec-compiler.lisp</h3>
+                <p>
+                  A hosted ViewSpec layout-validation hook, loaded at bootstrap.
+                  View authoring and a UI runtime are not supported by this
+                  package’s Triplex adapter.
+                </p>
+              </div>
+              <span class="oo-library-support__link"
+                >Read the source guide <span aria-hidden="true">→</span></span
+              ></a
+            >
+          </div>
+        </section>
+        <section
+          id="availability"
+          class="oo-library-availability"
+          aria-labelledby="availability-title"
+        >
+          <div>
+            <p class="oo-overline">Current availability</p>
+            <h2 id="availability-title">What you can use today.</h2>
+            <p>
+              The six sources above are checked in and bundled with experimental
+              v0.1. Clone the repository, use Node 24 and pnpm 10.11.0, and
+              follow a library’s model-check instructions. There is no npm
+              release yet.
+            </p>
+            <a
+              href="https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/preludes.md"
+              >Read the full source map ↗</a
+            >
+          </div>
+          <div>
+            <h3>Platform sketches are future work.</h3>
+            <p>
+              The homepage’s Salesforce, Stripe, Okta, GitHub teams, PagerDuty,
+              and cross-project examples are v0.2 design sketches. They are not
+              shipped libraries or commands. The available
+              <code>/github</code> import models local metadata; it does not
+              deploy or sync GitHub configuration.
+            </p>
+            <p>
+              No native deployment, platform synchronization, durable server, or
+              <code>oo</code> package registry ships today.
+            </p>
+            <a href="/#notes">See the project’s status →</a>
+          </div>
+        </section>
+      </main>
+      <footer class="oo-footer">
+        <div class="oo-footer__brand">
+          <b>Open Ontology</b> Experimental v0.1 · MIT
+        </div>
+        <nav aria-label="Footer navigation">
+          <a href="/preludes.html">All preludes</a
+          ><a href="/llms.txt">Agent index</a
+          ><a href="https://discord.gg/cjW4gxsdXK">Discord ↗</a
+          ><a href="https://github.com/bjacobso/open-ontology">Source ↗</a>
+        </nav>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f6f5ef" />
+    <meta
+      name="description"
+      content="The meta layer: form descriptors, slots, identifiers, and compile-time hooks. Loaded during bootstrap, not a domain import."
+    />
+    <title>Compiler kernel · Open Ontology</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      rel="alternate"
+      type="text/plain"
+      href="/llms-full.txt"
+      title="Open Ontology agent guide"
+    />
+    <link
+      rel="alternate"
+      type="text/plain"
+      href="/llms.txt"
+      title="Open Ontology llms.txt index"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/site.css" />
+    <script defer src="/site.js"></script>
+  </head>
+  <body>
+    <aside class="worldvm-banner" aria-label="WorldVM incubation notice">
+      <p>
+        Open Ontology is an incubation project within
+        <a href="https://worldvm.com/">WorldVM</a>.
+      </p>
+    </aside>
+    <div class="oo oo-library-page">
+      <a class="oo-skip" href="#main">Skip to content</a>
+      <header class="oo-nav">
+        <a class="oo-brand" href="/" aria-label="Open Ontology home">
+          <span class="oo-mark" aria-hidden="true"
+            ><svg
+              viewBox="0 0 64 64"
+              fill="none"
+              width="20"
+              height="20"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+            >
+              <path
+                d="M32 8Q42 6 50.5 14.5Q58 22 55.5 33Q56 44 46 51Q32 58 18 51Q8 44 8.5 33Q6 22 13.5 14.5Q22 6 32 8M32 8Q40 28 46 51M50.5 14.5Q32 30 8.5 33M55.5 33Q30 38 18 51"
+              />
+              <g fill="currentColor" stroke="none">
+                <circle cx="32" cy="8" r="6" />
+                <circle cx="50.5" cy="14.5" r="6" />
+                <circle cx="55.5" cy="33" r="6" />
+                <circle cx="46" cy="51" r="6" />
+                <circle cx="18" cy="51" r="6" />
+                <circle cx="8.5" cy="33" r="6" />
+                <circle cx="13.5" cy="14.5" r="6" />
+              </g></svg
+          ></span>
+          <span>Open Ontology</span>
+        </a>
+        <nav aria-label="Main navigation">
+          <a class="oo-nav__catalog" href="/preludes.html">Preludes</a>
+          <a class="oo-nav__section" href="/#notes">Status</a>
+          <a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a>
+          <a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a>
+        </nav>
+      </header>
+      <main
+        id="main"
+        class="oo-main"
+        data-prelude-source="preludes/compiler.lisp"
+      >
+        <nav class="oo-breadcrumb" aria-label="Breadcrumb">
+          <a href="/preludes.html">Preludes</a><span aria-hidden="true">/</span
+          ><span aria-current="page">Compiler kernel</span>
+        </nav>
+        <section
+          class="oo-hero oo-library-hero"
+          aria-labelledby="library-title"
+        >
+          <div>
+            <p class="oo-eyebrow">Compiler support source · v0.1</p>
+            <h1 id="library-title">
+              See how a language<br /><em>describes its forms.</em>
+            </h1>
+            <p class="oo-lead">
+              Inspect the descriptor and meta-function vocabulary that
+              bootstraps the ontology language. The language machinery is
+              checked-in Lisp, so you can follow it from syntax to hooks.
+            </p>
+            <div class="oo-actions">
+              <a class="oo-primary" href="#example"
+                >Read the excerpt <span aria-hidden="true">↓</span></a
+              ><a
+                class="oo-secondary"
+                href="https://raw.githubusercontent.com/bjacobso/open-ontology/main/preludes/compiler.lisp"
+                >Raw Lisp source <span aria-hidden="true">↗</span></a
+              >
+            </div>
+          </div>
+          <aside class="oo-library-facts" aria-label="Availability and usage">
+            <p class="oo-status oo-status--today">Shipped · compiler support</p>
+            <h2>compiler.lisp</h2>
+            <dl>
+              <div>
+                <dt>Role</dt>
+                <dd>Compiler support source</dd>
+              </div>
+              <div>
+                <dt>Entry</dt>
+                <dd>Automatic compiler bootstrap</dd>
+              </div>
+              <div>
+                <dt>Depends on</dt>
+                <dd>Forma descriptor/elaboration API</dd>
+              </div>
+              <div>
+                <dt>Produces</dt>
+                <dd>Descriptors & compile-time hooks</dd>
+              </div>
+            </dl>
+          </aside>
+        </section>
+        <div class="oo-library-layout">
+          <nav class="oo-library-toc" aria-label="On this page">
+            <p class="oo-overline">On this page</p>
+            <a href="#overview">Why use it</a
+            ><a href="#vocabulary">What’s included</a
+            ><a href="#example">Source excerpt</a
+            ><a href="#availability">Availability & limits</a
+            ><a href="#docs">Documentation</a>
+          </nav>
+          <div class="oo-library-content">
+            <section id="overview" aria-labelledby="overview-title">
+              <p class="oo-overline">The pitch</p>
+              <h2 id="overview-title">A source to learn from.</h2>
+              <p>
+                Read this when tracing how Forma recognizes a form, how its
+                slots are described, or which compile-time hook it calls. Most
+                model authors can start with the ontology guide instead.
+              </p>
+            </section>
+            <section id="vocabulary" aria-labelledby="vocabulary-title">
+              <h2 id="vocabulary-title">What’s included</h2>
+              <dl class="oo-library-vocabulary">
+                <div>
+                  <dt>Descriptors</dt>
+                  <dd>
+                    define-form describes heads, identifiers, slots, and result
+                    types.
+                  </dd>
+                </div>
+                <div>
+                  <dt>Meta hooks</dt>
+                  <dd>
+                    meta-fn declares compile-time bindings, validation,
+                    construction, and result-type functions.
+                  </dd>
+                </div>
+                <div>
+                  <dt>Bootstrap</dt>
+                  <dd>
+                    src/forma.ts supplies this source first to
+                    bootstrapFromSources, alongside the ontology and elaboration
+                    sources.
+                  </dd>
+                </div>
+              </dl>
+            </section>
+            <section id="example" aria-labelledby="example-title">
+              <p class="oo-overline">Inside the compiler</p>
+              <h2 id="example-title">How meta-fn itself is described</h2>
+              <p>
+                Compiler source excerpt, copied from compiler.lisp. It describes
+                a compile-time form; it is not a runnable ontology model or a
+                bundled import.
+              </p>
+              <figure class="oo-library-example">
+                <figcaption>Compiler source excerpt · not a model</figcaption>
+                <div class="oo-panel">
+                  <pre
+                    tabindex="0"
+                    aria-label="How meta-fn itself is described"
+                  ><code class="lang-lisp" data-source-excerpt="preludes/compiler.lisp">(define-form meta-fn
+  (:doc &quot;Declares a pure compile-time meta hook.&quot;)
+  (:phase meta)
+  (:identifiers
+    [name Symbol {:declaration true}])
+  (:slots
+    [kind value {:required true}]
+    [input value {:required true}]
+    [output value {:required true}]
+    [capabilities value {:many true}]
+    [doc value]
+    [body expr {:required true}])
+  (:validate-fn meta-fn-validate)
+  (:construct-fn meta-fn-construct)
+  (:result-type-fn meta-fn-result-type))</code></pre>
+                  <button type="button" class="oo-copy oo-copy--term" hidden>
+                    Copy
+                  </button>
+                </div>
+              </figure>
+              <p>
+                To trace this source, follow the bootstrap in
+                <a
+                  href="https://raw.githubusercontent.com/bjacobso/open-ontology/main/src/forma.ts"
+                  >src/forma.ts</a
+                >. Read the form descriptor, locate its named hook, then inspect
+                the adapter’s supported payload conversion.
+              </p>
+            </section>
+            <section
+              id="availability"
+              class="oo-library-boundary"
+              aria-labelledby="availability-title"
+            >
+              <p class="oo-overline">Current availability</p>
+              <h2 id="availability-title">Shipped · compiler support</h2>
+              <p>
+                Shipped compiler infrastructure, not an installable platform
+                prelude. Do not use (import "/compiler") or paste define-form
+                into a model: the bundled import registry and Triplex adapter do
+                not expose a language-extension workflow.
+              </p>
+              <p>
+                Work in a clone; the package is not released on npm. Native
+                platform deployment, synchronization, and the
+                <code>oo</code> package manager are not available.
+              </p>
+            </section>
+            <section id="docs" aria-labelledby="docs-title">
+              <h2 id="docs-title">Documentation & source</h2>
+              <p>
+                Plain-text documentation and checked-in source, ready for people
+                and agents.
+              </p>
+              <nav
+                class="oo-library-resources"
+                aria-label="Documentation and source"
+              >
+                <a
+                  href="https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/preludes.md"
+                  >Bootstrap & support source map <span>Markdown ↗</span></a
+                ><a
+                  href="https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/architecture.md"
+                  >Forma bridge architecture <span>Markdown ↗</span></a
+                ><a
+                  href="https://raw.githubusercontent.com/bjacobso/open-ontology/main/preludes/compiler.lisp"
+                  >Read compiler.lisp <span>raw Lisp ↗</span></a
+                ><a href="/llms-full.txt"
+                  >Complete authoring guide <span>txt →</span></a
+                >
+              </nav>
+            </section>
+            <nav class="oo-library-related" aria-label="Related preludes">
+              <a href="/preludes/ontology.html"
+                >Use the default language <span aria-hidden="true">→</span></a
+              ><a href="/preludes/ontology-compiler.html"
+                >Follow the lowering hooks <span aria-hidden="true">→</span></a
+              >
+            </nav>
+          </div>
+        </div>
+      </main>
+      <footer class="oo-footer">
+        <div class="oo-footer__brand">
+          <b>Open Ontology</b> Experimental v0.1 · MIT
+        </div>
+        <nav aria-label="Footer navigation">
+          <a href="/preludes.html">All preludes</a
+          ><a href="/llms.txt">Agent index</a
+          ><a href="https://discord.gg/cjW4gxsdXK">Discord ↗</a
+          ><a href="https://github.com/bjacobso/open-ontology">Source ↗</a>
+        </nav>
+      </footer>
+    </div>
+  </body>
+</html>

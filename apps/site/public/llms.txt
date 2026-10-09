@@ -10,6 +10,17 @@ If you are an agent modeling a domain for someone, read the agent guide first. I
 - [README](https://raw.githubusercontent.com/bjacobso/open-ontology/main/README.md): install, scripts and package boundary
 - [Architecture](https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/architecture.md): TypeScript/Forma → IR → Triplex adapter
 - [Git libraries](https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/git-libraries.md): bundled /std/git and /github vocabularies, imports and provider extension
+- [Prelude source map](https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/preludes.md): default language, domain imports, compiler support, and the adapter boundary
+
+## Preludes
+
+- [Prelude catalog](https://open-ontology.com/preludes.html): all six shipped sources with current availability; platform configuration sketches are future work
+- [Git](https://open-ontology.com/preludes/git.html): bundled /std/git import, provider-neutral Git graph, checked release model, docs and raw Lisp
+- [GitHub](https://open-ontology.com/preludes/github.html): bundled /github import, local collaboration metadata on /std/git, checked query, docs and raw Lisp
+- [Ontology](https://open-ontology.com/preludes/ontology.html): default authoring language, supported forms, checked task model, docs and raw Lisp
+- [Compiler kernel](https://open-ontology.com/preludes/compiler.html): bootstrap descriptors and meta vocabulary; compiler source excerpts, not runnable models
+- [Ontology elaboration](https://open-ontology.com/preludes/ontology-compiler.html): compiler hooks and payload construction; compiler source excerpts, not runnable models
+- [ViewSpec validation](https://open-ontology.com/preludes/viewspec-compiler.html): hosted validation hook; compiler support only, view models and a UI runtime are unsupported
 
 ## Examples
 

@@ -4,6 +4,13 @@ This static site preserves the layout and palette of the historical Open Ontolog
 
 `public/` is served directly as Cloudflare Worker static assets. No React app, old runtime, or workspace package is needed.
 
+`public/preludes.html` catalogs every shipped Lisp source. The six guides in
+`public/preludes/` distinguish domain imports, the default ontology language, and
+compiler support. Edit these HTML files directly. Model examples are checked
+against the Forma adapter in `test/prelude-pages.test.ts`; compiler excerpts are
+checked against their source files. The site check inventories `libraries/` and
+`preludes/` and validates the catalog, guides, and their local and repository links.
+
 ```sh
 pnpm site:check
 pnpm site:dev

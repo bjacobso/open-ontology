@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f6f5ef" />
-    <meta name="description" content="Open Ontology is config as code for any platform. Each platform is a Forma prelude that elaborates to its native config, preludes share a standard library of domain types, and references across projects are type-checked. Agent guide: /llms-full.txt" />
+    <meta name="description" content="Open Ontology is an experimental domain-modeling language with bundled Git and GitHub libraries and a local in-memory runtime. Explore the shipped preludes and the v0.2 vision for platform configuration. Agent guide: /llms-full.txt" />
     <title>Open Ontology: config as code for every platform, type-checked across all of them</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate" type="text/plain" href="/llms-full.txt" title="Open Ontology agent guide" />
@@ -19,7 +19,7 @@
         "@context": "https://schema.org",
         "@type": "SoftwareSourceCode",
         "name": "Open Ontology",
-        "description": "Config as code for any platform. Platform preludes are Forma packages that elaborate to native config, share a standard library of domain types, and are type-checked across projects.",
+        "description": "Experimental domain modeling with Forma and TypeScript, bundled Git and GitHub vocabularies, portable JSON IR, and a local in-memory Triplex runtime.",
         "codeRepository": "https://github.com/bjacobso/open-ontology",
         "programmingLanguage": ["TypeScript", "Lisp"],
         "license": "https://opensource.org/licenses/MIT",
@@ -40,7 +40,7 @@
         </a>
         <nav aria-label="Main navigation">
           <a class="oo-nav__section" href="#std">Standard library</a>
-          <a class="oo-nav__section" href="#preludes">Preludes</a>
+          <a class="oo-nav__catalog" href="/preludes.html">Preludes</a>
           <a class="oo-nav__section" href="#across">Cross-project</a>
           <a class="oo-nav__section" href="#notes">Status</a>
           <a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a>
@@ -54,20 +54,21 @@
       </aside>
 
       <main id="main">
+        <aside class="oo-main oo-shipped-note" aria-label="Current availability"><strong>Available in experimental v0.1:</strong> the default ontology language and local Git &amp; GitHub models. <a href="/preludes.html">Browse all six shipped sources →</a> The platform configuration examples and <code>oo</code> commands on this page are v0.2 design sketches.</aside>
         <!-- Hero -->
         <section class="oo-hero" aria-labelledby="hero-title">
           <div class="oo-hero__copy">
-            <p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Open Ontology · Configuration as code for every platform</p>
+            <p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Open Ontology · The v0.2 platform vision</p>
             <h1 id="hero-title">Configuration for every platform, <em>checked as one program.</em></h1>
             <p class="oo-lead">Salesforce objects, Stripe prices, Okta groups, and GitHub teams already depend on one another. Today those dependencies are implicit: copied by hand between dashboards, and verified by no one.</p>
             <p class="oo-detail">Open Ontology describes each platform with a <strong>Forma prelude</strong> that elaborates to its native configuration. Preludes share a <strong>standard library of domain types</strong>, so every reference between projects is type-checked before anything is deployed.</p>
             <div class="oo-actions">
-              <a class="oo-primary" href="#std">Read the standard library <span aria-hidden="true">↓</span></a>
+              <a class="oo-primary" href="/preludes.html">Explore available preludes <span aria-hidden="true">→</span></a>
               <a class="oo-secondary" href="#across">See cross-project checking <span aria-hidden="true">↓</span></a>
             </div>
             <p class="oo-meta">
               <span>MIT licensed</span>
-              <span>Standard library included</span>
+              <span>Git &amp; GitHub libraries included</span>
               <a href="https://github.com/bjacobso/open-ontology">Source ↗</a>
               <a href="https://discord.gg/cjW4gxsdXK">Discord ↗</a>
             </p>
@@ -189,6 +190,7 @@
 
         <!-- 02–07 · Preludes -->
         <section id="preludes" class="oo-section" aria-labelledby="preludes-title">
+          <p class="oo-shipped-note"><strong>Looking for what ships today?</strong> The <a href="/preludes.html">prelude catalog</a> covers the default ontology language, bundled <code>/std/git</code> and <code>/github</code> imports, and compiler sources. The platform packages, <code>oo</code> commands, and syntax below are v0.2 design sketches; native deployment and sync are not available.</p>
           <div class="oo-head">
             <p class="oo-overline"><span>02–07</span>The preludes</p>
             <h2 id="preludes-title">Every platform keeps its own words. They just share a type checker.</h2>
@@ -201,7 +203,7 @@
                 <p class="oo-spread__index"><span>02</span>The default prelude</p>
                 <h3 id="palantir-name" class="oo-pkg">@ontology/palantir</h3>
                 <p class="oo-spread__title">Objects, links, actions, and queries: the language the standard library is written in.</p>
-                <p class="oo-status oo-status--today">runs today · v0.1</p>
+                <p class="oo-status oo-status--preview">v0.2 syntax sketch · <a href="/preludes/ontology.html">v0.1 language guide →</a></p>
                 <div class="oo-story">
                   <span>The renewal</span>
                   <p>Your operational model took a year to build and lives inside one vendor's UI. When the contract comes up, the model is the one thing you can't take with you.</p>
@@ -246,7 +248,7 @@
                 <p class="oo-spread__index"><span>03</span>CRM metadata</p>
                 <h3 id="salesforce-name" class="oo-pkg">@ontology/salesforce</h3>
                 <p class="oo-spread__title">Org metadata you can review, in Salesforce's own vocabulary.</p>
-                <p class="oo-status oo-status--preview">preview</p>
+                <p class="oo-status oo-status--preview">v0.2 design sketch</p>
                 <div class="oo-story">
                   <span>The sandbox refresh</span>
                   <p>Billing launched a new plan. Nobody added it to the Plan picklist, so the flow that depends on it fails in UAT. The only diff tool is a 40,000-line XML retrieve.</p>
@@ -296,7 +298,7 @@
                 <p class="oo-spread__index"><span>04</span>Billing config</p>
                 <h3 id="stripe-name" class="oo-pkg">@ontology/stripe</h3>
                 <p class="oo-spread__title">Your price book is a program. Write it like one.</p>
-                <p class="oo-status oo-status--preview">preview</p>
+                <p class="oo-status oo-status--preview">v0.2 design sketch</p>
                 <div class="oo-story">
                   <span>The pricing launch</span>
                   <p>New pricing ships from a spreadsheet. Someone clicks through the dashboard creating fourteen prices and mistypes one tier. The first overage invoice is off by 100×.</p>
@@ -599,7 +601,8 @@ ok examples/support-desk/draft.lisp (draft@0.1.0)
             <div>
               <h3>Runs today · v0.1</h3>
               <ul class="oo-yes">
-                <li>The Palantir-style ontology prelude, in Forma or TypeScript, compiled to one JSON IR</li>
+                <li>The default ontology language, in Forma or TypeScript, compiled to one JSON IR</li>
+                <li>Bundled <a href="/preludes/git.html">/std/git</a> and <a href="/preludes/github.html">/github</a> imports for local domain modeling</li>
                 <li>Located errors, naming rules, and lint with <code>pnpm model:check</code></li>
                 <li>Actions as atomic, attributed, idempotent Triplex transactions</li>
                 <li>Named Datalog queries with joins, negation, aggregates, and ordering</li>
@@ -609,7 +612,7 @@ ok examples/support-desk/draft.lisp (draft@0.1.0)
             <div>
               <h3>Preview · v0.2 design</h3>
               <ul class="oo-no">
-                <li>The salesforce, stripe, okta, github, and pagerduty preludes. Their syntax will change</li>
+                <li>Salesforce, Stripe, Okta, GitHub team configuration, and PagerDuty platform sketches. Their syntax will change</li>
                 <li><code>@ontology/std</code>, <code>implements</code>, cross-project imports, and type checking</li>
                 <li>The <code>oo</code> CLI, manifests, lockfile, and registry</li>
                 <li><code>oo plan</code> against live platforms, persistence, and an npm release</li>
@@ -646,6 +649,7 @@ pnpm example:support-desk</code></pre>
             <button type="button" class="oo-copy oo-copy--term" data-copy-from="prev" hidden>Copy</button>
           </div>
           <nav class="oo-links" aria-label="Project resources">
+            <a href="/preludes.html">Prelude catalog <span>6 sources</span></a>
             <a href="/llms-full.txt">Agent guide <span>txt</span></a>
             <a href="/llms.txt">llms.txt <span>index</span></a>
             <a href="https://github.com/bjacobso/open-ontology/tree/main/examples/support-desk">Support-desk example <span>↗</span></a>

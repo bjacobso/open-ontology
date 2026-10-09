@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f6f5ef" />
+    <meta
+      name="description"
+      content="Repositories, shared commit objects, branch tips, ordered parents, forks, and project dependencies. A common graph for your engineering models."
+    />
+    <title>Git · Open Ontology</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      rel="alternate"
+      type="text/plain"
+      href="/llms-full.txt"
+      title="Open Ontology agent guide"
+    />
+    <link
+      rel="alternate"
+      type="text/plain"
+      href="/llms.txt"
+      title="Open Ontology llms.txt index"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/site.css" />
+    <script defer src="/site.js"></script>
+  </head>
+  <body>
+    <aside class="worldvm-banner" aria-label="WorldVM incubation notice">
+      <p>
+        Open Ontology is an incubation project within
+        <a href="https://worldvm.com/">WorldVM</a>.
+      </p>
+    </aside>
+    <div class="oo oo-library-page">
+      <a class="oo-skip" href="#main">Skip to content</a>
+      <header class="oo-nav">
+        <a class="oo-brand" href="/" aria-label="Open Ontology home">
+          <span class="oo-mark" aria-hidden="true"
+            ><svg
+              viewBox="0 0 64 64"
+              fill="none"
+              width="20"
+              height="20"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+            >
+              <path
+                d="M32 8Q42 6 50.5 14.5Q58 22 55.5 33Q56 44 46 51Q32 58 18 51Q8 44 8.5 33Q6 22 13.5 14.5Q22 6 32 8M32 8Q40 28 46 51M50.5 14.5Q32 30 8.5 33M55.5 33Q30 38 18 51"
+              />
+              <g fill="currentColor" stroke="none">
+                <circle cx="32" cy="8" r="6" />
+                <circle cx="50.5" cy="14.5" r="6" />
+                <circle cx="55.5" cy="33" r="6" />
+                <circle cx="46" cy="51" r="6" />
+                <circle cx="18" cy="51" r="6" />
+                <circle cx="8.5" cy="33" r="6" />
+                <circle cx="13.5" cy="14.5" r="6" />
+              </g></svg
+          ></span>
+          <span>Open Ontology</span>
+        </a>
+        <nav aria-label="Main navigation">
+          <a class="oo-nav__catalog" href="/preludes.html">Preludes</a>
+          <a class="oo-nav__section" href="/#notes">Status</a>
+          <a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a>
+          <a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a>
+        </nav>
+      </header>
+      <main
+        id="main"
+        class="oo-main"
+        data-prelude-source="libraries/std/git.lisp"
+      >
+        <nav class="oo-breadcrumb" aria-label="Breadcrumb">
+          <a href="/preludes.html">Preludes</a><span aria-hidden="true">/</span
+          ><span aria-current="page">Git</span>
+        </nav>
+        <section
+          class="oo-hero oo-library-hero"
+          aria-labelledby="library-title"
+        >
+          <div>
+            <p class="oo-eyebrow">Bundled domain import · v0.1</p>
+            <h1 id="library-title">
+              One Git graph.<br /><em>Any hosting provider.</em>
+            </h1>
+            <p class="oo-lead">
+              Model the repository, branch, and commit once. Reuse that
+              vocabulary for releases, forks, dependencies, or your own hosting
+              layer.
+            </p>
+            <div class="oo-actions">
+              <a class="oo-primary" href="#example"
+                >Try the model <span aria-hidden="true">↓</span></a
+              ><a
+                class="oo-secondary"
+                href="https://raw.githubusercontent.com/bjacobso/open-ontology/main/libraries/std/git.lisp"
+                >Raw Lisp source <span aria-hidden="true">↗</span></a
+              >
+            </div>
+          </div>
+          <aside class="oo-library-facts" aria-label="Availability and usage">
+            <p class="oo-status oo-status--today">
+              Available · experimental v0.1
+            </p>
+            <h2>/std/git</h2>
+            <dl>
+              <div>
+                <dt>Role</dt>
+                <dd>Bundled domain import</dd>
+              </div>
+              <div>
+                <dt>Entry</dt>
+                <dd>(import &quot;/std/git&quot;)</dd>
+              </div>
+              <div>
+                <dt>Depends on</dt>
+                <dd>Default ontology language</dd>
+              </div>
+              <div>
+                <dt>Produces</dt>
+                <dd>Portable ontology IR</dd>
+              </div>
+            </dl>
+          </aside>
+        </section>
+        <div class="oo-library-layout">
+          <nav class="oo-library-toc" aria-label="On this page">
+            <p class="oo-overline">On this page</p>
+            <a href="#overview">Why use it</a
+            ><a href="#vocabulary">What’s included</a
+            ><a href="#example">Model example</a
+            ><a href="#availability">Availability & limits</a
+            ><a href="#docs">Documentation</a>
+          </nav>
+          <div class="oo-library-content">
+            <section id="overview" aria-labelledby="overview-title">
+              <p class="oo-overline">The pitch</p>
+              <h2 id="overview-title">A vocabulary to build on.</h2>
+              <p>
+                Use it when a release, build, or service needs to point at a
+                precise commit, or when repository dependencies need to be
+                queryable alongside your own domain facts.
+              </p>
+            </section>
+            <section id="vocabulary" aria-labelledby="vocabulary-title">
+              <h2 id="vocabulary-title">What’s included</h2>
+              <dl class="oo-library-vocabulary">
+                <div>
+                  <dt>Objects</dt>
+                  <dd>GitRepository, GitCommit, GitBranch</dd>
+                </div>
+                <div>
+                  <dt>Relations</dt>
+                  <dd>git-parent, git-fork-of, git-depends-on</dd>
+                </div>
+                <div>
+                  <dt>Actions</dt>
+                  <dd>
+                    Eight actions record repositories, commits, branches,
+                    parents, forks, and dependencies. Branch-tip and
+                    default-branch updates clear the old reference first.
+                  </dd>
+                </div>
+                <div>
+                  <dt>Queries</dt>
+                  <dd>git-branch-tips and git-repository-dependencies</dd>
+                </div>
+              </dl>
+            </section>
+            <section id="example" aria-labelledby="example-title">
+              <p class="oo-overline">Authoring example</p>
+              <h2 id="example-title">Pin a release to a shared commit</h2>
+              <p>
+                This complete model adds Release to the imported graph. Record
+                repository and commit facts with the bundled actions, then
+                invoke record-release and query release-pins in the local
+                runtime.
+              </p>
+              <figure class="oo-library-example">
+                <figcaption>Checked model · Forma</figcaption>
+                <div class="oo-panel">
+                  <pre
+                    tabindex="0"
+                    aria-label="Pin a release to a shared commit"
+                  ><code class="lang-lisp" data-model-example="git">(import &quot;/std/git&quot;)
+
+; Your release model reuses the shared Git graph.
+(define-entity Release
+  (:field [release/name String {:required true}])
+  (:field [release/repository GitRepository {:required true}])
+  (:field [release/commit GitCommit {:required true}]))
+
+(define-action record-release
+  (:input [release String {:required true}])
+  (:input [name String {:required true}])
+  (:input [repository String {:required true}])
+  (:input [commit String {:required true}])
+  (:returns String)
+  (:do (create Release release
+    {:release/name name :release/repository repository
+     :release/commit commit})))
+
+(define-datalog-query release-pins
+  (:query
+    {:find [&quot;?release&quot; &quot;?repository&quot; &quot;?oid&quot;]
+     :where [[&quot;?r&quot; &quot;:release/name&quot; &quot;?release&quot;]
+             [&quot;?r&quot; &quot;:release/repository&quot; &quot;?repo&quot;]
+             [&quot;?repo&quot; &quot;:git-repository/name&quot; &quot;?repository&quot;]
+             [&quot;?r&quot; &quot;:release/commit&quot; &quot;?c&quot;]
+             [&quot;?c&quot; &quot;:git-commit/oid&quot; &quot;?oid&quot;]]}))</code></pre>
+                  <button type="button" class="oo-copy oo-copy--term" hidden>
+                    Copy
+                  </button>
+                </div>
+              </figure>
+              <p>
+                Save the complete model as
+                <code>examples/my-domain/model.lisp</code> inside a repository
+                clone, then check it:
+              </p>
+              <div class="oo-panel">
+                <pre
+                  tabindex="0"
+                  aria-label="Setup and model check"
+                ><code>pnpm install --frozen-lockfile
+pnpm model:check examples/my-domain/model.lisp</code></pre>
+              </div>
+              <p>
+                Use Node 24 and pnpm 10.11.0. Imports expand to ordinary
+                declarations and share one namespace; imported types cannot be
+                redefined. Only <code>/std/git</code> and
+                <code>/github</code> are bundled import paths.
+              </p>
+              <h3>Run a checked-in scenario</h3>
+              <p>
+                The checked-in GitHub scenario exercises shared commits, merge
+                parents, fork branches, and repository dependencies.
+              </p>
+              <div class="oo-panel">
+                <pre
+                  tabindex="0"
+                  aria-label="Run the existing example"
+                ><code>pnpm example:github</code></pre>
+              </div>
+              <p class="oo-note">
+                <a
+                  href="https://raw.githubusercontent.com/bjacobso/open-ontology/main/examples/github/model.lisp"
+                  >Read the scenario model ↗</a
+                >
+                ·
+                <a
+                  href="https://raw.githubusercontent.com/bjacobso/open-ontology/main/examples/github/scenario.ts"
+                  >Read the runtime example ↗</a
+                >
+              </p>
+            </section>
+            <section
+              id="availability"
+              class="oo-library-boundary"
+              aria-labelledby="availability-title"
+            >
+              <p class="oo-overline">Current availability</p>
+              <h2 id="availability-title">Available · experimental v0.1</h2>
+              <p>
+                Actions record local facts; they do not run Git commands.
+                Callers supply ids. Full object ids and repository-scoped branch
+                ids are conventions, not uniqueness guarantees. Reference
+                existence, branch/repository consistency, and acyclic ancestry
+                are not enforced.
+              </p>
+              <p>
+                Work in a clone; the package is not released on npm. Native
+                platform deployment, synchronization, and the
+                <code>oo</code> package manager are not available.
+              </p>
+            </section>
+            <section id="docs" aria-labelledby="docs-title">
+              <h2 id="docs-title">Documentation & source</h2>
+              <p>
+                Plain-text documentation and checked-in source, ready for people
+                and agents.
+              </p>
+              <nav
+                class="oo-library-resources"
+                aria-label="Documentation and source"
+              >
+                <a
+                  href="https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/git-libraries.md"
+                  >Vocabulary, identities & limits <span>Markdown ↗</span></a
+                ><a
+                  href="https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/architecture.md"
+                  >Runtime & package boundary <span>Markdown ↗</span></a
+                ><a
+                  href="https://raw.githubusercontent.com/bjacobso/open-ontology/main/libraries/std/git.lisp"
+                  >Read /std/git <span>raw Lisp ↗</span></a
+                ><a href="/llms-full.txt"
+                  >Complete authoring guide <span>txt →</span></a
+                >
+              </nav>
+            </section>
+            <nav class="oo-library-related" aria-label="Related preludes">
+              <a href="/preludes/github.html"
+                >Add GitHub hosting and collaboration
+                <span aria-hidden="true">→</span></a
+              ><a href="/preludes/ontology.html"
+                >Write your own domain model
+                <span aria-hidden="true">→</span></a
+              >
+            </nav>
+          </div>
+        </div>
+      </main>
+      <footer class="oo-footer">
+        <div class="oo-footer__brand">
+          <b>Open Ontology</b> Experimental v0.1 · MIT
+        </div>
+        <nav aria-label="Footer navigation">
+          <a href="/preludes.html">All preludes</a
+          ><a href="/llms.txt">Agent index</a
+          ><a href="https://discord.gg/cjW4gxsdXK">Discord ↗</a
+          ><a href="https://github.com/bjacobso/open-ontology">Source ↗</a>
+        </nav>
+      </footer>
+    </div>
+  </body>
+</html>

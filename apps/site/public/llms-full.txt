@@ -6,6 +6,8 @@ This guide covers experimental `@open-ontology/ontology` 0.1.0, source at https:
 
 Current checkpoint: one package, local in-memory runtime. Nothing persists between processes. There is no server, authorization, or npm release yet. See "Limits" before promising anything to the person you are helping.
 
+For reusable domain vocabularies, see the [prelude catalog](https://open-ontology.com/preludes.html) and [Git libraries guide](https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/git-libraries.md). The bundled imports are /std/git and /github; /github loads /std/git automatically. Compiler support sources are not domain imports. The homepage's platform configuration examples and oo commands are v0.2 design sketches, not shipped deployment or synchronization features.
+
 ## 1. When to use it
 
 Use Open Ontology when the person wants any of these:
