@@ -2,7 +2,7 @@
 
 `@open-ontology/ontology` defines a portable ontology model, compiles TypeScript and Forma sources to the same JSON-safe IR, and runs actions and named Datalog queries on Triplex.
 
-Maturity: **experimental (v0.1)**. One package, three executable examples, and a local in-memory runtime; no durable server or npm release yet.
+Maturity: **experimental (v0.1)**. One package, four executable examples, and a local in-memory runtime; no durable server or npm release yet.
 
 The selected implementation was adapted from the [historical Open Ontology repository](https://github.com/bjacobso/open-ontology-legacy) at [commit `7c2ff8a`](https://github.com/bjacobso/open-ontology-legacy/commit/7c2ff8a614b9f06a6e530aa80d0c7311dc81a323), especially its `packages/ontology` directory. The current code removes its server convenience method and does not bring over the old workspace or runtime.
 
@@ -20,6 +20,7 @@ pnpm check
 pnpm example
 pnpm example:support-desk
 pnpm example:github
+pnpm example:onboarded
 pnpm model:check examples/support-desk/model.lisp
 ```
 
@@ -32,6 +33,14 @@ pnpm model:check examples/support-desk/model.lisp
 Forma models can write `(import "/std/git")` for shared repositories, branches, commits, ancestry, forks, and dependencies, or `(import "/github")` for that graph plus GitHub accounts, hosting records, issues, pull requests, memberships, and collaborators. Imports load bundled Lisp sources once per model. A future `/gitlab` can reuse `/std/git`; it is not bundled yet.
 
 `pnpm example:github` runs [a local GitHub graph](examples/github/model.lisp), including a PR from a fork, a referenced issue, dependency links, and merge parents. These are synthetic facts, with no GitHub API connection. See [Git libraries](docs/git-libraries.md) for the vocabulary, id conventions, and extension pattern.
+
+## Onboarded domain study
+
+The unlisted `/onboarded` page explores an illustrative domain informed directionally by supplied Onboarded schema and API context. Four graph views cover people and work, versioned forms, account access, and policy/scope configuration. It uses [a working TypeScript model](examples/onboarded/model.ts), with synthetic facts and a recorded local Triplex transcript from `pnpm example:onboarded`. See [the model notes](examples/onboarded/README.md) for its selected vocabulary and simplifications. The page's I-9 helper and permission-scope demonstrations are design studies; form elaboration and scope-based authorization are not implemented by this example.
+
+After changing the model, scenario, or graph views, run `pnpm site:export-onboarded` to refresh the checked-in browser artifact. Tests verify that its ontology, transcript, property flags, and views match the checked-in sources.
+
+The page's Northwind study browses selected Forma source excerpts and authored journey expectations from a supplied account-program sketch, including a three-state unknown outcome. Its `onboarded` prelude is unimplemented; its status markers refer to the separate account DSL described in that sketch. Those expectations are not runtime results.
 
 ## Package boundary
 

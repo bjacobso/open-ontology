@@ -39,6 +39,8 @@
     "example": "tsx examples/field-service/run.ts",
     "example:support-desk": "tsx examples/support-desk/run.ts",
     "example:github": "tsx examples/github/run.ts",
+    "example:onboarded": "tsx examples/onboarded/run.ts",
+    "site:export-onboarded": "tsx scripts/export-onboarded.ts",
     "model:check": "tsx scripts/check-model.ts",
     "site:check": "node apps/site/check.mjs",
     "site:dev": "wrangler dev --config apps/site/wrangler.jsonc",
