@@ -36,7 +36,7 @@ Forma models can write `(import "/std/git")` for shared repositories, branches, 
 
 ## Onboarded domain study
 
-[`/onboarded`](https://open-ontology.com/onboarded) explores an illustrative domain informed directionally by supplied Onboarded schema and API context. Four graph views cover people and work, versioned forms, account access, and policy/scope configuration. It uses [a working TypeScript model](examples/onboarded/model.ts), with synthetic facts and a recorded local Triplex transcript from `pnpm example:onboarded`. See [the model notes](examples/onboarded/README.md) for its selected vocabulary and simplifications. The page's I-9 helper and permission-scope demonstrations are design studies; form elaboration and scope-based authorization are not implemented by this example.
+The unlisted `/onboarded` page explores an illustrative domain informed directionally by supplied Onboarded schema and API context. Four graph views cover people and work, versioned forms, account access, and policy/scope configuration. It uses [a working TypeScript model](examples/onboarded/model.ts), with synthetic facts and a recorded local Triplex transcript from `pnpm example:onboarded`. See [the model notes](examples/onboarded/README.md) for its selected vocabulary and simplifications. The page's I-9 helper and permission-scope demonstrations are design studies; form elaboration and scope-based authorization are not implemented by this example.
 
 After changing the model, scenario, or graph views, run `pnpm site:export-onboarded` to refresh the checked-in browser artifact. Tests verify that its ontology, transcript, property flags, and views match the checked-in sources.
 

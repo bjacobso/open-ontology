@@ -2,7 +2,7 @@
 
 This is a selected, illustrative model informed directionally by supplied Onboarded schema and API context. The complete attachments stay in the workspace's private `.context` directory; the example contains hand-authored declarations and synthetic facts, plus selected excerpts from a supplied Northwind design sketch.
 
-The [TypeScript model](model.ts) exports twenty object types, two demo actions, and three Datalog queries. The [site explorer](https://open-ontology.com/onboarded) presents four views:
+The [TypeScript model](model.ts) exports twenty object types, two demo actions, and three Datalog queries. The unlisted `/onboarded` site explorer presents four views:
 
 | View | Concepts and relationships |
 | --- | --- |
