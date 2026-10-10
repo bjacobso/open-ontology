@@ -21,6 +21,7 @@ pnpm example
 pnpm example:support-desk
 pnpm example:github
 pnpm model:check examples/support-desk/model.lisp
+pnpm model:foundry examples/support-desk/model.lisp --name support-desk
 ```
 
 `pnpm example` loads [the TypeScript model](examples/field-service/model.ts) and [the Forma model](examples/field-service/model.lisp), checks their IR for equivalence, seeds an in-memory Triplex host, invokes `assign-work-order`, and prints the `assigned-work` query result. `pnpm example:support-desk` runs a Forma-only model that exercises `create`, `clear` followed by `set`, reference fields, relations, negation, ordering, and aggregates.
@@ -33,9 +34,13 @@ Forma models can write `(import "/std/git")` for shared repositories, branches, 
 
 `pnpm example:github` runs [a local GitHub graph](examples/github/model.lisp), including a PR from a fork, a referenced issue, dependency links, and merge parents. These are synthetic facts, with no GitHub API connection. See [Git libraries](docs/git-libraries.md) for the vocabulary, id conventions, and extension pattern.
 
+## Foundry Ontology as Code
+
+`pnpm model:foundry <model.lisp | model.ts> [--out <file>]` compiles a checked model to a TypeScript module for [`@osdk/maker`](https://www.npmjs.com/package/@osdk/maker), the source format of Palantir Foundry's Ontology as Code (beta). Entities become object types, reference fields become foreign-key links, relations become many-to-many links or link objects, and actions become logic rules. Queries and other features Foundry cannot express are reported as warnings. The compiler is best effort: tests check that maker accepts the output, but it has not been installed into a Foundry enrollment. See [Foundry Ontology as Code](docs/foundry.md) for the mapping and limits.
+
 ## Package boundary
 
-The package exports the TypeScript DSL, portable IR, Forma elaborator, and Triplex runtime adapter. The checked-in Forma preludes and domain libraries are loaded at runtime and included in the package tarball. See [architecture](docs/architecture.md) for the boundary and current operational limits.
+The package exports the TypeScript DSL, portable IR, Forma elaborator, Triplex runtime adapter, and Foundry Ontology as Code compiler. The checked-in Forma preludes and domain libraries are loaded at runtime and included in the package tarball. See [architecture](docs/architecture.md) for the boundary and current operational limits.
 
 ## Website
 

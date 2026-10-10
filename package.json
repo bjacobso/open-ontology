@@ -20,6 +20,10 @@
       "types": "./dist/forma.d.ts",
       "import": "./dist/forma.js"
     },
+    "./foundry": {
+      "types": "./dist/foundry.d.ts",
+      "import": "./dist/foundry.js"
+    },
     "./ir": {
       "types": "./dist/ir.d.ts",
       "import": "./dist/ir.js"
@@ -40,6 +44,7 @@
     "example:support-desk": "tsx examples/support-desk/run.ts",
     "example:github": "tsx examples/github/run.ts",
     "model:check": "tsx scripts/check-model.ts",
+    "model:foundry": "tsx scripts/compile-foundry.ts",
     "site:check": "node apps/site/check.mjs",
     "site:dev": "wrangler dev --config apps/site/wrangler.jsonc",
     "site:deploy": "wrangler deploy --config apps/site/wrangler.jsonc"
@@ -50,6 +55,7 @@
     "effect": "4.0.0-rc.112"
   },
   "devDependencies": {
+    "@osdk/maker": "0.79.0",
     "@types/node": "25.9.1",
     "tsdown": "0.20.0",
     "tsx": "4.19.0",

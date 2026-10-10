@@ -4,6 +4,7 @@ export default defineConfig({
   entry: [
     "src/index.ts",
     "src/forma.ts",
+    "src/foundry.ts",
     "src/ir.ts",
     "src/runtime.ts",
   ],

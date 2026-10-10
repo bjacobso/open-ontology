@@ -3,10 +3,12 @@
 Forma and the TypeScript DSL produce `OntologyIR`. The IR is JSON-safe and names object types, link types, actions, and queries. `materializeOntology` restores the executable Effect Schema model. `makeOntologyRuntime` converts action changes into Triplex transactions and runs named Datalog queries. `toTriplexConfig` emits Triplex configuration nodes and constraints.
 
 ```text
-TypeScript DSL ──┐
-                ├──> OntologyIR ──> Triplex adapter ──> selected host
-Forma source ───┘
+TypeScript DSL ──┐                ┌──> Triplex adapter ──> selected host
+                ├──> OntologyIR ──┤
+Forma source ───┘                └──> compileOsdkMaker ──> @osdk/maker module (Foundry)
 ```
+
+`compileOsdkMaker` emits TypeScript source text for Palantir Foundry's Ontology as Code. The package does not depend on `@osdk/maker` at run time; it is a dev dependency used by tests to check the output. [Foundry Ontology as Code](foundry.md) documents the mapping and limits.
 
 The package does not own an HTTP server or UI. The initial example uses Triplex's in-memory `KvTriples.layer` only. It is not durable and does not enforce a product policy. Those host responsibilities are required for the next checkpoint.
 
