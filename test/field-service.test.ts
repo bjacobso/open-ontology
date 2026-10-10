@@ -6,8 +6,18 @@ import { elaborateFormaOntology, makeOntologyRuntime, ontologyToIR } from "../sr
 import { fieldService } from "../examples/field-service/model.js";
 
 const source = readFileSync(new URL("../examples/field-service/model.lisp", import.meta.url), "utf8");
+const landing = readFileSync(new URL("../apps/site/public/index.html", import.meta.url), "utf8");
+const landingCode = (attribute: string): string => {
+  const block = landing.match(new RegExp(`<code[^>]*${attribute}="field-service"[^>]*>([\\s\\S]*?)</code>`))?.[1];
+  if (!block) throw new Error(`Missing field-service ${attribute} on the landing page`);
+  return block;
+};
 
 describe("field-service authoring", () => {
+  it("shows a verbatim model excerpt on the landing page", () => {
+    expect(source).toContain(landingCode("data-example"));
+  });
+
   it("produces equivalent portable IR from TypeScript and Forma files", () => {
     expect(elaborateFormaOntology(source, { name: "field-service", version: "1" }))
       .toEqual(ontologyToIR(fieldService));
@@ -50,6 +60,7 @@ describe("field-service authoring", () => {
       return { assigned: yield* runtime.query("assigned-work"), statuses };
     }).pipe(Effect.provide(KvTriples.layer)));
     expect(response.assigned.results).toEqual([{ "?title": "Repair cooling pump", "?technician": "Ada" }]);
+    expect(response.assigned.results).toEqual(JSON.parse(landingCode("data-result")));
     // The action clears the old status before setting the new one, so only one value remains.
     expect(response.statuses.results).toEqual([{ "?status": "assigned" }]);
   });

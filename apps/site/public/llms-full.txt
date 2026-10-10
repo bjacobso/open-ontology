@@ -6,6 +6,8 @@ This guide covers experimental `@open-ontology/ontology` 0.1.0, source at https:
 
 Current checkpoint: one package, local in-memory runtime. Nothing persists between processes. There is no server, authorization, or npm release yet. See "Limits" before promising anything to the person you are helping.
 
+The homepage's Salesforce, Stripe, and Foldkit DSLs are proposed designs, not implemented targets. There are no platform generators, general shared business-type library, cross-project platform checker, package registry, or `oo` CLI. Foldkit is not used in this repo. Do not copy the proposed syntax into a v0.1 model. See https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/platform-dsls.md for the distinction.
+
 ## 1. When to use it
 
 Use Open Ontology when the person wants any of these:

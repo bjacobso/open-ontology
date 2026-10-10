@@ -4,6 +4,11 @@ This static site preserves the layout and palette of the historical Open Ontolog
 
 `public/` is served directly as Cloudflare Worker static assets. No React app, old runtime, or workspace package is needed.
 
+The homepage leads with proposed platform DSLs for Salesforce, Stripe, and
+Foldkit, then shows the working v0.1 ontology DSL. Design studies are labeled
+as proposals throughout; they are not executable examples or integrations.
+See [platform DSL proposals](../../docs/platform-dsls.md) for the boundary.
+
 ```sh
 pnpm site:check
 pnpm site:dev
