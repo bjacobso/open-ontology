@@ -6,4 +6,5 @@ export type { ActionChangeIR, ActionInputIR, ActionTypeIR, ActionValueIR, Datalo
 export { isOntologyIR } from "./ir.js";
 export { materializeOntology, ontologyToIR } from "./materialize.js";
 export { compileFormaOntology, elaborateFormaOntology, formaForms, formaLibrarySources, ontologyElaboration, ontologyElaborationDescriptors, ontologyPreludeSources, ontologyPreludeStats } from "./forma.js";
+export { compileOsdkMaker, type FoundryDiagnostic, type OsdkMakerModule } from "./foundry.js";
 export { makeOntologyRuntime, toTriplexConfig, type ActionInvocationOptions, type OntologyQueryResponse, type OntologyRuntime } from "./runtime.js";

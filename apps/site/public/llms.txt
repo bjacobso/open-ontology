@@ -9,6 +9,7 @@ If you are an agent modeling a domain for someone, read the agent guide first. I
 - [Agent guide](https://open-ontology.com/llms-full.txt): everything needed to write, check and run a model
 - [README](https://raw.githubusercontent.com/bjacobso/open-ontology/main/README.md): install, scripts and package boundary
 - [Architecture](https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/architecture.md): TypeScript/Forma → IR → Triplex adapter
+- [Foundry Ontology as Code](https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/foundry.md): best-effort compiler from a model to an @osdk/maker module, mapping and limits
 - [Git libraries](https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/git-libraries.md): bundled /std/git and /github vocabularies, imports and provider extension
 
 ## Examples

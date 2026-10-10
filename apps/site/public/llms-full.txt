@@ -342,6 +342,16 @@ const AssignWorkOrder = Ontology.ActionType("assign-work-order", {
 
 The arrays above are abbreviated. The IR is plain JSON: store it, diff it, or hand it to another tool. Each action carries a JSON Schema (draft 2020-12) for its input in `inputSchema`. `materializeOntology(ir)` restores the executable model. `toTriplexConfig(ir)` emits Triplex configuration nodes and constraints. Types are in `src/ir.ts`.
 
+### Compiling to Palantir Foundry
+
+If the person runs Palantir Foundry, the same model can compile to a TypeScript module for `@osdk/maker`, the source format of Foundry's Ontology as Code (beta):
+
+```sh
+pnpm model:foundry examples/<domain>/model.lisp --name <domain> --out ontology.ts
+```
+
+Entities become object types with a synthesized `id` primary key. Reference fields become foreign-key properties with one-to-many links. Relations become many-to-many links, or link objects when they have fields. Actions become logic rules. Queries are not compiled. Warnings on stderr, repeated in the file header, list everything left out or approximated; include them in your "not captured yet" list. This is best effort: maker accepts the output in tests, but it has not been installed into a Foundry enrollment. Mapping and limits: https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/foundry.md
+
 ## 10. Worked example: support desk
 
 The person said: "Customers raise tickets with a priority. Support can escalate a ticket to an engineer with a reason, and close it. We need the open work in priority order, who each ticket was escalated to and why, and a count per status."
@@ -454,6 +464,7 @@ Not captured yet, and worth telling the person: "only support staff may close ti
 - Queries: named and fixed. There are no parameters.
 - Integrity: `required`, cardinality and uniqueness are recorded, not enforced on write.
 - Forms: only the five listed in section 5.8.
+- Foundry: `pnpm model:foundry` output is best effort and not tested against a Foundry enrollment. Queries are not compiled.
 
 Next checkpoint, in order: SQLite persistence, policy authorization, and a versioned config release and deploy. After that come restart and historical-query tests, verification of attribution and idempotency, and a migration or rebuild procedure. HTTP reflection and OpenAPI follow that.
 
