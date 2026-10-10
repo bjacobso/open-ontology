@@ -9,6 +9,7 @@ const FORMS = new Set([
   "value-type", "interface", "implements",
   "object", "field", "validation-rule", "record-flow", "profile",
   "product", "price", "meter",
+  "model", "message",
   "group", "app-assignment", "team", "repo", "schedule", "escalation",
 ]);
 const OPERATIONS = new Set([
@@ -100,19 +101,35 @@ if (rosetta) {
 }
 
 // Lowering stages become tabs; without JavaScript every stage stays visible.
-for (const stages of document.querySelectorAll("[data-stages]")) {
+for (const [stageIndex, stages] of [...document.querySelectorAll("[data-stages]")].entries()) {
   const rail = stages.querySelector("[role=tablist]");
   const tabs = [...rail.querySelectorAll("[role=tab]")];
   const panels = [...stages.querySelectorAll("[data-stage-panel]")];
+  tabs.forEach((tab, i) => {
+    tab.id = `stage-${stageIndex}-tab-${i}`;
+    tab.setAttribute("aria-controls", `stage-${stageIndex}-panel-${i}`);
+    panels[i].id = `stage-${stageIndex}-panel-${i}`;
+    panels[i].setAttribute("role", "tabpanel");
+    panels[i].setAttribute("aria-labelledby", tab.id);
+    panels[i].tabIndex = 0;
+  });
   const select = (index) => {
-    tabs.forEach((tab, i) => tab.setAttribute("aria-selected", String(i === index)));
-    panels.forEach((panel, i) => panel.classList.toggle("is-active", i === index));
+    tabs.forEach((tab, i) => {
+      tab.setAttribute("aria-selected", String(i === index));
+      tab.tabIndex = i === index ? 0 : -1;
+    });
+    panels.forEach((panel, i) => {
+      panel.classList.toggle("is-active", i === index);
+      panel.hidden = i !== index;
+    });
   };
   tabs.forEach((tab, i) => tab.addEventListener("click", () => select(i)));
   rail.addEventListener("keydown", (event) => {
     const step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
-    if (!step) return;
-    const next = (tabs.findIndex((tab) => tab.getAttribute("aria-selected") === "true") + step + tabs.length) % tabs.length;
+    if (!step && event.key !== "Home" && event.key !== "End") return;
+    event.preventDefault();
+    const next = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1
+      : (tabs.findIndex((tab) => tab.getAttribute("aria-selected") === "true") + step + tabs.length) % tabs.length;
     select(next);
     tabs[next].focus();
   });

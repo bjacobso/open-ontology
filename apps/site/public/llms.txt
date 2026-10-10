@@ -10,6 +10,7 @@ If you are an agent modeling a domain for someone, read the agent guide first. I
 - [README](https://raw.githubusercontent.com/bjacobso/open-ontology/main/README.md): install, scripts and package boundary
 - [Architecture](https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/architecture.md): TypeScript/Forma → IR → Triplex adapter
 - [Git libraries](https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/git-libraries.md): bundled /std/git and /github vocabularies, imports and provider extension
+- [Platform DSL proposals](https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/platform-dsls.md): Salesforce, Stripe, and Foldkit design studies; no implemented targets, generators, or integrations
 
 ## Examples
 
