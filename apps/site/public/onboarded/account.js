@@ -15,27 +15,6 @@ const press = (selector, attribute, value) => {
   for (const node of document.querySelectorAll(selector)) node.setAttribute("aria-pressed", String(node.dataset[attribute] === value));
 };
 
-const verbs = [
-  { verb: "account", grammar: "(account name \"Title\" :languages [...] :sender \"…\" :support \"…\" :dedupe [paths])",
-    about: "The account’s identity and settings. Its name is the namespace for every key below." },
-  { verb: "attributes", grammar: "(attributes entity (name type \"Label\" :searchable :sensitive :scope) ...)",
-    about: "Typed custom attributes on built-in entities. Choices are closed; :scope marks what access rules may read; sensitive attributes can be neither searchable nor scoped." },
-  { verb: "rule", also: ["def"], grammar: "(rule name expression)   (def name arithmetic)",
-    about: "Named three-valued predicates, reused by policies, forms, automations, and access. A missing fact is unknown, not false. def folds arithmetic at build time." },
-  { verb: "form", grammar: "(form name \"Title\" :due-in days (page \"Title\" :employee field...) ...)",
-    about: "Fields bind an attribute or a form answer; reads and writes are inferred. :from references a form another package owns." },
-  { verb: "policy", grammar: "(policy name \"Title\" :when rule :require [form (form :when rule)])",
-    about: "When a placement matches, require forms. Policies may read placement, employee, employer, client, and job facts." },
-  { verb: "automation", also: ["param"], grammar: "(automation name \"Title\" :on trigger (wait …) (when rule step...) (email …) (assign form))",
-    about: "A trigger, then steps. Each trigger limits the facts its steps may read; a template is a parameter each target supplies." },
-  { verb: "group", grammar: "(group name \"Title\" :can [permissions] :sees rule)",
-    about: "Permissions plus an access rule that may read only :scope attributes." },
-  { verb: "integration", grammar: "(integration name \"provider@revision\" :connection \"ref\" :setting value ...)",
-    about: "Pin a provider revision and name a connection reference. Credentials stay with the target account." },
-  { verb: "scenario", grammar: "(scenario \"Title\" {facts} (expect …) (day n (record …) (complete …) (expect …)))",
-    about: "Facts in, outcomes out. Scenarios run on every check, and every decision must be seen both true and false." },
-];
-
 const tokens = /(;.*$)|("(?:\\.|[^"\\])*")|(:[^\s()[\]{}"]+)|((?<=\()[^\s()[\]{}"]+)|(\b(?:true|false)\b)|(-?\b\d+(?:\.\d+)?\b)|([a-z][\w-]*\.[\w.-]+)/g;
 const tokenKinds = ["comment", "string", "keyword", "head", "literal", "literal", "path"];
 
@@ -59,6 +38,25 @@ function line(number, text, kind, { lisp = true } = {}) {
   return row;
 }
 
+for (const code of document.querySelectorAll("pre[data-source] code, .ob-syntax code")) {
+  const text = code.textContent;
+  code.replaceChildren();
+  highlight(text, code);
+}
+
+const tocLinks = new Map([...document.querySelectorAll(".ob-toc a[href^='#']")].map((link) => [link.getAttribute("href").slice(1), link]));
+const spy = new IntersectionObserver((entries) => {
+  for (const entry of entries) {
+    if (!entry.isIntersecting) continue;
+    for (const link of tocLinks.values()) link.removeAttribute("aria-current");
+    tocLinks.get(entry.target.id)?.setAttribute("aria-current", "true");
+  }
+}, { rootMargin: "-20% 0px -70% 0px" });
+for (const id of tocLinks.keys()) {
+  const target = document.getElementById(id);
+  if (target) spy.observe(target);
+}
+
 async function loadAccount() {
   const response = await fetch("/onboarded/account.json");
   if (!response.ok) throw new Error(`Account returned HTTP ${response.status}`);
@@ -70,40 +68,18 @@ async function loadAccount() {
     return [row, "\n"];
   }).flat());
 
-  // 01 · Language tour
-  function showVerb(entry) {
-    press("#verbs button", "verb", entry.verb);
-    const declarations = account.declarations.filter((item) => item.verb === entry.verb || entry.also?.includes(item.verb));
-    const grammar = make("code", "ob-grammar");
-    highlight(entry.grammar, grammar);
-    $("#verb-head").replaceChildren(grammar, make("p", "", entry.about));
-    const code = $("#verb-source");
-    code.replaceChildren();
-    declarations.forEach((item, i) => {
-      if (i > 0) code.append(line(undefined, "", "gap"));
-      for (let number = item.startLine; number <= item.endLine; number++) code.append(line(number, sourceLines[number - 1]));
-    });
-    const resources = declarations.flatMap((item) => item.resources);
-    const ranges = declarations.map((item) => item.startLine === item.endLine ? `${item.startLine}` : `${item.startLine}–${item.endLine}`);
-    $("#source-label").textContent = `northwind.account.lisp · line${ranges.length > 1 || ranges[0].includes("–") ? "s" : ""} ${ranges.join(", ")}`;
-    $("#resource-label").textContent = resources.length
-      ? `${resources.length} resource${resources.length === 1 ? "" : "s"} · ${[...new Set(resources.map((item) => item.kind))].join(", ")}`
-      : "No resources · inlined where used";
-    $("#verb-resources").textContent = resources.length
+  for (const details of document.querySelectorAll(".ob-lowered")) {
+    const verbs = details.dataset.verbs.split(" ");
+    const resources = account.declarations.filter((item) => verbs.includes(item.verb)).flatMap((item) => item.resources);
+    details.querySelector("summary").textContent = resources.length
+      ? `Lowers to ${resources.length} resource${resources.length === 1 ? "" : "s"}: ${[...new Set(resources.map((item) => item.kind))].join(", ")}`
+      : "Lowers to no resources of its own";
+    details.querySelector("code").textContent = resources.length
       ? JSON.stringify(resources.length === 1 ? resources[0] : resources, null, 2)
-      : "// Rules and defs produce no resources of their own.\n// Each use inlines the rule, so the platform stores it where it is read.";
+      : "// Each use inlines the rule, so the platform stores it where it is read.\n// def values fold into constants, such as 0.015 in the union card formula.";
   }
-  for (const entry of verbs) {
-    const count = account.declarations.filter((item) => item.verb === entry.verb || entry.also?.includes(item.verb)).length;
-    const node = button("", { verb: entry.verb });
-    node.append(make("span", "", entry.verb), make("small", "", String(count)));
-    node.addEventListener("click", () => showVerb(entry));
-    $("#verbs").append(node);
-  }
-  showVerb(verbs.find((entry) => entry.verb === "policy"));
-  $("#tour").hidden = false;
 
-  // 02 · Checks
+  // Checks
   function showMistake(mistake) {
     press("#mistakes button", "mistake", mistake.id);
     $("#mistake-copy").replaceChildren(make("h3", "", mistake.title), make("p", "", mistake.why));
@@ -133,7 +109,7 @@ async function loadAccount() {
   showMistake(account.mistakes[0]);
   $("#checks-panel").hidden = false;
 
-  // 03 · Three-state simulator
+  // Three-state simulator
   const { simulator } = account;
   const defaults = { "job.site-type": "warehouse", "placement.union-local": "", "placement.weekly-hours": "32", "client.requires-drug-screen": "" };
   for (const fact of simulator.facts) {
@@ -192,7 +168,7 @@ async function loadAccount() {
   simulate();
   $("#simulator-panel").hidden = false;
 
-  // 04 · Scenarios and coverage
+  // Scenarios and coverage
   function showScenario(scenario) {
     press("#scenario-list button", "scenario", scenario.title);
     const timeline = $("#timeline");

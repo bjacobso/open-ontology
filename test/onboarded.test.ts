@@ -118,6 +118,20 @@ describe("Northwind account program", () => {
     expect(diagnostics[0]?.loc?.line).toBe(1);
   });
 
+  it("quotes the program verbatim in the page's guide and states its current numbers", () => {
+    const page = read("apps/site/public/onboarded/index.html");
+    const unescape = (text: string) => text.replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&quot;", "\"").replaceAll("&amp;", "&");
+    const quoted = [...page.matchAll(/<pre[^>]*data-source[^>]*><code>([\s\S]*?)<\/code><\/pre>/g)].map((match) => unescape(match[1]!));
+    expect(quoted.length).toBeGreaterThanOrEqual(10);
+    for (const snippet of quoted) expect(northwind).toContain(snippet);
+    const { summary } = buildAccountArtifact(northwind);
+    const stat = (name: string) => page.match(new RegExp(`data-stat="${name}">([^<]+)<`))?.[1];
+    expect(stat("lines")).toBe(String(summary.lines));
+    expect(stat("resources")).toBe(String(summary.resources));
+    expect(stat("scenarios")).toBe(String(summary.scenarios.passed));
+    expect(stat("decisions")).toBe(`${summary.decisions.covered} / ${summary.decisions.total}`);
+  });
+
   it("keeps the site's account artifact in sync with the program", () => {
     expect(JSON.parse(read("apps/site/public/onboarded/account.json"))).toEqual(buildAccountArtifact(northwind));
   });
