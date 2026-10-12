@@ -1,0 +1,109 @@
+diff --git a/dist/Branded.js b/dist/Branded.js
+index fb078755f01a2c1cdc00654e85ac377a3620b33f..b88423dbfd09e1ec4e5d22601c4431269dd85c47 100644
+--- a/dist/Branded.js
++++ b/dist/Branded.js
+@@ -1,28 +1,28 @@
+ import { Schema } from "effect";
+ //#region src/Branded.ts
+ const TripleIdSchema = Schema.String.pipe(Schema.check(Schema.isPattern(/^[0-9A-Z]{26}$/)), Schema.brand("TripleId"));
+-const TripleId = Object.assign(TripleIdSchema, {
+-	decode: (s) => Schema.decodeEffect(TripleIdSchema)(s),
+-	make: (s) => Schema.decodeSync(TripleIdSchema)(s)
++const TripleId = Object.defineProperties(TripleIdSchema, {
++	decode: { value: (s) => Schema.decodeEffect(TripleIdSchema)(s), enumerable: true },
++	make: { value: (s) => Schema.decodeSync(TripleIdSchema)(s), enumerable: true }
+ });
+ const EntityIdSchema = Schema.String.pipe(Schema.check(Schema.isMinLength(1)), Schema.brand("EntityId"));
+-const EntityId = Object.assign(EntityIdSchema, {
+-	decode: (s) => Schema.decodeEffect(EntityIdSchema)(s),
+-	make: (s) => Schema.decodeSync(EntityIdSchema)(s)
++const EntityId = Object.defineProperties(EntityIdSchema, {
++	decode: { value: (s) => Schema.decodeEffect(EntityIdSchema)(s), enumerable: true },
++	make: { value: (s) => Schema.decodeSync(EntityIdSchema)(s), enumerable: true }
+ });
+ const Attribute = Schema.String.pipe(Schema.check(Schema.isPattern(/^:[a-zA-Z_][a-zA-Z0-9_-]*\/[a-zA-Z][a-zA-Z0-9_-]*$/)), Schema.brand("Attribute"), Schema.annotate({
+ 	identifier: "Attribute",
+ 	description: "Namespaced attribute name in format :namespace/attribute"
+ }));
+ const DatabaseIdSchema = Schema.String.pipe(Schema.check(Schema.isPattern(/^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/)), Schema.check(Schema.isMinLength(1)), Schema.check(Schema.isMaxLength(64)), Schema.brand("DatabaseId"));
+-const DatabaseId = Object.assign(DatabaseIdSchema, {
+-	decode: (s) => Schema.decodeEffect(DatabaseIdSchema)(s),
+-	make: (s) => Schema.decodeSync(DatabaseIdSchema)(s)
++const DatabaseId = Object.defineProperties(DatabaseIdSchema, {
++	decode: { value: (s) => Schema.decodeEffect(DatabaseIdSchema)(s), enumerable: true },
++	make: { value: (s) => Schema.decodeSync(DatabaseIdSchema)(s), enumerable: true }
+ });
+ const TransactionIdSchema = EntityId.pipe(Schema.check(Schema.isPattern(/^_tx\/[0-9A-Z]{26}$/)), Schema.brand("TransactionId"));
+-const TransactionId = Object.assign(TransactionIdSchema, {
+-	decode: (s) => Schema.decodeEffect(TransactionIdSchema)(s),
+-	make: (s) => Schema.decodeSync(TransactionIdSchema)(s)
++const TransactionId = Object.defineProperties(TransactionIdSchema, {
++	decode: { value: (s) => Schema.decodeEffect(TransactionIdSchema)(s), enumerable: true },
++	make: { value: (s) => Schema.decodeSync(TransactionIdSchema)(s), enumerable: true }
+ });
+ const decode = {
+ 	tripleId: TripleId.decode,
+diff --git a/dist/EntityPage.js b/dist/EntityPage.js
+index 20d1150c72a63eeccd80dc19bf4f15220d6175ba..45293e5007d6d3289839fa42bde61b5f73083de2 100644
+--- a/dist/EntityPage.js
++++ b/dist/EntityPage.js
+@@ -1,7 +1,8 @@
+ import { resolveTemporalBasis } from "./Temporal.js";
+ import { PaginationCursorError } from "./errors/index.js";
+ import { Domain, hash } from "./content/ContentId.js";
+-import { Encoding, Result } from "effect";
++import { Result } from "effect";
++import { Base64Url } from "effect/encoding";
+ //#region src/EntityPage.ts
+ const decoder = new TextDecoder();
+ const encoder = new TextEncoder();
+@@ -12,7 +13,7 @@ const cursorError = (message, cause) => new PaginationCursorError({
+ });
+ const decode = (cursor) => {
+ 	try {
+-		const bytes = Encoding.decodeBase64Url(cursor);
++		const bytes = Base64Url.decode(cursor);
+ 		if (Result.isFailure(bytes)) throw bytes.failure;
+ 		const value = JSON.parse(decoder.decode(bytes.success));
+ 		if (typeof value !== "object" || value === null || !("version" in value) || value.version !== 1 || !("scope" in value) || typeof value.scope !== "string" || !("entityType" in value) || typeof value.entityType !== "string" || !("after" in value) || typeof value.after !== "string" || !("recordedAt" in value) || typeof value.recordedAt !== "number" || !("recordedPosition" in value) || typeof value.recordedPosition !== "number" || !("validAt" in value) || typeof value.validAt !== "number" || !Number.isFinite(value.recordedAt) || !Number.isSafeInteger(value.recordedPosition) || value.recordedPosition < 0 || !Number.isFinite(value.validAt)) throw cursorError("Entity page cursor has an invalid shape");
+@@ -68,7 +69,7 @@ const prepareEntityPage = (input) => {
+ 		scope: expectedScope
+ 	};
+ };
+-const encodeEntityPageCursor = (prepared, after) => Encoding.encodeBase64Url(encoder.encode(JSON.stringify({
++const encodeEntityPageCursor = (prepared, after) => Base64Url.encode(encoder.encode(JSON.stringify({
+ 	version: 1,
+ 	scope: prepared.scope,
+ 	entityType: prepared.entityType,
+diff --git a/dist/Pagination.js b/dist/Pagination.js
+index 518260f8623277e33876a6049c85dd6145156c1c..57d21e072dec1508277fed1a40480ab75c9456c3 100644
+--- a/dist/Pagination.js
++++ b/dist/Pagination.js
+@@ -2,7 +2,8 @@ import { encodeOrThrow } from "./content/CanonicalJson.js";
+ import { resolveTemporalBasis } from "./Temporal.js";
+ import { PaginationCursorError } from "./errors/index.js";
+ import { Domain, hash } from "./content/ContentId.js";
+-import { Encoding, Result, Schema } from "effect";
++import { Result, Schema } from "effect";
++import { Base64Url } from "effect/encoding";
+ //#region src/Pagination.ts
+ /** Public reads default to 100 rows and never exceed 1,000 rows per page. */
+ const DEFAULT_QUERY_PAGE_SIZE = 100;
+@@ -80,7 +81,7 @@ const scopeFingerprint = (scope) => hash(Domain.paginationScope, scope);
+ const decodeEnvelope = (cursor) => {
+ 	let unknown;
+ 	try {
+-		const decoded = Encoding.decodeBase64Url(cursor);
++		const decoded = Base64Url.decode(cursor);
+ 		if (Result.isFailure(decoded)) throw decoded.failure;
+ 		unknown = JSON.parse(textDecoder.decode(decoded.success));
+ 	} catch (cause) {
+@@ -179,7 +180,7 @@ const preparePagination = (input) => {
+ 		pageSize
+ 	};
+ };
+-const encodeEnvelope = (envelope) => Encoding.encodeBase64Url(textEncoder.encode(JSON.stringify(envelope)));
++const encodeEnvelope = (envelope) => Base64Url.encode(textEncoder.encode(JSON.stringify(envelope)));
+ const finishPagination = (prepared, result) => {
+ 	if (result.results.length <= prepared.pageSize) return result;
+ 	const results = result.results.slice(0, prepared.pageSize);

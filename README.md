@@ -43,7 +43,9 @@ The static site in [apps/site](apps/site) adapts the visual design of the histor
 
 The [site deployment workflow](.github/workflows/deploy-site.yml) checks pull requests and deploys merges to `main` to the personal Cloudflare account as the `open-ontology-site` Worker, which serves `open-ontology.com`. It needs `CLOUDFLARE_ACCOUNT_ID` and a scoped `CLOUDFLARE_API_TOKEN` GitHub secret. The token needs Workers Scripts Write for the account and Workers Routes Write for the `open-ontology.com` zone when attaching or changing the custom domain.
 
-The dependency lockfile resolves `@formalang/ts@0.3.0`, `@triplex-build/triplex@0.2.0`, and this package to `effect@4.0.0-rc.112`. Forma 0.3.0's published package declares Effect 4.0.0-rc.112; the Effect 3 boundary noted in the transition plan applied to an earlier Forma package state.
+The dependency lockfile resolves `@formalang/ts@0.3.0`, `@triplex-build/triplex@0.2.0`, and this package to `effect@4.0.3`; the public Effect peer is pinned to that tested version. Forma and Triplex still declare an older Effect RC, so version-scoped pnpm overrides select 4.0.3 for those two packages only. The checked-in [Triplex patch](patches/@triplex-build__triplex@0.2.0.patch) migrates its cursor encoding to `Base64Url` from `effect/encoding` and preserves its branded-id constructors with Effect's getter-backed schema objects. Frozen installs apply the patch.
+
+Materialized actions retain their source JSON Schema document because Effect's importer can change its AST and re-exported shape. Action checks that Effect marks as approximate are rejected; use `Schema.isMinCodePoints` for portable string-length checks and Unicode regular expressions (`/.../u`) for portable patterns. The tests cover Forma elaboration, portable schema validation, Triplex configuration and actions, and cursor continuation and rejection. This compatibility exception belongs to this repository; package consumers would need the same overrides and patch until upstream releases support 4.0.3. Foldkit and Effect companion packages are not used here.
 
 ## Next checkpoint
 
