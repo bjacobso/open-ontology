@@ -42,6 +42,7 @@
     "example:onboarded": "tsx examples/onboarded/run.ts",
     "site:export-onboarded": "tsx scripts/export-onboarded.ts",
     "model:check": "tsx scripts/check-model.ts",
+    "account:check": "tsx scripts/check-account.ts",
     "site:check": "node apps/site/check.mjs",
     "site:dev": "wrangler dev --config apps/site/wrangler.jsonc",
     "site:deploy": "wrangler deploy --config apps/site/wrangler.jsonc"

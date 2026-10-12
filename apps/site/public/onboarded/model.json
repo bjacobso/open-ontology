@@ -1055,23 +1055,6 @@
       ]
     }
   },
-  "permissionProperties": [
-    {
-      "path": "employee.department",
-      "scalarType": "string",
-      "isPermissionScope": true
-    },
-    {
-      "path": "employee.work_location",
-      "scalarType": "string",
-      "isPermissionScope": true
-    },
-    {
-      "path": "employee.start_date",
-      "scalarType": "date",
-      "isPermissionScope": false
-    }
-  ],
   "views": {
     "work": {
       "label": "People & work",

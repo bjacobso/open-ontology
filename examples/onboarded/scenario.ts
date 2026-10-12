@@ -3,7 +3,7 @@ import { EntityId, KvTriples, Triples, boolean, ref, string } from "@triplex-bui
 import { makeOntologyRuntime, ontologyToIR } from "../../src/index.js";
 import { onboarded } from "./model.js";
 
-/** Synthetic custom-property definitions for the proposed permission-scope study. */
+/** Synthetic custom-property definitions, including permission-scope flags. */
 export const permissionProperties = [
   { path: "employee.department", scalarType: "string", isPermissionScope: true },
   { path: "employee.work_location", scalarType: "string", isPermissionScope: true },

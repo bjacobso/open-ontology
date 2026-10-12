@@ -1,8 +1,41 @@
 # Onboarded domain study
 
-This is a selected, illustrative model informed directionally by supplied Onboarded schema and API context. The complete attachments stay in the workspace's private `.context` directory; the example contains hand-authored declarations and synthetic facts, plus selected excerpts from a supplied Northwind design sketch.
+This is a selected, illustrative study informed directionally by supplied Onboarded schema and API context. The complete attachments stay in the workspace's private `.context` directory; the example contains hand-authored declarations and synthetic facts. The unlisted `/onboarded` site page presents both parts.
 
-The [TypeScript model](model.ts) exports twenty object types, two demo actions, and three Datalog queries. The unlisted `/onboarded` site explorer presents four views:
+## Northwind account program
+
+[`northwind.account.lisp`](northwind.account.lisp) configures one synthetic account end to end in nine verbs:
+
+| Verb | Declares |
+| --- | --- |
+| `account` | Name (the key namespace), languages, sender and support emails, deduplication criteria |
+| `attributes` | Typed custom attributes on built-in entities, with closed choices and `:searchable`, `:sensitive`, `:scope`, `:pattern`, and `:deprecated` |
+| `rule`, `def` | Named three-valued predicates reused everywhere; build-time arithmetic |
+| `form` | Pages and fields that bind attributes or form answers; `:from` references another package's form |
+| `policy` | `:when` a placement matches, `:require` forms, optionally each with its own `:when` |
+| `automation`, `param` | A trigger, then `wait`, `when`, `email`, and `assign` steps; per-target parameters |
+| `group` | Permissions plus an access rule |
+| `integration` | A pinned provider revision and a connection reference |
+| `scenario` | Facts, then `expect`, `record`, and `complete` on day 0 and later `(day n ...)` |
+
+The Forma reader parses the file. The TypeScript elaborator in [`account/`](account) is example code, not a Forma prelude or package export:
+
+- [`elaborate.ts`](account/elaborate.ts) resolves names and attribute paths; checks types and choice literals, field/attribute compatibility, deprecated writes, sensitive-attribute flags, policy and trigger fact scopes, `:scope`-only access rules, key namespaces, and due dates required by waits. Every problem is reported with a line and column, without cascading errors.
+- [`lower.ts`](account/lower.ts) lowers declarations to directional `account`, `property`, `form-reference`, `form`, `parameter`, `policy`, `automation`, `user-group`, `integration`, and `scenario` resources. Names map to platform snake_case, named rules are inlined where used, and `def` arithmetic folds into constants. The shapes echo platform field names but are not production formats.
+- [`evaluate.ts`](account/evaluate.ts) evaluates policies with three-valued logic: an unrecorded fact is unknown, and an unknown outcome names the facts it is waiting for. Scenarios play a placement forward day by day: policies assign tasks, task due dates come from `:due-in`, automations wait, decide, email (rendering simple `{{ entity.field }}` variables), and assign.
+- [`check.ts`](account/check.ts) fails on elaboration errors, failing scenario expectations, and any policy or automation decision that no scenario sees both true and false.
+- [`mistakes.ts`](account/mistakes.ts) lists ten plausible edits; tests require each to produce exactly one located error.
+
+```sh
+pnpm account:check examples/onboarded/northwind.account.lisp
+pnpm account:check examples/onboarded/northwind.account.lisp --json
+```
+
+Nothing here calls Onboarded, plans against or deploys to an account, renders forms, evaluates runtime formulas, runs integrations, or enforces access rules.
+
+## Domain ontology
+
+The [TypeScript model](model.ts) exports twenty object types, two demo actions, and three Datalog queries, explored in four graph views:
 
 | View | Concepts and relationships |
 | --- | --- |
@@ -16,19 +49,10 @@ Placements describe an employee's employment context, while tasks share employee
 ```sh
 pnpm model:check examples/onboarded/model.ts
 pnpm example:onboarded
-pnpm site:export-onboarded
 ```
 
-The local scenario seeds an example form lineage/version/template and creates a task. `request-review` replaces its next action and employer assignee; repeating it with another user leaves only the new assignee in the review queue. `employee-input` and `employer-review` are demo next-action values. The `requires_action` status remains unchanged. These actions exercise local Triplex mutations and queries, with no Onboarded API requests or production workflow semantics.
+The local scenario seeds an example form lineage/version/template and creates a task. `request-review` replaces its next action and employer assignee; repeating it with another user leaves only the new assignee in the review queue. `employee-input` and `employer-review` are demo next-action values. The `requires_action` status remains unchanged. These actions exercise local Triplex mutations and queries, with no Onboarded API requests or production workflow semantics. User-group rules, policy rules, field rules, automation trigger descriptions, and authorization inference configuration are modeled as opaque data in this ontology.
 
-User-group rules, policy rules, field rules, automation trigger descriptions, and authorization inference configuration are modeled as data. The permission-scope study reads synthetic `CustomProperty.isPermissionScope` flags and illustrates a possible future authoring check. This package does not evaluate those rules, enforce authorization, elaborate forms, publish form versions, or execute automations. The I-9 helper is a partial predicate using the form DSL from the original discussion; it is not an I-9 eligibility implementation.
+## Site artifacts
 
-`apps/site/onboarded-views.json` defines diagram positions; arrows come from the model's reference properties. The exported browser artifact includes the model IR, scenario transcript, custom-property flags, and graph views. Tests verify export freshness, graph coverage, and the task/reassignment query results.
-
-## Northwind account sketch
-
-The page also explores selected excerpts from a supplied `northwind.account.forma` sheet, in [`northwind-study.json`](../../apps/site/public/onboarded/northwind-study.json). That sheet belongs to a separate account DSL context; its referenced account docs and executable TypeScript account are not in this repository. The `[built]` markers describe TypeScript features in that supplied context, `[proposed]` describes design intent, and `[unsupported]` describes an adapter limit. No `onboarded` Forma prelude exists here, and neither its syntax nor its journeys have been verified.
-
-The study connects the package namespace and W-4 dependency, typed attributes and helpers, three local forms, two policies, two automations, group access, a proposed integration binding, and authored journeys. Its target is an account resource IR, which is distinct from this package's `OntologyIR`. Byte-identical snapshots would be an acceptance criterion for a future prelude; the reference snapshots are not included.
-
-The placement selector displays the sheet's four authored expectations. It does not evaluate policy rules. The missing-union-local case preserves its `three_state` setting, unknown policy/form outcomes, and missing attribute. The reminder/story depends on a proposed 30-day task release setting. Code excerpts may include proposed options within a section whose overall status is `[built]`; the accompanying notes call out these dependencies.
+`pnpm site:export-onboarded` writes two browser artifacts. `model.json` holds the ontology IR, the runtime transcript, and the graph views from `apps/site/onboarded-views.json`, where diagram positions are defined and arrows come from reference properties. `account.json` holds the Northwind source, its lowered resources per declaration, the checker output, scenario timelines, decision coverage, each mistake's recorded diagnostic, and the policy evaluator's result for every combination of the simulator's facts. Tests verify that both artifacts match the checked-in sources.

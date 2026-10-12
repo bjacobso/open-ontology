@@ -21,7 +21,7 @@ const groups = [
 async function loadExplorer() {
   const response = await fetch("/onboarded/model.json");
   if (!response.ok) throw new Error(`Model returned HTTP ${response.status}`);
-  const { ontology, scenario, permissionProperties, views } = await response.json();
+  const { ontology, scenario, views } = await response.json();
   const declarations = groups.flatMap(([, key]) => ontology[key]);
   const byName = new Map(declarations.map((item) => [item.name, item]));
   const edges = [
@@ -248,7 +248,6 @@ async function loadExplorer() {
   $("#workspace").hidden = false;
   select(selected);
   showTranscript("before");
-  setupPermissionScope(permissionProperties);
   $("#model-load-status").hidden = true;
 }
 
@@ -257,94 +256,5 @@ loadExplorer().catch(() => {
     document.createTextNode("The interactive model could not load. "),
     Object.assign(make("a", "", "Open the exported model and transcript ↗"), { href: "/onboarded/model.json" }),
     document.createTextNode(" or reload to try again."),
-  );
-});
-
-const passportStatuses = new Set(["us_citizen", "noncitizen_national"]);
-function evaluateRule() {
-  const failures = [];
-  if (!passportStatuses.has($("#rule-status").value)) failures.push("the status is outside the example set");
-  if ($("#rule-path").value !== "list_a") failures.push("the document path is not List A");
-  if ($("#rule-document").value !== "us_passport") failures.push("the selected document is not a US passport");
-  const result = $("#rule-result");
-  result.dataset.match = String(failures.length === 0);
-  result.replaceChildren(make("strong", "", failures.length ? "Condition does not match" : "Condition matches"), make("span", "", failures.length
-    ? `The predicate is false because ${failures.join("; ")}.`
-    : "The status is in the example set, the path is List A, and the selection is a US passport."));
-}
-$("#rule-form").addEventListener("change", evaluateRule);
-$("#rule-form").addEventListener("submit", (event) => event.preventDefault());
-evaluateRule();
-
-function setupPermissionScope(properties) {
-  const select = $("#scope-read");
-  select.replaceChildren();
-  $("#scope-facts").replaceChildren(make("span", "ob-label", "Example properties flagged for permission scope"));
-  for (const property of properties) {
-    const option = make("option", "", property.path);
-    option.value = property.path;
-    select.append(option);
-    if (property.isPermissionScope) $("#scope-facts").append(make("code", "", property.path));
-  }
-  function evaluateScope() {
-    const property = properties.find((item) => item.path === select.value);
-    const allowed = property.isPermissionScope;
-    const result = $("#scope-result");
-    result.dataset.match = String(allowed);
-    result.replaceChildren(make("strong", "", allowed ? "Flagged for permission scope" : "Not a permission-scope property"), make("span", "", allowed
-      ? `${property.path} has isPermissionScope: true in the synthetic property definitions.`
-      : `${property.path} has isPermissionScope: false. A future authoring checker could flag this access-rule read.`));
-  }
-  select.disabled = false;
-  select.addEventListener("change", evaluateScope);
-  evaluateScope();
-}
-
-async function loadNorthwindStudy() {
-  const response = await fetch("/onboarded/northwind-study.json");
-  if (!response.ok) throw new Error(`Study returned HTTP ${response.status}`);
-  const study = await response.json();
-  function showSection(section) {
-    for (const button of document.querySelectorAll("[data-northwind-section]")) {
-      button.setAttribute("aria-pressed", String(button.dataset.northwindSection === section.id));
-    }
-    $("#northwind-description").replaceChildren(
-      make("span", "ob-label", `[${section.status}] in the supplied sketch`),
-      make("h3", "", section.title), make("p", "", section.summary),
-      make("p", "ob-small", study.statusLegend[section.status]),
-      make("p", "ob-small", section.note),
-    );
-    $("#northwind-resource").textContent = `Target resource: ${section.resource}`;
-    $("#northwind-source").textContent = section.source;
-  }
-  for (const section of study.sections) {
-    const button = make("button", "", section.title);
-    button.type = "button";
-    button.dataset.northwindSection = section.id;
-    button.addEventListener("click", () => showSection(section));
-    $("#northwind-tabs").append(button);
-  }
-  for (const item of study.cases) {
-    const option = make("option", "", item.label);
-    option.value = item.id;
-    $("#northwind-case").append(option);
-  }
-  function showCase() {
-    const item = study.cases.find((item) => item.id === $("#northwind-case").value);
-    $("#northwind-case-note").textContent = item.note;
-    $("#northwind-case-output").textContent = JSON.stringify({ given: item.given, authoredExpectations: item.expects }, null, 2);
-  }
-  $("#northwind-case").addEventListener("change", showCase);
-  showSection(study.sections.find((section) => section.id === "policies"));
-  showCase();
-  $("#northwind-program").hidden = false;
-  $("#northwind-cases").hidden = false;
-  $("#northwind-load-status").hidden = true;
-}
-
-loadNorthwindStudy().catch(() => {
-  $("#northwind-load-status").replaceChildren(
-    document.createTextNode("The Northwind study could not load. "),
-    Object.assign(make("a", "", "Read its selected excerpts and authored expectations ↗"), { href: "/onboarded/northwind-study.json" }),
   );
 });

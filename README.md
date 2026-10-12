@@ -36,11 +36,15 @@ Forma models can write `(import "/std/git")` for shared repositories, branches, 
 
 ## Onboarded domain study
 
-The unlisted `/onboarded` page explores an illustrative domain informed directionally by supplied Onboarded schema and API context. Four graph views cover people and work, versioned forms, account access, and policy/scope configuration. It uses [a working TypeScript model](examples/onboarded/model.ts), with synthetic facts and a recorded local Triplex transcript from `pnpm example:onboarded`. See [the model notes](examples/onboarded/README.md) for its selected vocabulary and simplifications. The page's I-9 helper and permission-scope demonstrations are design studies; form elaboration and scope-based authorization are not implemented by this example.
+The unlisted `/onboarded` page presents an illustrative account language for Onboarded, informed directionally by supplied schema and API context. [`northwind.account.lisp`](examples/onboarded/northwind.account.lisp) configures one synthetic account end to end, covering attributes, forms, policies, automations, access, integrations, and scenarios, in nine verbs. The Forma reader parses it; example code in [`examples/onboarded/account`](examples/onboarded/account) checks it with located errors, lowers it to directional resources, evaluates policies with three-valued logic, and plays scenarios day by day. The check fails on a failing scenario or on any policy or automation decision that no scenario sees both true and false.
 
-After changing the model, scenario, or graph views, run `pnpm site:export-onboarded` to refresh the checked-in browser artifact. Tests verify that its ontology, transcript, property flags, and views match the checked-in sources.
+```sh
+pnpm account:check examples/onboarded/northwind.account.lisp
+```
 
-The page's Northwind study browses selected Forma source excerpts and authored journey expectations from a supplied account-program sketch, including a three-state unknown outcome. Its `onboarded` prelude is unimplemented; its status markers refer to the separate account DSL described in that sketch. Those expectations are not runtime results.
+The page also explores [a working TypeScript ontology](examples/onboarded/model.ts) of the underlying domain, with a recorded local Triplex transcript from `pnpm example:onboarded`. See [the study notes](examples/onboarded/README.md) for the vocabulary, checks, and simplifications. The account elaborator is not a Forma prelude or package export; its resource shapes are not production formats, and nothing calls Onboarded or deploys configuration.
+
+After changing the account program, model, scenario, or graph views, run `pnpm site:export-onboarded` to refresh the checked-in browser artifacts. Tests verify that they match the checked-in sources.
 
 ## Package boundary
 

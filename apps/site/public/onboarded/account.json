@@ -1,0 +1,5315 @@
+{
+  "file": "examples/onboarded/northwind.account.lisp",
+  "command": "pnpm account:check examples/onboarded/northwind.account.lisp",
+  "output": "examples/onboarded/northwind.account.lisp: ok\n  resources  30 (1 account, 11 property, 1 form-reference, 4 form, 2 policy, 1 parameter, 2 automation, 1 user-group, 1 integration, 6 scenario)\n  scenarios  6 of 6 passed\n    ✓ warehouse, Local 42, full time\n    ✓ certified driver, drug screen required\n    ✓ office, not represented\n    ✓ union local recorded on day five\n    ✓ Ada returns her union card on day ten\n    ✓ Ben's union card goes overdue\n  coverage   5 of 5 decisions seen true and false",
+  "source": "; Northwind: one Onboarded account, end to end, in one file.\n;\n; Illustrative and synthetic. The Forma reader parses this file; the example's account\n; elaborator checks it, lowers it to directional resource IR, and simulates its scenarios.\n; Nothing here calls Onboarded or deploys configuration.\n;\n;   pnpm account:check examples/onboarded/northwind.account.lisp\n\n(account northwind \"Northwind Logistics\"\n  :languages [:en :es]\n  :sender \"onboarding@northwind.example\"\n  :support \"people@northwind.example\"\n  :dedupe [employee.email])\n\n; ── Attributes: built-in entities, extended with typed fields ────────────────────────────\n\n(attributes client\n  (region (one-of :west \"West\" :east \"East\") \"Region\" :scope)\n  (requires-drug-screen boolean \"Requires drug screen\"))\n\n(attributes job\n  (site-type (one-of :warehouse \"Warehouse\" :office \"Office\") \"Site type\" :searchable)\n  (hourly-rate decimal \"Hourly rate\"))\n\n(attributes placement\n  (union-local (one-of :local-42 \"Local 42\" :local-77 \"Local 77\" :none \"Not represented\")\n    \"Union local\" :searchable)\n  (weekly-hours integer \"Scheduled weekly hours\"))\n\n(attributes employee\n  (badge-number string \"Badge number\" :searchable :pattern \"^NW-[0-9]{6}$\")\n  (union-card-number string \"Union card number\" :sensitive)\n  (mailing-address address \"Mailing address\")\n  (forklift-certified-on date \"Forklift certification date\")\n  (legacy-hris-id string \"Legacy HRIS ID\" :deprecated \"Replaced by badge-number\"))\n\n; ── Rules: named, three-valued, usable by policies, forms, automations, and access ───────\n\n(rule at-warehouse (= job.site-type :warehouse))\n\n(rule union-covered\n  (and (not= placement.union-local :none)\n       (>= placement.weekly-hours 20)))\n\n(def dues-rate (/ 1.5 100))   ; build-time arithmetic, inlined as 0.015\n\n; ── Forms: fields bind attributes or form answers; reads and writes are inferred ─────────\n\n(form w4 :from \"onboarded.compliance\" :key \"irs.w-4\")\n\n(form union-card \"Union card\"\n  :due-in 30\n  (page \"Union membership\" :employee\n    (checkbox has-card \"I already hold a union card\" :es \"Ya tengo una tarjeta sindical\")\n    (text employee.union-card-number \"Union card number\" :required :show-if has-card)\n    (address employee.mailing-address \"Mailing address\" :required)\n    (formula weekly-dues \"Estimated weekly dues\"\n      (round (* job.hourly-rate placement.weekly-hours dues-rate) 2))\n    (signature employee-signature))\n  (page \"Steward review\" :employer\n    (review [employee.union-card-number weekly-dues])\n    (signature steward-signature)))\n\n(form site-safety \"Globex site safety\" :key \"northwind.globex.site-safety\"\n  (page \"Site rules\" :employee\n    (checkbox acknowledged \"I have read the Globex site safety rules\" :required)\n    (signature employee-signature)))\n\n(form forklift-certification \"Forklift certification\"\n  (page \"Certification\" :employee\n    (date employee.forklift-certified-on \"Certification date\" :required)))\n\n(form drug-screen-consent \"Drug screen consent\"\n  (page \"Consent\" :employee\n    (content \"I consent to a pre-placement drug screen.\")\n    (signature consent-signature)))\n\n; ── Policies: when a placement matches, require forms ────────────────────────────────────\n\n(policy warehouse-onboarding \"Warehouse onboarding\"\n  :when at-warehouse\n  :require [w4 site-safety\n            (drug-screen-consent :when client.requires-drug-screen)])\n\n(policy union-card-obligation \"Union card\"\n  :when union-covered\n  :require [union-card])\n\n; ── Automations: a trigger, then steps ───────────────────────────────────────────────────\n\n(param overdue-template :sendgrid-template \"Supplied per target account.\")\n\n(automation union-card-reminder \"Union card reminder\"\n  :on (task-created union-card)\n  (wait 2 :days :after task.due-at)\n  (when (not= task.status :completed)\n    (email :employee overdue-template \"Your union card is overdue\"\n      \"Hi {{ employee.first_name }}, please complete your union card.\")))\n\n(automation forklift-follow-up \"Request forklift certification\"\n  :on (placement-created)\n  (when (and at-warehouse (missing? employee.forklift-certified-on))\n    (assign forklift-certification)))\n\n; ── Access and integrations ──────────────────────────────────────────────────────────────\n\n(group west-managers \"West region managers\"\n  :can [:placement/read :employee/read :task/read :task/edit]\n  :sees (= client.region :west))\n\n(integration checkr \"@onboarded-platform/checkr@1.4.0\"\n  :connection \"checkr\"\n  :package \"driver_pro\"\n  :adjudication :manual)\n\n; ── Scenarios: facts in, outcomes out; every decision covered both ways ──────────────────\n\n(scenario \"warehouse, Local 42, full time\"\n  {job.site-type :warehouse placement.union-local :local-42\n   placement.weekly-hours 32 client.requires-drug-screen false}\n  (expect :policies [warehouse-onboarding union-card-obligation]\n          :forms [w4 site-safety union-card]\n          :tasks [w4 site-safety union-card forklift-certification]))\n\n(scenario \"certified driver, drug screen required\"\n  {job.site-type :warehouse placement.union-local :none\n   client.requires-drug-screen true employee.forklift-certified-on \"2026-03-14\"}\n  (expect :policies [warehouse-onboarding]\n          :forms [w4 site-safety drug-screen-consent]\n          :tasks [w4 site-safety drug-screen-consent]))\n\n(scenario \"office, not represented\"\n  {job.site-type :office placement.union-local :none}\n  (expect :policies [] :forms [] :tasks []))\n\n(scenario \"union local recorded on day five\"\n  {job.site-type :office placement.weekly-hours 32}\n  (expect :forms [] :unknown {union-card-obligation [placement.union-local]})\n  (day 5 (record placement.union-local :local-42)\n         (expect :policies [union-card-obligation] :tasks [union-card])))\n\n(scenario \"Ada returns her union card on day ten\"\n  {employee.first-name \"Ada\" job.site-type :office\n   placement.union-local :local-42 placement.weekly-hours 32}\n  (day 10 (complete union-card))\n  (day 40 (expect :open [] :emails [])))\n\n(scenario \"Ben's union card goes overdue\"\n  {employee.first-name \"Ben\" job.site-type :office\n   placement.union-local :local-77 placement.weekly-hours 24}\n  (day 31 (expect :emails []))\n  (day 32 (expect :open [union-card]\n                  :emails [{:to :employee :body \"Hi Ben, please complete your union card.\"}])))\n",
+  "summary": {
+    "lines": 153,
+    "declarations": 26,
+    "resources": 30,
+    "kinds": {
+      "account": 1,
+      "property": 11,
+      "form-reference": 1,
+      "form": 4,
+      "policy": 2,
+      "parameter": 1,
+      "automation": 2,
+      "user-group": 1,
+      "integration": 1,
+      "scenario": 6
+    },
+    "scenarios": {
+      "passed": 6,
+      "total": 6
+    },
+    "decisions": {
+      "covered": 5,
+      "total": 5
+    }
+  },
+  "declarations": [
+    {
+      "verb": "account",
+      "name": "northwind",
+      "startLine": 9,
+      "endLine": 13,
+      "resources": [
+        {
+          "kind": "account",
+          "key": "northwind",
+          "spec": {
+            "name": "Northwind Logistics",
+            "default_language": "en",
+            "supported_languages": [
+              "en",
+              "es"
+            ],
+            "sender_email": "onboarding@northwind.example",
+            "candidate_support_email": "people@northwind.example",
+            "deduplication_match_criteria": [
+              "employee.email"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "verb": "attributes",
+      "name": "client",
+      "startLine": 17,
+      "endLine": 19,
+      "resources": [
+        {
+          "kind": "property",
+          "key": "client.custom_attributes.region",
+          "spec": {
+            "entity_type": "client",
+            "name": "region",
+            "path": "custom_attributes.region",
+            "label": "Region",
+            "scalar_type": "enum",
+            "enum_options": [
+              "west",
+              "east"
+            ],
+            "option_labels": {
+              "west": "West",
+              "east": "East"
+            },
+            "is_searchable": false,
+            "is_sensitive_info": false,
+            "is_permission_scope": true
+          }
+        },
+        {
+          "kind": "property",
+          "key": "client.custom_attributes.requires_drug_screen",
+          "spec": {
+            "entity_type": "client",
+            "name": "requires_drug_screen",
+            "path": "custom_attributes.requires_drug_screen",
+            "label": "Requires drug screen",
+            "scalar_type": "boolean",
+            "is_searchable": false,
+            "is_sensitive_info": false,
+            "is_permission_scope": false
+          }
+        }
+      ]
+    },
+    {
+      "verb": "attributes",
+      "name": "job",
+      "startLine": 21,
+      "endLine": 23,
+      "resources": [
+        {
+          "kind": "property",
+          "key": "job.custom_attributes.site_type",
+          "spec": {
+            "entity_type": "job",
+            "name": "site_type",
+            "path": "custom_attributes.site_type",
+            "label": "Site type",
+            "scalar_type": "enum",
+            "enum_options": [
+              "warehouse",
+              "office"
+            ],
+            "option_labels": {
+              "warehouse": "Warehouse",
+              "office": "Office"
+            },
+            "is_searchable": true,
+            "is_sensitive_info": false,
+            "is_permission_scope": false
+          }
+        },
+        {
+          "kind": "property",
+          "key": "job.custom_attributes.hourly_rate",
+          "spec": {
+            "entity_type": "job",
+            "name": "hourly_rate",
+            "path": "custom_attributes.hourly_rate",
+            "label": "Hourly rate",
+            "scalar_type": "decimal",
+            "is_searchable": false,
+            "is_sensitive_info": false,
+            "is_permission_scope": false
+          }
+        }
+      ]
+    },
+    {
+      "verb": "attributes",
+      "name": "placement",
+      "startLine": 25,
+      "endLine": 28,
+      "resources": [
+        {
+          "kind": "property",
+          "key": "placement.custom_attributes.union_local",
+          "spec": {
+            "entity_type": "placement",
+            "name": "union_local",
+            "path": "custom_attributes.union_local",
+            "label": "Union local",
+            "scalar_type": "enum",
+            "enum_options": [
+              "local_42",
+              "local_77",
+              "none"
+            ],
+            "option_labels": {
+              "local_42": "Local 42",
+              "local_77": "Local 77",
+              "none": "Not represented"
+            },
+            "is_searchable": true,
+            "is_sensitive_info": false,
+            "is_permission_scope": false
+          }
+        },
+        {
+          "kind": "property",
+          "key": "placement.custom_attributes.weekly_hours",
+          "spec": {
+            "entity_type": "placement",
+            "name": "weekly_hours",
+            "path": "custom_attributes.weekly_hours",
+            "label": "Scheduled weekly hours",
+            "scalar_type": "integer",
+            "is_searchable": false,
+            "is_sensitive_info": false,
+            "is_permission_scope": false
+          }
+        }
+      ]
+    },
+    {
+      "verb": "attributes",
+      "name": "employee",
+      "startLine": 30,
+      "endLine": 35,
+      "resources": [
+        {
+          "kind": "property",
+          "key": "employee.custom_attributes.badge_number",
+          "spec": {
+            "entity_type": "employee",
+            "name": "badge_number",
+            "path": "custom_attributes.badge_number",
+            "label": "Badge number",
+            "scalar_type": "string",
+            "is_searchable": true,
+            "is_sensitive_info": false,
+            "is_permission_scope": false,
+            "value_validation_regex": "^NW-[0-9]{6}$"
+          }
+        },
+        {
+          "kind": "property",
+          "key": "employee.custom_attributes.union_card_number",
+          "spec": {
+            "entity_type": "employee",
+            "name": "union_card_number",
+            "path": "custom_attributes.union_card_number",
+            "label": "Union card number",
+            "scalar_type": "string",
+            "is_searchable": false,
+            "is_sensitive_info": true,
+            "is_permission_scope": false
+          }
+        },
+        {
+          "kind": "property",
+          "key": "employee.custom_attributes.mailing_address",
+          "spec": {
+            "entity_type": "employee",
+            "name": "mailing_address",
+            "path": "custom_attributes.mailing_address",
+            "label": "Mailing address",
+            "scalar_type": "address",
+            "is_searchable": false,
+            "is_sensitive_info": false,
+            "is_permission_scope": false
+          }
+        },
+        {
+          "kind": "property",
+          "key": "employee.custom_attributes.forklift_certified_on",
+          "spec": {
+            "entity_type": "employee",
+            "name": "forklift_certified_on",
+            "path": "custom_attributes.forklift_certified_on",
+            "label": "Forklift certification date",
+            "scalar_type": "date",
+            "is_searchable": false,
+            "is_sensitive_info": false,
+            "is_permission_scope": false
+          }
+        },
+        {
+          "kind": "property",
+          "key": "employee.custom_attributes.legacy_hris_id",
+          "spec": {
+            "entity_type": "employee",
+            "name": "legacy_hris_id",
+            "path": "custom_attributes.legacy_hris_id",
+            "label": "Legacy HRIS ID",
+            "scalar_type": "string",
+            "is_searchable": false,
+            "is_sensitive_info": false,
+            "is_permission_scope": false,
+            "deprecated": {
+              "reason": "Replaced by badge-number"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "verb": "rule",
+      "name": "at-warehouse",
+      "startLine": 39,
+      "endLine": 39,
+      "resources": []
+    },
+    {
+      "verb": "rule",
+      "name": "union-covered",
+      "startLine": 41,
+      "endLine": 43,
+      "resources": []
+    },
+    {
+      "verb": "def",
+      "name": "dues-rate",
+      "startLine": 45,
+      "endLine": 45,
+      "resources": []
+    },
+    {
+      "verb": "form",
+      "name": "w4",
+      "startLine": 49,
+      "endLine": 49,
+      "resources": [
+        {
+          "kind": "form-reference",
+          "key": "irs.w-4",
+          "spec": {
+            "from": "onboarded.compliance"
+          }
+        }
+      ]
+    },
+    {
+      "verb": "form",
+      "name": "union-card",
+      "startLine": 51,
+      "endLine": 62,
+      "resources": [
+        {
+          "kind": "form",
+          "key": "northwind.union-card",
+          "spec": {
+            "name": "Union card",
+            "languages": [
+              "en",
+              "es"
+            ],
+            "task_due_in_days": 30,
+            "pages": [
+              {
+                "name": "Union membership",
+                "assignee": "employee",
+                "fields": [
+                  {
+                    "type": "checkbox",
+                    "path": "form.has_card",
+                    "label": "I already hold a union card",
+                    "i18n": {
+                      "es": {
+                        "label": "Ya tengo una tarjeta sindical"
+                      }
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "path": "employee.custom_attributes.union_card_number",
+                    "label": "Union card number",
+                    "required": true,
+                    "rule": {
+                      "show": {
+                        "fact": "form.has_card",
+                        "op": "eq",
+                        "value": true
+                      }
+                    }
+                  },
+                  {
+                    "type": "address",
+                    "path": "employee.custom_attributes.mailing_address",
+                    "label": "Mailing address",
+                    "required": true
+                  },
+                  {
+                    "type": "formula",
+                    "path": "form.weekly_dues",
+                    "label": "Estimated weekly dues",
+                    "value": "=ROUND([job.custom_attributes.hourly_rate] * [placement.custom_attributes.weekly_hours] * 0.015, 2)"
+                  },
+                  {
+                    "type": "signature",
+                    "path": "form.employee_signature",
+                    "label": "Signature",
+                    "required": true
+                  }
+                ]
+              },
+              {
+                "name": "Steward review",
+                "assignee": "employer",
+                "fields": [
+                  {
+                    "type": "review",
+                    "label": "Review",
+                    "rows": [
+                      "employee.custom_attributes.union_card_number",
+                      "form.weekly_dues"
+                    ]
+                  },
+                  {
+                    "type": "signature",
+                    "path": "form.steward_signature",
+                    "label": "Signature",
+                    "required": true
+                  }
+                ]
+              }
+            ],
+            "reads": [
+              "job.custom_attributes.hourly_rate",
+              "placement.custom_attributes.weekly_hours"
+            ],
+            "writes": [
+              "employee.custom_attributes.union_card_number",
+              "employee.custom_attributes.mailing_address"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "verb": "form",
+      "name": "site-safety",
+      "startLine": 64,
+      "endLine": 67,
+      "resources": [
+        {
+          "kind": "form",
+          "key": "northwind.globex.site-safety",
+          "spec": {
+            "name": "Globex site safety",
+            "languages": [
+              "en",
+              "es"
+            ],
+            "pages": [
+              {
+                "name": "Site rules",
+                "assignee": "employee",
+                "fields": [
+                  {
+                    "type": "checkbox",
+                    "path": "form.acknowledged",
+                    "label": "I have read the Globex site safety rules",
+                    "required": true
+                  },
+                  {
+                    "type": "signature",
+                    "path": "form.employee_signature",
+                    "label": "Signature",
+                    "required": true
+                  }
+                ]
+              }
+            ],
+            "reads": [],
+            "writes": []
+          }
+        }
+      ]
+    },
+    {
+      "verb": "form",
+      "name": "forklift-certification",
+      "startLine": 69,
+      "endLine": 71,
+      "resources": [
+        {
+          "kind": "form",
+          "key": "northwind.forklift-certification",
+          "spec": {
+            "name": "Forklift certification",
+            "languages": [
+              "en",
+              "es"
+            ],
+            "pages": [
+              {
+                "name": "Certification",
+                "assignee": "employee",
+                "fields": [
+                  {
+                    "type": "date",
+                    "path": "employee.custom_attributes.forklift_certified_on",
+                    "label": "Certification date",
+                    "required": true
+                  }
+                ]
+              }
+            ],
+            "reads": [],
+            "writes": [
+              "employee.custom_attributes.forklift_certified_on"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "verb": "form",
+      "name": "drug-screen-consent",
+      "startLine": 73,
+      "endLine": 76,
+      "resources": [
+        {
+          "kind": "form",
+          "key": "northwind.drug-screen-consent",
+          "spec": {
+            "name": "Drug screen consent",
+            "languages": [
+              "en",
+              "es"
+            ],
+            "pages": [
+              {
+                "name": "Consent",
+                "assignee": "employee",
+                "fields": [
+                  {
+                    "type": "content",
+                    "content": "I consent to a pre-placement drug screen."
+                  },
+                  {
+                    "type": "signature",
+                    "path": "form.consent_signature",
+                    "label": "Signature",
+                    "required": true
+                  }
+                ]
+              }
+            ],
+            "reads": [],
+            "writes": []
+          }
+        }
+      ]
+    },
+    {
+      "verb": "policy",
+      "name": "warehouse-onboarding",
+      "startLine": 80,
+      "endLine": 83,
+      "resources": [
+        {
+          "kind": "policy",
+          "key": "northwind.warehouse-onboarding",
+          "spec": {
+            "name": "Warehouse onboarding",
+            "status": "enabled",
+            "rules": {
+              "fact": "job.custom_attributes.site_type",
+              "op": "eq",
+              "value": "warehouse"
+            },
+            "forms": [
+              {
+                "form": "irs.w-4"
+              },
+              {
+                "form": "northwind.globex.site-safety"
+              },
+              {
+                "form": "northwind.drug-screen-consent",
+                "rule": {
+                  "fact": "client.custom_attributes.requires_drug_screen",
+                  "op": "eq",
+                  "value": true
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "verb": "policy",
+      "name": "union-card-obligation",
+      "startLine": 85,
+      "endLine": 87,
+      "resources": [
+        {
+          "kind": "policy",
+          "key": "northwind.union-card-obligation",
+          "spec": {
+            "name": "Union card",
+            "status": "enabled",
+            "rules": {
+              "all": [
+                {
+                  "fact": "placement.custom_attributes.union_local",
+                  "op": "neq",
+                  "value": "none"
+                },
+                {
+                  "fact": "placement.custom_attributes.weekly_hours",
+                  "op": "gte",
+                  "value": 20
+                }
+              ]
+            },
+            "forms": [
+              {
+                "form": "northwind.union-card"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "verb": "param",
+      "name": "overdue-template",
+      "startLine": 91,
+      "endLine": 91,
+      "resources": [
+        {
+          "kind": "parameter",
+          "key": "overdue_template",
+          "spec": {
+            "type": "sendgrid_template",
+            "doc": "Supplied per target account."
+          }
+        }
+      ]
+    },
+    {
+      "verb": "automation",
+      "name": "union-card-reminder",
+      "startLine": 93,
+      "endLine": 98,
+      "resources": [
+        {
+          "kind": "automation",
+          "key": "northwind.union-card-reminder",
+          "spec": {
+            "name": "Union card reminder",
+            "trigger": {
+              "entity": "task",
+              "events": [
+                "created"
+              ],
+              "form": "northwind.union-card"
+            },
+            "nodes": {
+              "wait": {
+                "type": "wait",
+                "days": 2,
+                "after": "task.due_at"
+              },
+              "when": {
+                "type": "condition",
+                "rule": {
+                  "fact": "task.status",
+                  "op": "neq",
+                  "value": "completed"
+                }
+              },
+              "email": {
+                "type": "send_email",
+                "to": "employee",
+                "template": {
+                  "kind": "parameter",
+                  "key": "overdue_template"
+                },
+                "subject": "Your union card is overdue",
+                "body": "Hi {{ employee.first_name }}, please complete your union card."
+              }
+            },
+            "edges": [
+              {
+                "from": "wait",
+                "to": "when"
+              },
+              {
+                "from": "when",
+                "to": "email",
+                "branch": "yes"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "verb": "automation",
+      "name": "forklift-follow-up",
+      "startLine": 100,
+      "endLine": 103,
+      "resources": [
+        {
+          "kind": "automation",
+          "key": "northwind.forklift-follow-up",
+          "spec": {
+            "name": "Request forklift certification",
+            "trigger": {
+              "entity": "placement",
+              "events": [
+                "created"
+              ]
+            },
+            "nodes": {
+              "when": {
+                "type": "condition",
+                "rule": {
+                  "all": [
+                    {
+                      "fact": "job.custom_attributes.site_type",
+                      "op": "eq",
+                      "value": "warehouse"
+                    },
+                    {
+                      "fact": "employee.custom_attributes.forklift_certified_on",
+                      "op": "not_exists"
+                    }
+                  ]
+                }
+              },
+              "assign": {
+                "type": "create_task",
+                "form": "northwind.forklift-certification"
+              }
+            },
+            "edges": [
+              {
+                "from": "when",
+                "to": "assign",
+                "branch": "yes"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "verb": "group",
+      "name": "west-managers",
+      "startLine": 107,
+      "endLine": 109,
+      "resources": [
+        {
+          "kind": "user-group",
+          "key": "northwind.west-managers",
+          "spec": {
+            "name": "West region managers",
+            "permissions": [
+              "placement/read",
+              "employee/read",
+              "task/read",
+              "task/edit"
+            ],
+            "access_rules": {
+              "fact": "client.custom_attributes.region",
+              "op": "eq",
+              "value": "west"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "verb": "integration",
+      "name": "checkr",
+      "startLine": 111,
+      "endLine": 114,
+      "resources": [
+        {
+          "kind": "integration",
+          "key": "northwind.checkr",
+          "spec": {
+            "provider": "@onboarded-platform/checkr",
+            "revision": "1.4.0",
+            "connection": {
+              "kind": "connection",
+              "key": "checkr"
+            },
+            "settings": {
+              "package": "driver_pro",
+              "adjudication": "manual"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "verb": "scenario",
+      "name": "warehouse, Local 42, full time",
+      "startLine": 118,
+      "endLine": 123,
+      "resources": [
+        {
+          "kind": "scenario",
+          "key": "northwind.scenario-1",
+          "spec": {
+            "name": "warehouse, Local 42, full time",
+            "given": {
+              "job.custom_attributes.site_type": "warehouse",
+              "placement.custom_attributes.union_local": "local_42",
+              "placement.custom_attributes.weekly_hours": 32,
+              "client.custom_attributes.requires_drug_screen": false
+            },
+            "days": [
+              {
+                "day": 0,
+                "actions": [
+                  {
+                    "expect": {
+                      "policies": [
+                        "warehouse-onboarding",
+                        "union-card-obligation"
+                      ],
+                      "forms": [
+                        "w4",
+                        "site-safety",
+                        "union-card"
+                      ],
+                      "tasks": [
+                        "w4",
+                        "site-safety",
+                        "union-card",
+                        "forklift-certification"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "verb": "scenario",
+      "name": "certified driver, drug screen required",
+      "startLine": 125,
+      "endLine": 130,
+      "resources": [
+        {
+          "kind": "scenario",
+          "key": "northwind.scenario-2",
+          "spec": {
+            "name": "certified driver, drug screen required",
+            "given": {
+              "job.custom_attributes.site_type": "warehouse",
+              "placement.custom_attributes.union_local": "none",
+              "client.custom_attributes.requires_drug_screen": true,
+              "employee.custom_attributes.forklift_certified_on": "2026-03-14"
+            },
+            "days": [
+              {
+                "day": 0,
+                "actions": [
+                  {
+                    "expect": {
+                      "policies": [
+                        "warehouse-onboarding"
+                      ],
+                      "forms": [
+                        "w4",
+                        "site-safety",
+                        "drug-screen-consent"
+                      ],
+                      "tasks": [
+                        "w4",
+                        "site-safety",
+                        "drug-screen-consent"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "verb": "scenario",
+      "name": "office, not represented",
+      "startLine": 132,
+      "endLine": 134,
+      "resources": [
+        {
+          "kind": "scenario",
+          "key": "northwind.scenario-3",
+          "spec": {
+            "name": "office, not represented",
+            "given": {
+              "job.custom_attributes.site_type": "office",
+              "placement.custom_attributes.union_local": "none"
+            },
+            "days": [
+              {
+                "day": 0,
+                "actions": [
+                  {
+                    "expect": {
+                      "policies": [],
+                      "forms": [],
+                      "tasks": []
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "verb": "scenario",
+      "name": "union local recorded on day five",
+      "startLine": 136,
+      "endLine": 140,
+      "resources": [
+        {
+          "kind": "scenario",
+          "key": "northwind.scenario-4",
+          "spec": {
+            "name": "union local recorded on day five",
+            "given": {
+              "job.custom_attributes.site_type": "office",
+              "placement.custom_attributes.weekly_hours": 32
+            },
+            "days": [
+              {
+                "day": 0,
+                "actions": [
+                  {
+                    "expect": {
+                      "forms": [],
+                      "unknown": {
+                        "union-card-obligation": [
+                          "placement.union-local"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "day": 5,
+                "actions": [
+                  {
+                    "record": {
+                      "placement.custom_attributes.union_local": "local_42"
+                    }
+                  },
+                  {
+                    "expect": {
+                      "policies": [
+                        "union-card-obligation"
+                      ],
+                      "tasks": [
+                        "union-card"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "verb": "scenario",
+      "name": "Ada returns her union card on day ten",
+      "startLine": 142,
+      "endLine": 146,
+      "resources": [
+        {
+          "kind": "scenario",
+          "key": "northwind.scenario-5",
+          "spec": {
+            "name": "Ada returns her union card on day ten",
+            "given": {
+              "employee.first_name": "Ada",
+              "job.custom_attributes.site_type": "office",
+              "placement.custom_attributes.union_local": "local_42",
+              "placement.custom_attributes.weekly_hours": 32
+            },
+            "days": [
+              {
+                "day": 10,
+                "actions": [
+                  {
+                    "complete": "northwind.union-card"
+                  }
+                ]
+              },
+              {
+                "day": 40,
+                "actions": [
+                  {
+                    "expect": {
+                      "open": [],
+                      "emails": []
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "verb": "scenario",
+      "name": "Ben's union card goes overdue",
+      "startLine": 148,
+      "endLine": 153,
+      "resources": [
+        {
+          "kind": "scenario",
+          "key": "northwind.scenario-6",
+          "spec": {
+            "name": "Ben's union card goes overdue",
+            "given": {
+              "employee.first_name": "Ben",
+              "job.custom_attributes.site_type": "office",
+              "placement.custom_attributes.union_local": "local_77",
+              "placement.custom_attributes.weekly_hours": 24
+            },
+            "days": [
+              {
+                "day": 31,
+                "actions": [
+                  {
+                    "expect": {
+                      "emails": []
+                    }
+                  }
+                ]
+              },
+              {
+                "day": 32,
+                "actions": [
+                  {
+                    "expect": {
+                      "open": [
+                        "union-card"
+                      ],
+                      "emails": [
+                        {
+                          "to": "employee",
+                          "body": "Hi Ben, please complete your union card."
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "title": "warehouse, Local 42, full time",
+      "line": 118,
+      "ok": true,
+      "timeline": [
+        {
+          "day": 0,
+          "kind": "placement",
+          "text": "Placement created",
+          "detail": [
+            "job.site-type :warehouse",
+            "placement.union-local :local-42",
+            "placement.weekly-hours 32",
+            "client.requires-drug-screen false"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "policy",
+          "text": "warehouse-onboarding applies",
+          "detail": [
+            "w4: required",
+            "site-safety: required",
+            "drug-screen-consent: not required"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "policy",
+          "text": "union-card-obligation applies",
+          "detail": [
+            "union-card: required"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "task",
+          "text": "w4 assigned",
+          "detail": [
+            "required by warehouse-onboarding"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "task",
+          "text": "site-safety assigned",
+          "detail": [
+            "required by warehouse-onboarding"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "task",
+          "text": "union-card assigned · due day 30",
+          "detail": [
+            "required by union-card-obligation"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "automation",
+          "text": "union-card-reminder started"
+        },
+        {
+          "day": 0,
+          "kind": "wait",
+          "text": "union-card-reminder waits until day 32",
+          "detail": [
+            "2 days after task.due-at"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "automation",
+          "text": "forklift-follow-up started"
+        },
+        {
+          "day": 0,
+          "kind": "decision",
+          "text": "forklift-follow-up › when is true"
+        },
+        {
+          "day": 0,
+          "kind": "task",
+          "text": "forklift-certification assigned",
+          "detail": [
+            "assigned by forklift-follow-up"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "expect",
+          "text": "Expectations met",
+          "ok": true,
+          "detail": [
+            "policies [warehouse-onboarding union-card-obligation]",
+            "forms [w4 site-safety union-card]",
+            "tasks [w4 site-safety union-card forklift-certification]"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "certified driver, drug screen required",
+      "line": 125,
+      "ok": true,
+      "timeline": [
+        {
+          "day": 0,
+          "kind": "placement",
+          "text": "Placement created",
+          "detail": [
+            "job.site-type :warehouse",
+            "placement.union-local :none",
+            "client.requires-drug-screen true",
+            "employee.forklift-certified-on \"2026-03-14\""
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "policy",
+          "text": "warehouse-onboarding applies",
+          "detail": [
+            "w4: required",
+            "site-safety: required",
+            "drug-screen-consent: required"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "policy",
+          "text": "union-card-obligation does not apply",
+          "detail": []
+        },
+        {
+          "day": 0,
+          "kind": "task",
+          "text": "w4 assigned",
+          "detail": [
+            "required by warehouse-onboarding"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "task",
+          "text": "site-safety assigned",
+          "detail": [
+            "required by warehouse-onboarding"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "task",
+          "text": "drug-screen-consent assigned",
+          "detail": [
+            "required by warehouse-onboarding"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "automation",
+          "text": "forklift-follow-up started"
+        },
+        {
+          "day": 0,
+          "kind": "decision",
+          "text": "forklift-follow-up › when is false"
+        },
+        {
+          "day": 0,
+          "kind": "expect",
+          "text": "Expectations met",
+          "ok": true,
+          "detail": [
+            "policies [warehouse-onboarding]",
+            "forms [w4 site-safety drug-screen-consent]",
+            "tasks [w4 site-safety drug-screen-consent]"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "office, not represented",
+      "line": 132,
+      "ok": true,
+      "timeline": [
+        {
+          "day": 0,
+          "kind": "placement",
+          "text": "Placement created",
+          "detail": [
+            "job.site-type :office",
+            "placement.union-local :none"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "policy",
+          "text": "warehouse-onboarding does not apply",
+          "detail": []
+        },
+        {
+          "day": 0,
+          "kind": "policy",
+          "text": "union-card-obligation does not apply",
+          "detail": []
+        },
+        {
+          "day": 0,
+          "kind": "automation",
+          "text": "forklift-follow-up started"
+        },
+        {
+          "day": 0,
+          "kind": "decision",
+          "text": "forklift-follow-up › when is false"
+        },
+        {
+          "day": 0,
+          "kind": "expect",
+          "text": "Expectations met",
+          "ok": true,
+          "detail": [
+            "policies []",
+            "forms []",
+            "tasks []"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "union local recorded on day five",
+      "line": 136,
+      "ok": true,
+      "timeline": [
+        {
+          "day": 0,
+          "kind": "placement",
+          "text": "Placement created",
+          "detail": [
+            "job.site-type :office",
+            "placement.weekly-hours 32"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "policy",
+          "text": "warehouse-onboarding does not apply",
+          "detail": []
+        },
+        {
+          "day": 0,
+          "kind": "policy",
+          "text": "union-card-obligation is unknown · waiting for placement.union-local",
+          "detail": []
+        },
+        {
+          "day": 0,
+          "kind": "automation",
+          "text": "forklift-follow-up started"
+        },
+        {
+          "day": 0,
+          "kind": "decision",
+          "text": "forklift-follow-up › when is false"
+        },
+        {
+          "day": 0,
+          "kind": "expect",
+          "text": "Expectations met",
+          "ok": true,
+          "detail": [
+            "forms []",
+            "unknown union-card-obligation [placement.union-local]"
+          ]
+        },
+        {
+          "day": 5,
+          "kind": "record",
+          "text": "placement.union-local recorded as :local-42"
+        },
+        {
+          "day": 5,
+          "kind": "policy",
+          "text": "union-card-obligation applies",
+          "detail": [
+            "union-card: required"
+          ]
+        },
+        {
+          "day": 5,
+          "kind": "task",
+          "text": "union-card assigned · due day 35",
+          "detail": [
+            "required by union-card-obligation"
+          ]
+        },
+        {
+          "day": 5,
+          "kind": "automation",
+          "text": "union-card-reminder started"
+        },
+        {
+          "day": 5,
+          "kind": "wait",
+          "text": "union-card-reminder waits until day 37",
+          "detail": [
+            "2 days after task.due-at"
+          ]
+        },
+        {
+          "day": 5,
+          "kind": "expect",
+          "text": "Expectations met",
+          "ok": true,
+          "detail": [
+            "policies [union-card-obligation]",
+            "tasks [union-card]"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Ada returns her union card on day ten",
+      "line": 142,
+      "ok": true,
+      "timeline": [
+        {
+          "day": 0,
+          "kind": "placement",
+          "text": "Placement created",
+          "detail": [
+            "employee.first-name \"Ada\"",
+            "job.site-type :office",
+            "placement.union-local :local-42",
+            "placement.weekly-hours 32"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "policy",
+          "text": "warehouse-onboarding does not apply",
+          "detail": []
+        },
+        {
+          "day": 0,
+          "kind": "policy",
+          "text": "union-card-obligation applies",
+          "detail": [
+            "union-card: required"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "task",
+          "text": "union-card assigned · due day 30",
+          "detail": [
+            "required by union-card-obligation"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "automation",
+          "text": "union-card-reminder started"
+        },
+        {
+          "day": 0,
+          "kind": "wait",
+          "text": "union-card-reminder waits until day 32",
+          "detail": [
+            "2 days after task.due-at"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "automation",
+          "text": "forklift-follow-up started"
+        },
+        {
+          "day": 0,
+          "kind": "decision",
+          "text": "forklift-follow-up › when is false"
+        },
+        {
+          "day": 10,
+          "kind": "complete",
+          "text": "union-card completed",
+          "detail": []
+        },
+        {
+          "day": 32,
+          "kind": "decision",
+          "text": "union-card-reminder › when is false"
+        },
+        {
+          "day": 40,
+          "kind": "expect",
+          "text": "Expectations met",
+          "ok": true,
+          "detail": [
+            "open []",
+            "emails 0"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Ben's union card goes overdue",
+      "line": 148,
+      "ok": true,
+      "timeline": [
+        {
+          "day": 0,
+          "kind": "placement",
+          "text": "Placement created",
+          "detail": [
+            "employee.first-name \"Ben\"",
+            "job.site-type :office",
+            "placement.union-local :local-77",
+            "placement.weekly-hours 24"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "policy",
+          "text": "warehouse-onboarding does not apply",
+          "detail": []
+        },
+        {
+          "day": 0,
+          "kind": "policy",
+          "text": "union-card-obligation applies",
+          "detail": [
+            "union-card: required"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "task",
+          "text": "union-card assigned · due day 30",
+          "detail": [
+            "required by union-card-obligation"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "automation",
+          "text": "union-card-reminder started"
+        },
+        {
+          "day": 0,
+          "kind": "wait",
+          "text": "union-card-reminder waits until day 32",
+          "detail": [
+            "2 days after task.due-at"
+          ]
+        },
+        {
+          "day": 0,
+          "kind": "automation",
+          "text": "forklift-follow-up started"
+        },
+        {
+          "day": 0,
+          "kind": "decision",
+          "text": "forklift-follow-up › when is false"
+        },
+        {
+          "day": 31,
+          "kind": "expect",
+          "text": "Expectations met",
+          "ok": true,
+          "detail": [
+            "emails 0"
+          ]
+        },
+        {
+          "day": 32,
+          "kind": "decision",
+          "text": "union-card-reminder › when is true"
+        },
+        {
+          "day": 32,
+          "kind": "email",
+          "text": "Email to employee: “Your union card is overdue”",
+          "detail": [
+            "Hi Ben, please complete your union card.",
+            "template: overdue-template (parameter)"
+          ]
+        },
+        {
+          "day": 32,
+          "kind": "expect",
+          "text": "Expectations met",
+          "ok": true,
+          "detail": [
+            "open [union-card]",
+            "emails 1"
+          ]
+        }
+      ]
+    }
+  ],
+  "coverage": [
+    {
+      "decision": "warehouse-onboarding :when",
+      "line": 80,
+      "seen": {
+        "true": [
+          "warehouse, Local 42, full time",
+          "certified driver, drug screen required"
+        ],
+        "false": [
+          "office, not represented",
+          "union local recorded on day five",
+          "Ada returns her union card on day ten",
+          "Ben's union card goes overdue"
+        ],
+        "unknown": []
+      },
+      "covered": true
+    },
+    {
+      "decision": "warehouse-onboarding › drug-screen-consent :when",
+      "line": 80,
+      "seen": {
+        "true": [
+          "certified driver, drug screen required"
+        ],
+        "false": [
+          "warehouse, Local 42, full time"
+        ],
+        "unknown": []
+      },
+      "covered": true
+    },
+    {
+      "decision": "union-card-obligation :when",
+      "line": 85,
+      "seen": {
+        "true": [
+          "warehouse, Local 42, full time",
+          "union local recorded on day five",
+          "Ada returns her union card on day ten",
+          "Ben's union card goes overdue"
+        ],
+        "false": [
+          "certified driver, drug screen required",
+          "office, not represented"
+        ],
+        "unknown": [
+          "union local recorded on day five"
+        ]
+      },
+      "covered": true
+    },
+    {
+      "decision": "union-card-reminder › when",
+      "line": 93,
+      "seen": {
+        "true": [
+          "Ben's union card goes overdue"
+        ],
+        "false": [
+          "Ada returns her union card on day ten"
+        ],
+        "unknown": []
+      },
+      "covered": true
+    },
+    {
+      "decision": "forklift-follow-up › when",
+      "line": 100,
+      "seen": {
+        "true": [
+          "warehouse, Local 42, full time"
+        ],
+        "false": [
+          "certified driver, drug screen required",
+          "office, not represented",
+          "union local recorded on day five",
+          "Ada returns her union card on day ten",
+          "Ben's union card goes overdue"
+        ],
+        "unknown": []
+      },
+      "covered": true
+    }
+  ],
+  "mistakes": [
+    {
+      "id": "choice-typo",
+      "title": "A typo in a choice",
+      "why": "Choices are closed vocabularies, so a misspelled option is an error where it is written.",
+      "diff": {
+        "line": 39,
+        "removed": [
+          "(rule at-warehouse (= job.site-type :warehouse))"
+        ],
+        "added": [
+          "(rule at-warehouse (= job.site-type :warehous))"
+        ]
+      },
+      "output": [
+        "northwind.account.lisp:39:37 error: :warehous is not an option of job.site-type. Did you mean :warehouse?"
+      ],
+      "caret": {
+        "line": 39,
+        "col": 37,
+        "length": 9
+      },
+      "excerpt": {
+        "startLine": 37,
+        "lines": [
+          "; ── Rules: named, three-valued, usable by policies, forms, automations, and access ───────",
+          "",
+          "(rule at-warehouse (= job.site-type :warehous))",
+          "",
+          "(rule union-covered"
+        ]
+      }
+    },
+    {
+      "id": "access-scope",
+      "title": "Access that reads an unscoped attribute",
+      "why": "Group access may read only attributes declared with :scope. Site type is searchable, not a permission scope.",
+      "diff": {
+        "line": 109,
+        "removed": [
+          "  :sees (= client.region :west))"
+        ],
+        "added": [
+          "  :sees (= job.site-type :warehouse))"
+        ]
+      },
+      "output": [
+        "northwind.account.lisp:109:12 error: Access rules may read only :scope attributes; job.site-type is not marked :scope"
+      ],
+      "caret": {
+        "line": 109,
+        "col": 12,
+        "length": 13
+      },
+      "excerpt": {
+        "startLine": 107,
+        "lines": [
+          "(group west-managers \"West region managers\"",
+          "  :can [:placement/read :employee/read :task/read :task/edit]",
+          "  :sees (= job.site-type :warehouse))",
+          "",
+          "(integration checkr \"@onboarded-platform/checkr@1.4.0\""
+        ]
+      }
+    },
+    {
+      "id": "trigger-scope",
+      "title": "A task trigger that reads placement facts",
+      "why": "A task trigger loads task and employee facts. Reusing a placement rule is caught through the rule's name.",
+      "diff": {
+        "line": 96,
+        "removed": [
+          "  (when (not= task.status :completed)"
+        ],
+        "added": [
+          "  (when (and (not= task.status :completed) union-covered)"
+        ]
+      },
+      "output": [
+        "northwind.account.lisp:96:44 error: A task trigger loads task and employee facts; placement.union-local is not available (through rule union-covered)"
+      ],
+      "caret": {
+        "line": 96,
+        "col": 44,
+        "length": 13
+      },
+      "excerpt": {
+        "startLine": 94,
+        "lines": [
+          "  :on (task-created union-card)",
+          "  (wait 2 :days :after task.due-at)",
+          "  (when (and (not= task.status :completed) union-covered)",
+          "    (email :employee overdue-template \"Your union card is overdue\"",
+          "      \"Hi {{ employee.first_name }}, please complete your union card.\")))"
+        ]
+      }
+    },
+    {
+      "id": "field-type",
+      "title": "A field that writes the wrong type",
+      "why": "A field's kind must suit the attribute it writes: a checkbox cannot store a certification date.",
+      "diff": {
+        "line": 71,
+        "removed": [
+          "    (date employee.forklift-certified-on \"Certification date\" :required)))"
+        ],
+        "added": [
+          "    (checkbox employee.forklift-certified-on \"Certification date\" :required)))"
+        ]
+      },
+      "output": [
+        "northwind.account.lisp:71:15 error: A checkbox field writes boolean values; employee.forklift-certified-on is a date"
+      ],
+      "caret": {
+        "line": 71,
+        "col": 15,
+        "length": 30
+      },
+      "excerpt": {
+        "startLine": 69,
+        "lines": [
+          "(form forklift-certification \"Forklift certification\"",
+          "  (page \"Certification\" :employee",
+          "    (checkbox employee.forklift-certified-on \"Certification date\" :required)))",
+          "",
+          "(form drug-screen-consent \"Drug screen consent\""
+        ]
+      }
+    },
+    {
+      "id": "due-in",
+      "title": "Waiting after a due date that never exists",
+      "why": "The reminder waits two days after task.due-at, so the union card must set a due date.",
+      "diff": {
+        "line": 52,
+        "removed": [
+          "  :due-in 30"
+        ],
+        "added": []
+      },
+      "output": [
+        "northwind.account.lisp:94:24 error: union-card-reminder waits after task.due-at, but union-card sets no :due-in"
+      ],
+      "caret": {
+        "line": 94,
+        "col": 24,
+        "length": 11
+      },
+      "excerpt": {
+        "startLine": 92,
+        "lines": [
+          "(automation union-card-reminder \"Union card reminder\"",
+          "  :on (task-created union-card)",
+          "  (wait 2 :days :after task.due-at)",
+          "  (when (not= task.status :completed)",
+          "    (email :employee overdue-template \"Your union card is overdue\""
+        ]
+      }
+    },
+    {
+      "id": "deprecated",
+      "title": "Writing a deprecated attribute",
+      "why": "Deprecated attributes stay readable for history, but no form may write them.",
+      "diff": {
+        "line": 66,
+        "removed": [],
+        "added": [
+          "    (text employee.legacy-hris-id \"Legacy HRIS ID\")"
+        ]
+      },
+      "output": [
+        "northwind.account.lisp:66:11 error: employee.legacy-hris-id is deprecated (Replaced by badge-number); forms cannot write it"
+      ],
+      "caret": {
+        "line": 66,
+        "col": 11,
+        "length": 23
+      },
+      "excerpt": {
+        "startLine": 64,
+        "lines": [
+          "(form site-safety \"Globex site safety\" :key \"northwind.globex.site-safety\"",
+          "  (page \"Site rules\" :employee",
+          "    (text employee.legacy-hris-id \"Legacy HRIS ID\")",
+          "    (checkbox acknowledged \"I have read the Globex site safety rules\" :required)",
+          "    (signature employee-signature)))"
+        ]
+      }
+    },
+    {
+      "id": "unknown-form",
+      "title": "A misspelled form name",
+      "why": "Every reference resolves to a declaration in the file, with a suggestion when one is close.",
+      "diff": {
+        "line": 103,
+        "removed": [
+          "    (assign forklift-certification)))"
+        ],
+        "added": [
+          "    (assign forklift-certifcation)))"
+        ]
+      },
+      "output": [
+        "northwind.account.lisp:103:13 error: Unknown form forklift-certifcation. Did you mean forklift-certification?"
+      ],
+      "caret": {
+        "line": 103,
+        "col": 13,
+        "length": 21
+      },
+      "excerpt": {
+        "startLine": 101,
+        "lines": [
+          "  :on (placement-created)",
+          "  (when (and at-warehouse (missing? employee.forklift-certified-on))",
+          "    (assign forklift-certifcation)))",
+          "",
+          "; ── Access and integrations ──────────────────────────────────────────────────────────────"
+        ]
+      }
+    },
+    {
+      "id": "missing-is-unknown",
+      "title": "Treating a missing fact as false",
+      "why": "An unrecorded union local leaves the union policy unknown. The scenario must say what it is waiting for.",
+      "diff": {
+        "line": 138,
+        "removed": [
+          "  (expect :forms [] :unknown {union-card-obligation [placement.union-local]})"
+        ],
+        "added": [
+          "  (expect :forms [])"
+        ]
+      },
+      "output": [
+        "northwind.account.lisp:138:3 error: Scenario “union local recorded on day five”, day 0: unknown: expected {}, got {union-card-obligation [placement.union-local]}"
+      ],
+      "caret": {
+        "line": 138,
+        "col": 3,
+        "length": 18
+      },
+      "excerpt": {
+        "startLine": 136,
+        "lines": [
+          "(scenario \"union local recorded on day five\"",
+          "  {job.site-type :office placement.weekly-hours 32}",
+          "  (expect :forms [])",
+          "  (day 5 (record placement.union-local :local-42)",
+          "         (expect :policies [union-card-obligation] :tasks [union-card])))"
+        ]
+      }
+    },
+    {
+      "id": "wrong-expectation",
+      "title": "A scenario that expects the wrong forms",
+      "why": "Scenarios run on every check. A policy change that alters what a placement needs fails here first.",
+      "diff": {
+        "line": 122,
+        "removed": [
+          "          :forms [w4 site-safety union-card]"
+        ],
+        "added": [
+          "          :forms [w4 site-safety]"
+        ]
+      },
+      "output": [
+        "northwind.account.lisp:121:3 error: Scenario “warehouse, Local 42, full time”, day 0: forms: expected [w4 site-safety], got [w4 site-safety union-card]"
+      ],
+      "caret": {
+        "line": 121,
+        "col": 3,
+        "length": 165
+      },
+      "excerpt": {
+        "startLine": 119,
+        "lines": [
+          "  {job.site-type :warehouse placement.union-local :local-42",
+          "   placement.weekly-hours 32 client.requires-drug-screen false}",
+          "  (expect :policies [warehouse-onboarding union-card-obligation]",
+          "          :forms [w4 site-safety]",
+          "          :tasks [w4 site-safety union-card forklift-certification]))"
+        ]
+      }
+    },
+    {
+      "id": "coverage",
+      "title": "A branch no scenario exercises",
+      "why": "Every policy and automation decision must be seen both true and false. Without Ada's story, no reminder is ever skipped.",
+      "diff": {
+        "line": 142,
+        "removed": [
+          "(scenario \"Ada returns her union card on day ten\"",
+          "  {employee.first-name \"Ada\" job.site-type :office",
+          "   placement.union-local :local-42 placement.weekly-hours 32}",
+          "  (day 10 (complete union-card))",
+          "  (day 40 (expect :open [] :emails [])))",
+          ""
+        ],
+        "added": []
+      },
+      "output": [
+        "northwind.account.lisp:93:1 error: union-card-reminder › when is never false in any scenario"
+      ],
+      "caret": {
+        "line": 93,
+        "col": 1,
+        "length": 300
+      },
+      "excerpt": {
+        "startLine": 91,
+        "lines": [
+          "(param overdue-template :sendgrid-template \"Supplied per target account.\")",
+          "",
+          "(automation union-card-reminder \"Union card reminder\"",
+          "  :on (task-created union-card)",
+          "  (wait 2 :days :after task.due-at)"
+        ]
+      }
+    }
+  ],
+  "simulator": {
+    "facts": [
+      {
+        "path": "job.site-type",
+        "label": "Site type",
+        "options": [
+          {
+            "value": "warehouse",
+            "label": "Warehouse"
+          },
+          {
+            "value": "office",
+            "label": "Office"
+          }
+        ]
+      },
+      {
+        "path": "placement.union-local",
+        "label": "Union local",
+        "options": [
+          {
+            "value": "local-42",
+            "label": "Local 42"
+          },
+          {
+            "value": "local-77",
+            "label": "Local 77"
+          },
+          {
+            "value": "none",
+            "label": "Not represented"
+          }
+        ]
+      },
+      {
+        "path": "placement.weekly-hours",
+        "label": "Scheduled weekly hours",
+        "options": [
+          {
+            "value": "12",
+            "label": "12"
+          },
+          {
+            "value": "32",
+            "label": "32"
+          }
+        ]
+      },
+      {
+        "path": "client.requires-drug-screen",
+        "label": "Requires drug screen",
+        "options": [
+          {
+            "value": "true",
+            "label": "true"
+          },
+          {
+            "value": "false",
+            "label": "false"
+          }
+        ]
+      }
+    ],
+    "policies": [
+      {
+        "name": "warehouse-onboarding",
+        "title": "Warehouse onboarding"
+      },
+      {
+        "name": "union-card-obligation",
+        "title": "Union card"
+      }
+    ],
+    "outcomes": {
+      "warehouse|local-42|12|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": true,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety",
+          "drug-screen-consent"
+        ],
+        "unknown": {}
+      },
+      "warehouse|local-42|12|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": false,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {}
+      },
+      "warehouse|local-42|12|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": "unknown",
+                "missing": [
+                  "client.requires-drug-screen"
+                ]
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {
+          "drug-screen-consent": [
+            "client.requires-drug-screen"
+          ]
+        }
+      },
+      "warehouse|local-42|32|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": true,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "union-card",
+                "value": true,
+                "missing": []
+              }
+            ]
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety",
+          "drug-screen-consent",
+          "union-card"
+        ],
+        "unknown": {}
+      },
+      "warehouse|local-42|32|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": false,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "union-card",
+                "value": true,
+                "missing": []
+              }
+            ]
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety",
+          "union-card"
+        ],
+        "unknown": {}
+      },
+      "warehouse|local-42|32|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": "unknown",
+                "missing": [
+                  "client.requires-drug-screen"
+                ]
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "union-card",
+                "value": true,
+                "missing": []
+              }
+            ]
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety",
+          "union-card"
+        ],
+        "unknown": {
+          "drug-screen-consent": [
+            "client.requires-drug-screen"
+          ]
+        }
+      },
+      "warehouse|local-42||true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": true,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety",
+          "drug-screen-consent"
+        ],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "warehouse|local-42||false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": false,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "warehouse|local-42||": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": "unknown",
+                "missing": [
+                  "client.requires-drug-screen"
+                ]
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {
+          "drug-screen-consent": [
+            "client.requires-drug-screen"
+          ],
+          "union-card-obligation": [
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "warehouse|local-77|12|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": true,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety",
+          "drug-screen-consent"
+        ],
+        "unknown": {}
+      },
+      "warehouse|local-77|12|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": false,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {}
+      },
+      "warehouse|local-77|12|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": "unknown",
+                "missing": [
+                  "client.requires-drug-screen"
+                ]
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {
+          "drug-screen-consent": [
+            "client.requires-drug-screen"
+          ]
+        }
+      },
+      "warehouse|local-77|32|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": true,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "union-card",
+                "value": true,
+                "missing": []
+              }
+            ]
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety",
+          "drug-screen-consent",
+          "union-card"
+        ],
+        "unknown": {}
+      },
+      "warehouse|local-77|32|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": false,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "union-card",
+                "value": true,
+                "missing": []
+              }
+            ]
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety",
+          "union-card"
+        ],
+        "unknown": {}
+      },
+      "warehouse|local-77|32|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": "unknown",
+                "missing": [
+                  "client.requires-drug-screen"
+                ]
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "union-card",
+                "value": true,
+                "missing": []
+              }
+            ]
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety",
+          "union-card"
+        ],
+        "unknown": {
+          "drug-screen-consent": [
+            "client.requires-drug-screen"
+          ]
+        }
+      },
+      "warehouse|local-77||true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": true,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety",
+          "drug-screen-consent"
+        ],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "warehouse|local-77||false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": false,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "warehouse|local-77||": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": "unknown",
+                "missing": [
+                  "client.requires-drug-screen"
+                ]
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {
+          "drug-screen-consent": [
+            "client.requires-drug-screen"
+          ],
+          "union-card-obligation": [
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "warehouse|none|12|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": true,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety",
+          "drug-screen-consent"
+        ],
+        "unknown": {}
+      },
+      "warehouse|none|12|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": false,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {}
+      },
+      "warehouse|none|12|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": "unknown",
+                "missing": [
+                  "client.requires-drug-screen"
+                ]
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {
+          "drug-screen-consent": [
+            "client.requires-drug-screen"
+          ]
+        }
+      },
+      "warehouse|none|32|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": true,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety",
+          "drug-screen-consent"
+        ],
+        "unknown": {}
+      },
+      "warehouse|none|32|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": false,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {}
+      },
+      "warehouse|none|32|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": "unknown",
+                "missing": [
+                  "client.requires-drug-screen"
+                ]
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {
+          "drug-screen-consent": [
+            "client.requires-drug-screen"
+          ]
+        }
+      },
+      "warehouse|none||true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": true,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety",
+          "drug-screen-consent"
+        ],
+        "unknown": {}
+      },
+      "warehouse|none||false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": false,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {}
+      },
+      "warehouse|none||": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": "unknown",
+                "missing": [
+                  "client.requires-drug-screen"
+                ]
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {
+          "drug-screen-consent": [
+            "client.requires-drug-screen"
+          ]
+        }
+      },
+      "warehouse||12|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": true,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety",
+          "drug-screen-consent"
+        ],
+        "unknown": {}
+      },
+      "warehouse||12|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": false,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {}
+      },
+      "warehouse||12|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": "unknown",
+                "missing": [
+                  "client.requires-drug-screen"
+                ]
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {
+          "drug-screen-consent": [
+            "client.requires-drug-screen"
+          ]
+        }
+      },
+      "warehouse||32|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": true,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.union-local"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety",
+          "drug-screen-consent"
+        ],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.union-local"
+          ]
+        }
+      },
+      "warehouse||32|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": false,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.union-local"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.union-local"
+          ]
+        }
+      },
+      "warehouse||32|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": "unknown",
+                "missing": [
+                  "client.requires-drug-screen"
+                ]
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.union-local"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {
+          "drug-screen-consent": [
+            "client.requires-drug-screen"
+          ],
+          "union-card-obligation": [
+            "placement.union-local"
+          ]
+        }
+      },
+      "warehouse|||true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": true,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.union-local",
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety",
+          "drug-screen-consent"
+        ],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.union-local",
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "warehouse|||false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": false,
+                "missing": []
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.union-local",
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.union-local",
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "warehouse|||": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "w4",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "site-safety",
+                "value": true,
+                "missing": []
+              },
+              {
+                "form": "drug-screen-consent",
+                "value": "unknown",
+                "missing": [
+                  "client.requires-drug-screen"
+                ]
+              }
+            ]
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.union-local",
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [
+          "w4",
+          "site-safety"
+        ],
+        "unknown": {
+          "drug-screen-consent": [
+            "client.requires-drug-screen"
+          ],
+          "union-card-obligation": [
+            "placement.union-local",
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "office|local-42|12|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {}
+      },
+      "office|local-42|12|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {}
+      },
+      "office|local-42|12|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {}
+      },
+      "office|local-42|32|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "union-card",
+                "value": true,
+                "missing": []
+              }
+            ]
+          }
+        ],
+        "forms": [
+          "union-card"
+        ],
+        "unknown": {}
+      },
+      "office|local-42|32|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "union-card",
+                "value": true,
+                "missing": []
+              }
+            ]
+          }
+        ],
+        "forms": [
+          "union-card"
+        ],
+        "unknown": {}
+      },
+      "office|local-42|32|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "union-card",
+                "value": true,
+                "missing": []
+              }
+            ]
+          }
+        ],
+        "forms": [
+          "union-card"
+        ],
+        "unknown": {}
+      },
+      "office|local-42||true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "office|local-42||false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "office|local-42||": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "office|local-77|12|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {}
+      },
+      "office|local-77|12|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {}
+      },
+      "office|local-77|12|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {}
+      },
+      "office|local-77|32|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "union-card",
+                "value": true,
+                "missing": []
+              }
+            ]
+          }
+        ],
+        "forms": [
+          "union-card"
+        ],
+        "unknown": {}
+      },
+      "office|local-77|32|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "union-card",
+                "value": true,
+                "missing": []
+              }
+            ]
+          }
+        ],
+        "forms": [
+          "union-card"
+        ],
+        "unknown": {}
+      },
+      "office|local-77|32|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "union-card",
+                "value": true,
+                "missing": []
+              }
+            ]
+          }
+        ],
+        "forms": [
+          "union-card"
+        ],
+        "unknown": {}
+      },
+      "office|local-77||true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "office|local-77||false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "office|local-77||": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "office|none|12|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {}
+      },
+      "office|none|12|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {}
+      },
+      "office|none|12|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {}
+      },
+      "office|none|32|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {}
+      },
+      "office|none|32|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {}
+      },
+      "office|none|32|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {}
+      },
+      "office|none||true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {}
+      },
+      "office|none||false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {}
+      },
+      "office|none||": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {}
+      },
+      "office||12|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {}
+      },
+      "office||12|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {}
+      },
+      "office||12|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {}
+      },
+      "office||32|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.union-local"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.union-local"
+          ]
+        }
+      },
+      "office||32|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.union-local"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.union-local"
+          ]
+        }
+      },
+      "office||32|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.union-local"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.union-local"
+          ]
+        }
+      },
+      "office|||true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.union-local",
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.union-local",
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "office|||false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.union-local",
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.union-local",
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "office|||": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": false,
+            "missing": [],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.union-local",
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "union-card-obligation": [
+            "placement.union-local",
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "|local-42|12|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|local-42|12|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|local-42|12|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|local-42|32|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "union-card",
+                "value": true,
+                "missing": []
+              }
+            ]
+          }
+        ],
+        "forms": [
+          "union-card"
+        ],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|local-42|32|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "union-card",
+                "value": true,
+                "missing": []
+              }
+            ]
+          }
+        ],
+        "forms": [
+          "union-card"
+        ],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|local-42|32|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "union-card",
+                "value": true,
+                "missing": []
+              }
+            ]
+          }
+        ],
+        "forms": [
+          "union-card"
+        ],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|local-42||true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ],
+          "union-card-obligation": [
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "|local-42||false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ],
+          "union-card-obligation": [
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "|local-42||": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ],
+          "union-card-obligation": [
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "|local-77|12|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|local-77|12|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|local-77|12|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|local-77|32|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "union-card",
+                "value": true,
+                "missing": []
+              }
+            ]
+          }
+        ],
+        "forms": [
+          "union-card"
+        ],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|local-77|32|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "union-card",
+                "value": true,
+                "missing": []
+              }
+            ]
+          }
+        ],
+        "forms": [
+          "union-card"
+        ],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|local-77|32|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": true,
+            "missing": [],
+            "forms": [
+              {
+                "form": "union-card",
+                "value": true,
+                "missing": []
+              }
+            ]
+          }
+        ],
+        "forms": [
+          "union-card"
+        ],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|local-77||true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ],
+          "union-card-obligation": [
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "|local-77||false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ],
+          "union-card-obligation": [
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "|local-77||": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ],
+          "union-card-obligation": [
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "|none|12|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|none|12|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|none|12|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|none|32|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|none|32|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|none|32|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|none||true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|none||false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "|none||": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "||12|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "||12|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "||12|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": false,
+            "missing": [],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ]
+        }
+      },
+      "||32|true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.union-local"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ],
+          "union-card-obligation": [
+            "placement.union-local"
+          ]
+        }
+      },
+      "||32|false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.union-local"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ],
+          "union-card-obligation": [
+            "placement.union-local"
+          ]
+        }
+      },
+      "||32|": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.union-local"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ],
+          "union-card-obligation": [
+            "placement.union-local"
+          ]
+        }
+      },
+      "|||true": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.union-local",
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ],
+          "union-card-obligation": [
+            "placement.union-local",
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "|||false": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.union-local",
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ],
+          "union-card-obligation": [
+            "placement.union-local",
+            "placement.weekly-hours"
+          ]
+        }
+      },
+      "|||": {
+        "policies": [
+          {
+            "policy": "warehouse-onboarding",
+            "value": "unknown",
+            "missing": [
+              "job.site-type"
+            ],
+            "forms": []
+          },
+          {
+            "policy": "union-card-obligation",
+            "value": "unknown",
+            "missing": [
+              "placement.union-local",
+              "placement.weekly-hours"
+            ],
+            "forms": []
+          }
+        ],
+        "forms": [],
+        "unknown": {
+          "warehouse-onboarding": [
+            "job.site-type"
+          ],
+          "union-card-obligation": [
+            "placement.union-local",
+            "placement.weekly-hours"
+          ]
+        }
+      }
+    }
+  }
+}

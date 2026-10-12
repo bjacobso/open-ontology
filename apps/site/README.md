@@ -4,9 +4,7 @@ This static site preserves the layout and palette of the historical Open Ontolog
 
 `public/` is served directly as Cloudflare Worker static assets. No React app, old runtime, or workspace package is needed.
 
-`public/onboarded/index.html` serves the `/onboarded` domain explorer. Its JSON artifact is exported from `examples/onboarded/model.ts`, a synthetic local Triplex scenario, property flags, and `onboarded-views.json` with `pnpm site:export-onboarded`; tests check that it stays in sync and every modeled object appears in a view. Four graph views separate people/work, forms/versions, account/access, and policy/scope configuration. The page distinguishes the executable v0.1 model from illustrative I-9 form helpers and proposed permission scopes. `check.mjs` discovers HTML pages recursively and checks links to directory index routes as well as files.
-
-`public/onboarded/northwind-study.json` contains selected excerpts and authored expectations from a supplied Northwind account sketch. Its browser controls browse the proposal; they do not compile Forma or run journeys. Status labels refer to the separate TypeScript account DSL described by the sheet, not implemented features in this package.
+`public/onboarded/index.html` serves the unlisted `/onboarded` study. `account.js` presents the Northwind account program from `public/onboarded/account.json`: a tour of its verbs with lowered resources, recorded diagnostics for ten example mistakes, a three-state policy simulator over precomputed results, and scenario timelines with decision coverage. `explorer.js` presents the domain ontology and runtime transcript from `public/onboarded/model.json`, with graph positions from `onboarded-views.json`. `pnpm site:export-onboarded` writes both artifacts from `examples/onboarded`, and tests check that they stay in sync. The browser evaluates nothing itself. `check.mjs` discovers HTML pages recursively and checks links to directory index routes as well as files.
 
 ```sh
 pnpm site:check
