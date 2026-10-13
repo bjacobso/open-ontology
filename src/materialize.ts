@@ -13,6 +13,7 @@ import type {
 import type {
   ActionChangeIR,
   ActionInputIR,
+  ActionTypeIR,
   ActionValueIR,
   DatalogQueryIR,
   OntologyIR,
@@ -129,6 +130,9 @@ const assertPortableActionSchema = (ast: PortableAst, path: string): void => {
     if (
       typeof reflected !== "object" ||
       reflected === null ||
+      // Effect 4 marks approximate check exports as [schema, true].
+      // They cannot preserve the action's validation after a JSON round trip.
+      Array.isArray(reflected) ||
       Object.keys(reflected).length === 0
     ) {
       throw new TypeError(
@@ -148,7 +152,16 @@ const assertPortableActionSchema = (ast: PortableAst, path: string): void => {
   }
 };
 
+// Effect's JSON Schema importer can change the AST and emitted document shape.
+// Retain the source document for restored schemas to keep IR round trips lossless.
+const restoredInputSchemas = new WeakMap<
+  Schema.Schema<unknown>,
+  NonNullable<ActionTypeIR["inputSchema"]>
+>();
+
 const actionInputSchema = (schema: Schema.Schema<unknown>, name: string) => {
+  const restored = restoredInputSchemas.get(schema);
+  if (restored) return restored;
   assertPortableActionSchema(schema.ast as PortableAst, name);
   return Schema.toJsonSchemaDocument(schema);
 };
@@ -355,15 +368,17 @@ export const materializeOntology = (ir: OntologyIR): OntologyDefinition => {
 
   const declarations: OntologyDeclaration[] = [...objects.values(), ...links.values()];
   for (const action of ir.actionTypes) {
+    const input = (action.inputSchema
+      ? SchemaRepresentation.fromJsonSchemaDocument(action.inputSchema, { patterns: "apply" })
+      : actionSchemaFromFields(action.input)) as unknown as Schema.Schema<
+      Record<string, unknown>
+    > & {
+      readonly DecodingServices: never;
+    };
+    if (action.inputSchema) restoredInputSchemas.set(input, action.inputSchema);
     declarations.push({
       ...Ontology.ActionType(action.name, {
-        input: (action.inputSchema
-          ? SchemaRepresentation.fromJsonSchemaDocument(action.inputSchema, { patterns: "apply" })
-          : actionSchemaFromFields(action.input)) as unknown as Schema.Schema<
-          Record<string, unknown>
-        > & {
-          readonly DecodingServices: never;
-        },
+        input,
         changes: action.changes.map((change) => changeFromIR(change, objects, links)),
         ...(action.description === undefined ? {} : { description: action.description }),
       }),

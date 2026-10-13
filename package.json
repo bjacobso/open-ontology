@@ -50,7 +50,7 @@
   "dependencies": {
     "@formalang/ts": "0.3.0",
     "@triplex-build/triplex": "0.2.0",
-    "effect": "4.0.0-rc.112"
+    "effect": "4.0.3"
   },
   "devDependencies": {
     "@types/node": "25.9.1",
@@ -61,7 +61,16 @@
     "wrangler": "4.142.0"
   },
   "peerDependencies": {
-    "effect": "4.0.0-rc.112"
+    "effect": "4.0.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "@formalang/ts@0.3.0>effect": "4.0.3",
+      "@triplex-build/triplex@0.2.0>effect": "4.0.3"
+    },
+    "patchedDependencies": {
+      "@triplex-build/triplex@0.2.0": "patches/@triplex-build__triplex@0.2.0.patch"
+    }
   },
   "engines": {
     "node": ">=22"
