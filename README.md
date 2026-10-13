@@ -2,7 +2,7 @@
 
 `@open-ontology/ontology` defines a portable ontology model, compiles TypeScript and Forma sources to the same JSON-safe IR, and runs actions and named Datalog queries on Triplex.
 
-Maturity: **experimental (v0.1)**. One package, three executable examples, and a local in-memory runtime; no durable server or npm release yet.
+Maturity: **experimental (v0.1)**. One package, four executable examples, and a local in-memory runtime; no durable server or npm release yet.
 
 The selected implementation was adapted from the [historical Open Ontology repository](https://github.com/bjacobso/open-ontology-legacy) at [commit `7c2ff8a`](https://github.com/bjacobso/open-ontology-legacy/commit/7c2ff8a614b9f06a6e530aa80d0c7311dc81a323), especially its `packages/ontology` directory. The current code removes its server convenience method and does not bring over the old workspace or runtime.
 
@@ -20,6 +20,7 @@ pnpm check
 pnpm example
 pnpm example:support-desk
 pnpm example:github
+pnpm example:onboarded
 pnpm model:check examples/support-desk/model.lisp
 ```
 
@@ -32,6 +33,18 @@ pnpm model:check examples/support-desk/model.lisp
 Forma models can write `(import "/std/git")` for shared repositories, branches, commits, ancestry, forks, and dependencies, or `(import "/github")` for that graph plus GitHub accounts, hosting records, issues, pull requests, memberships, and collaborators. Imports load bundled Lisp sources once per model. A future `/gitlab` can reuse `/std/git`; it is not bundled yet.
 
 `pnpm example:github` runs [a local GitHub graph](examples/github/model.lisp), including a PR from a fork, a referenced issue, dependency links, and merge parents. These are synthetic facts, with no GitHub API connection. See [Git libraries](docs/git-libraries.md) for the vocabulary, id conventions, and extension pattern.
+
+## Onboarded domain study
+
+The unlisted `/onboarded` page presents an illustrative account language for Onboarded, informed directionally by supplied schema and API context. [`northwind.account.lisp`](examples/onboarded/northwind.account.lisp) configures one synthetic account end to end, covering attributes, forms, policies, automations, access, integrations, and scenarios, in nine verbs. The Forma reader parses it; example code in [`examples/onboarded/account`](examples/onboarded/account) checks it with located errors, lowers it to directional resources, evaluates policies with three-valued logic, and plays scenarios day by day. The check fails on a failing scenario or on any policy or automation decision that no scenario sees both true and false.
+
+```sh
+pnpm account:check examples/onboarded/northwind.account.lisp
+```
+
+The page also explores [a working TypeScript ontology](examples/onboarded/model.ts) of the underlying domain, with a recorded local Triplex transcript from `pnpm example:onboarded`. See [the study notes](examples/onboarded/README.md) for the vocabulary, checks, and simplifications. The account elaborator is not a Forma prelude or package export; its resource shapes are not production formats, and nothing calls Onboarded or deploys configuration.
+
+After changing the account program, model, scenario, or graph views, run `pnpm site:export-onboarded` to refresh the checked-in browser artifacts. Tests verify that they match the checked-in sources.
 
 ## Package boundary
 

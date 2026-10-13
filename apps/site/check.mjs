@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -11,7 +11,9 @@ const rawRepoUrl = "https://raw.githubusercontent.com/bjacobso/open-ontology/mai
 const siteUrl = "https://open-ontology.com";
 
 const read = (name) => readFileSync(join(publicDir, name), "utf8");
-const pages = { "index.html": read("index.html"), "404.html": read("404.html") };
+const pages = Object.fromEntries(readdirSync(publicDir, { recursive: true })
+  .filter((name) => name.endsWith(".html"))
+  .map((name) => [name, read(name)]));
 const texts = { "llms.txt": read("llms.txt"), "llms-full.txt": read("llms-full.txt") };
 
 const checkRepoLink = (source, url) => {
@@ -26,7 +28,8 @@ const checkSiteLink = (source, value) => {
   const url = new URL(value, siteUrl);
   if (url.origin !== siteUrl) return;
   const path = decodeURIComponent(url.pathname === "/" ? "/index.html" : url.pathname);
-  assert.ok(statSync(join(publicDir, path), { throwIfNoEntry: false })?.isFile(), `${source}: missing asset ${path}`);
+  const candidates = [path, `${path}.html`, join(path, "index.html")];
+  assert.ok(candidates.some((candidate) => statSync(join(publicDir, candidate), { throwIfNoEntry: false })?.isFile()), `${source}: missing asset ${path}`);
 };
 
 for (const [name, html] of Object.entries(pages)) {

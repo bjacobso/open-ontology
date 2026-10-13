@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f6f5ef" />
+    <meta name="description" content="Account as code for Onboarded, an illustrative study: one file declares attributes, forms, policies, automations, access, integrations, and the scenarios that prove them. A guide to the nine-verb language, with a checker, three-state policy simulator, and scenario timelines." />
+    <title>Onboarded accounts as code · Open Ontology</title>
+    <link rel="canonical" href="https://open-ontology.com/onboarded" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="text/plain" href="/llms-full.txt" title="Open Ontology agent guide" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/site.css" />
+    <link rel="stylesheet" href="/onboarded/explorer.css" />
+    <script type="module" src="/onboarded/account.js"></script>
+    <script type="module" src="/onboarded/explorer.js"></script>
+  </head>
+  <body>
+    <div class="oo ob">
+      <a class="oo-skip" href="#main">Skip to content</a>
+      <header class="oo-nav">
+        <a class="oo-brand" href="/"><img src="/favicon.svg" width="24" height="24" alt="" />Open Ontology</a>
+        <nav aria-label="Main navigation">
+          <a href="#why">Why</a>
+          <a href="#quickstart">Quick start</a>
+          <a href="#guide">Guide</a>
+          <a href="#simulator">Simulator</a>
+          <a href="#scenarios">Scenarios</a>
+          <a class="oo-nav__guide" href="/llms-full.txt">Agent guide ↗</a>
+        </nav>
+      </header>
+
+      <main id="main" class="ob-main">
+        <div class="ob-breadcrumb"><a href="/">Open Ontology</a><span aria-hidden="true">/</span><span>Domain studies</span><span aria-hidden="true">/</span><strong>Onboarded</strong></div>
+        <section class="ob-hero" aria-labelledby="hero-title">
+          <div>
+            <p class="ob-eyebrow"><span class="ob-dot" aria-hidden="true"></span> Onboarded · Accounts as code · Illustrative study</p>
+            <h1 id="hero-title">Configure an onboarding account<br /><em>the way you ship software.</em></h1>
+            <p class="ob-lead">One file declares an account’s attributes, forms, policies, automations, access, and integrations, next to the scenarios that prove them. A checker stops mistakes at the line where they are written, and scenarios play placements forward before anything ships.</p>
+            <div class="ob-hero-actions">
+              <a class="ob-primary" href="#guide">Read the guide <span aria-hidden="true">↓</span></a>
+              <a href="#simulator">Try the policy simulator ↓</a>
+            </div>
+            <dl class="ob-stats">
+              <div><dt>Lines</dt><dd data-stat="lines">153</dd></div>
+              <div><dt>Verbs</dt><dd>9</dd></div>
+              <div><dt>Resources</dt><dd data-stat="resources">30</dd></div>
+              <div><dt>Scenarios passing</dt><dd data-stat="scenarios">6</dd></div>
+              <div><dt>Decisions covered</dt><dd data-stat="decisions">5 / 5</dd></div>
+            </dl>
+          </div>
+          <figure class="ob-pitch-card" aria-label="A policy and the scenario that proves it">
+            <div class="ob-pitch-step"><span class="ob-label">Declare</span><pre data-source><code>(policy union-card-obligation "Union card"
+  :when union-covered
+  :require [union-card])</code></pre></div>
+            <div class="ob-pitch-step"><span class="ob-label">Prove</span><pre data-source><code>(scenario "Ben's union card goes overdue"
+  {employee.first-name "Ben" job.site-type :office
+   placement.union-local :local-77 placement.weekly-hours 24}
+  (day 31 (expect :emails []))
+  (day 32 (expect :open [union-card]
+                  :emails [{:to :employee :body "Hi Ben, please complete your union card."}])))</code></pre></div>
+            <figcaption><span class="tk-ok">✓</span> <code>pnpm account:check</code> plays Ben’s placement to day 32 and checks the reminder he receives.</figcaption>
+          </figure>
+        </section>
+        <p class="ob-disclosure"><strong>Illustrative and synthetic.</strong> Vocabulary informed directionally by supplied Onboarded schema and API context. The Forma reader parses the program; a TypeScript elaborator in this example checks, lowers, and simulates it. Resource shapes echo platform field names but are not production formats. Nothing calls Onboarded or deploys configuration.</p>
+
+        <div class="ob-docs">
+          <nav class="ob-toc" aria-label="On this page">
+            <span class="ob-label">On this page</span>
+            <ol>
+              <li><a href="#why">Why a program</a></li>
+              <li><a href="#quickstart">Quick start</a></li>
+              <li><a href="#guide">Language guide</a>
+                <ol>
+                  <li><a href="#verb-account">account</a></li>
+                  <li><a href="#verb-attributes">attributes</a></li>
+                  <li><a href="#verb-rule">rule · def</a></li>
+                  <li><a href="#verb-form">form</a></li>
+                  <li><a href="#verb-policy">policy</a></li>
+                  <li><a href="#verb-automation">automation · param</a></li>
+                  <li><a href="#verb-group">group</a></li>
+                  <li><a href="#verb-integration">integration</a></li>
+                  <li><a href="#verb-scenario">scenario</a></li>
+                </ol>
+              </li>
+              <li><a href="#checks">Checks</a></li>
+              <li><a href="#simulator">Three-state policies</a></li>
+              <li><a href="#scenarios">Scenarios</a></li>
+              <li><a href="#domain">Under the hood</a></li>
+              <li><a href="#status">Status</a></li>
+            </ol>
+            <a class="ob-toc-source" href="https://github.com/bjacobso/open-ontology/blob/main/examples/onboarded/northwind.account.lisp">northwind.account.lisp ↗</a>
+          </nav>
+
+          <div class="ob-docs-main">
+            <p id="account-load-status" class="ob-fallback" role="status">The checks, simulator, and scenario timelines load from <a href="/onboarded/account.json" download="northwind-account.json">account.json ↗</a>, which also holds the source and every recorded result.</p>
+            <noscript><p class="ob-fallback">The guide below reads without JavaScript. Enable it to explore the checks, simulator, and scenarios, or read <a href="/onboarded/account.json">account.json</a>.</p></noscript>
+
+            <section id="why" class="ob-section" aria-labelledby="why-title">
+              <span class="ob-label">01 / Why a program</span>
+              <h2 id="why-title">An account is already a program.<br /><em>It just isn’t written as one.</em></h2>
+              <p class="ob-intro">Policies decide which forms a placement needs. Automations wait, branch, and email. Access rules filter what a group sees. Writing those decisions as one checked program brings the tools software already relies on.</p>
+              <div class="ob-values">
+                <article><span>01</span><h3>One reviewable file</h3><p>Attributes through integrations live together, so a change is a diff a teammate can read. Northwind fits in 153 lines.</p></article>
+                <article><span>02</span><h3>Mistakes stop at a line</h3><p>Choice typos, wrong field types, and access rules that read the wrong facts become errors with a line and column. <a href="#checks">See ten →</a></p></article>
+                <article><span>03</span><h3>Behavior you can test</h3><p>Scenarios assert which policies apply, which tasks exist, and which emails go out on any day. <a href="#scenarios">Watch one →</a></p></article>
+                <article><span>04</span><h3>Missing is unknown</h3><p>An unrecorded fact leaves a policy undecided, and the program names what it is waiting for. <a href="#simulator">Try it →</a></p></article>
+              </div>
+              <div class="ob-mapping">
+                <div><span class="ob-label">What each verb configures</span><p>A directional mapping to concepts in the supplied schema. The lowered shapes are illustrative, not production formats.</p></div>
+                <table>
+                  <thead><tr><th scope="col">Verb</th><th scope="col">Platform concept</th></tr></thead>
+                  <tbody>
+                    <tr><th scope="row"><a href="#verb-account"><code>account</code></a></th><td>Account and organization settings: languages, sender email, deduplication criteria</td></tr>
+                    <tr><th scope="row"><a href="#verb-attributes"><code>attributes</code></a></th><td>Custom properties: scalar type, enum options, searchable, sensitive, permission scope, validation pattern</td></tr>
+                    <tr><th scope="row"><a href="#verb-form"><code>form</code></a></th><td>Task templates with page and field templates</td></tr>
+                    <tr><th scope="row"><a href="#verb-policy"><code>policy</code></a></th><td>Policy rules and policy forms, each with an optional rule</td></tr>
+                    <tr><th scope="row"><a href="#verb-automation"><code>automation</code></a></th><td>Automations: trigger, conditions, timings, and actions</td></tr>
+                    <tr><th scope="row"><a href="#verb-group"><code>group</code></a></th><td>User groups: permissions and access rules</td></tr>
+                    <tr><th scope="row"><a href="#verb-integration"><code>integration</code></a></th><td>Per-account integration configuration, such as Checkr</td></tr>
+                    <tr><th scope="row"><a href="#verb-scenario"><code>scenario</code></a></th><td>Nothing on the platform: scenarios are tests that run on every check</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section id="quickstart" class="ob-section" aria-labelledby="quickstart-title">
+              <span class="ob-label">02 / Quick start</span>
+              <h2 id="quickstart-title">Write, check,<br /><em>lower, and play.</em></h2>
+              <ol class="ob-pipeline">
+                <li><strong>Write</strong><span>A <code>.lisp</code> account program</span></li>
+                <li><strong>Read</strong><span>Forma reader, with source locations</span></li>
+                <li><strong>Check</strong><span>Names, types, vocabularies, and fact scopes</span></li>
+                <li><strong>Lower</strong><span>JSON-safe resources, one or more per declaration</span></li>
+                <li><strong>Play</strong><span>Three-state policies, scenarios, and coverage</span></li>
+              </ol>
+              <div class="ob-quickstart">
+                <div>
+                  <p>Clone the repository and run the checker on the Northwind account. It exits non-zero on any error, on a failing scenario, or on a policy or automation decision that no scenario sees both true and false.</p>
+<pre class="ob-commands"><code>pnpm install --frozen-lockfile
+pnpm account:check examples/onboarded/northwind.account.lisp
+pnpm account:check examples/onboarded/northwind.account.lisp --json</code></pre>
+                  <p class="ob-small">The elaborator lives in <a href="https://github.com/bjacobso/open-ontology/tree/main/examples/onboarded/account">examples/onboarded/account</a>: <code>elaborate.ts</code> reads and checks, <code>lower.ts</code> emits resources, and <code>evaluate.ts</code> runs policies and scenarios.</p>
+                </div>
+                <figure class="ob-terminal">
+                  <div class="ob-terminal-bar"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><b>open-ontology</b></div>
+                  <pre><code id="check-output">$ pnpm account:check examples/onboarded/northwind.account.lisp</code></pre>
+                  <figcaption>Recorded from the checker by <code>pnpm site:export-onboarded</code>.</figcaption>
+                </figure>
+              </div>
+            </section>
+
+            <section id="guide" class="ob-section" aria-labelledby="guide-title">
+              <span class="ob-label">03 / Language guide</span>
+              <h2 id="guide-title">Nine verbs.<br /><em>One account.</em></h2>
+              <p class="ob-intro">Each top-level declaration names something the rest of the file can use. Paths such as <code>placement.union-local</code> name attributes, keywords such as <code>:warehouse</code> name choices, and source names are kebab-case; lowering maps them to the platform’s snake_case. Every example below is quoted from <code>northwind.account.lisp</code>. Open <em>Lowers to</em> to see the recorded resources.</p>
+
+              <article class="ob-verb" id="verb-account">
+                <header><h3><code>account</code></h3><p>Who this is, and the namespace for every key.</p></header>
+                <pre class="ob-syntax"><code>(account name "Title" :languages [:en ...] :sender "email" :support "email" :dedupe [paths])</code></pre>
+                <div class="ob-verb-body">
+                  <div>
+                    <p>A program starts with exactly one account. Its name prefixes every key, so <code>union-card</code> becomes <code>northwind.union-card</code>. The first language is the default; the others enable per-field translations. <code>:dedupe</code> lists the attributes that identify a duplicate employee.</p>
+                    <h4>Checked</h4>
+                    <ul><li>Exactly one account, declared first</li><li>Deduplication paths name known placement facts</li></ul>
+                  </div>
+                  <pre class="ob-example" data-source><code>(account northwind "Northwind Logistics"
+  :languages [:en :es]
+  :sender "onboarding@northwind.example"
+  :support "people@northwind.example"
+  :dedupe [employee.email])</code></pre>
+                </div>
+                <details class="ob-lowered" data-verbs="account"><summary>Lowers to</summary><pre><code></code></pre></details>
+              </article>
+
+              <article class="ob-verb" id="verb-attributes">
+                <header><h3><code>attributes</code></h3><p>Typed custom attributes on built-in entities.</p></header>
+                <pre class="ob-syntax"><code>(attributes entity (name type "Label" :searchable :sensitive :scope :pattern "re" :deprecated "why") ...)</code></pre>
+                <div class="ob-verb-body">
+                  <div>
+                    <p>Extend <code>employee</code>, <code>employer</code>, <code>client</code>, <code>job</code>, or <code>placement</code>. Types are <code>string boolean date datetime integer decimal address</code>, or a closed choice: <code>(one-of :value "Label" ...)</code>. <code>:scope</code> marks an attribute that access rules may read. A deprecated attribute stays readable but cannot be written.</p>
+                    <h4>Checked</h4>
+                    <ul><li>Names are unique, kebab-case, and not built-in</li><li><code>:sensitive</code> excludes <code>:searchable</code> and <code>:scope</code>; addresses take no flags</li><li><code>:pattern</code> applies to strings and must be a valid expression</li><li>Choice options are unique keywords with non-empty labels</li></ul>
+                  </div>
+                  <pre class="ob-example" data-source><code>(attributes employee
+  (badge-number string "Badge number" :searchable :pattern "^NW-[0-9]{6}$")
+  (union-card-number string "Union card number" :sensitive)
+  (mailing-address address "Mailing address")
+  (forklift-certified-on date "Forklift certification date")
+  (legacy-hris-id string "Legacy HRIS ID" :deprecated "Replaced by badge-number"))</code></pre>
+                </div>
+                <details class="ob-lowered" data-verbs="attributes"><summary>Lowers to</summary><pre><code></code></pre></details>
+              </article>
+
+              <article class="ob-verb" id="verb-rule">
+                <header><h3><code>rule</code> · <code>def</code></h3><p>Name a decision once and reuse it everywhere.</p></header>
+                <pre class="ob-syntax"><code>(rule name expression)    (def name arithmetic)</code></pre>
+                <div class="ob-verb-body">
+                  <div>
+                    <p>Rules combine <code>= not= &gt; &gt;= &lt; &lt;=</code>, <code>in</code>, <code>missing?</code>, <code>and</code>, <code>or</code>, and <code>not</code> over attribute paths. They evaluate to true, false, or unknown: a fact that is not recorded is unknown, and <code>and</code> is false as soon as any part is false. A rule is inlined wherever it is used, and the reader’s fact scope is checked at that use. <code>def</code> evaluates arithmetic at build time.</p>
+                    <h4>Checked</h4>
+                    <ul><li>Choice values exist, with a suggestion for near misses</li><li>Comparisons match the attribute’s type; ordering needs a number or date</li><li>Rules are defined before use</li></ul>
+                  </div>
+                  <pre class="ob-example" data-source><code>(rule union-covered
+  (and (not= placement.union-local :none)
+       (&gt;= placement.weekly-hours 20)))
+
+(def dues-rate (/ 1.5 100))   ; build-time arithmetic, inlined as 0.015</code></pre>
+                </div>
+                <details class="ob-lowered" data-verbs="rule def"><summary>Lowers to</summary><pre><code></code></pre></details>
+              </article>
+
+              <article class="ob-verb" id="verb-form">
+                <header><h3><code>form</code></h3><p>Pages and fields; reads and writes are inferred.</p></header>
+                <pre class="ob-syntax"><code>(form name "Title" :due-in days (page "Title" :employee field ...) ...)
+(form name :from "package" :key "key")</code></pre>
+                <div class="ob-verb-body">
+                  <div>
+                    <p>A field binds an attribute path, which the form writes, or a bare name, which becomes a form answer. Fields are <code>checkbox text number date address dropdown signature formula review content</code>, with <code>:required</code>, <code>:show-if rule</code>, and translations such as <code>:es "…"</code>. <code>:due-in</code> sets the task due date. A <code>:from</code> form references one another package owns.</p>
+                    <h4>Checked</h4>
+                    <ul><li>The field suits the attribute: a checkbox writes a boolean, a date writes a date</li><li>No writes to deprecated or built-in attributes, and each attribute is written once</li><li>Answers are unique, and <code>:show-if</code> reads only earlier answers</li><li>Local keys stay in the account namespace; <code>:from</code> keys stay outside it</li></ul>
+                  </div>
+                  <pre class="ob-example" data-source><code>(form union-card "Union card"
+  :due-in 30
+  (page "Union membership" :employee
+    (checkbox has-card "I already hold a union card" :es "Ya tengo una tarjeta sindical")
+    (text employee.union-card-number "Union card number" :required :show-if has-card)
+    (address employee.mailing-address "Mailing address" :required)
+    (formula weekly-dues "Estimated weekly dues"
+      (round (* job.hourly-rate placement.weekly-hours dues-rate) 2))
+    (signature employee-signature))
+  (page "Steward review" :employer
+    (review [employee.union-card-number weekly-dues])
+    (signature steward-signature)))</code></pre>
+                </div>
+                <details class="ob-lowered" data-verbs="form"><summary>Lowers to</summary><pre><code></code></pre></details>
+              </article>
+
+              <article class="ob-verb" id="verb-policy">
+                <header><h3><code>policy</code></h3><p>When a placement matches, require forms.</p></header>
+                <pre class="ob-syntax"><code>(policy name "Title" :when rule :require [form (form :when rule) ...])</code></pre>
+                <div class="ob-verb-body">
+                  <div>
+                    <p>A policy applies when its <code>:when</code> rule is true, then requires each listed form, optionally behind its own rule. When a rule is unknown, the policy or form is undecided rather than skipped, and the evaluator reports the missing facts.</p>
+                    <h4>Checked</h4>
+                    <ul><li>Rules read only placement, employee, employer, client, and job facts</li><li>Each form appears at most once per policy</li><li>Every form reference resolves</li></ul>
+                  </div>
+                  <pre class="ob-example" data-source><code>(policy warehouse-onboarding "Warehouse onboarding"
+  :when at-warehouse
+  :require [w4 site-safety
+            (drug-screen-consent :when client.requires-drug-screen)])</code></pre>
+                </div>
+                <details class="ob-lowered" data-verbs="policy"><summary>Lowers to</summary><pre><code></code></pre></details>
+              </article>
+
+              <article class="ob-verb" id="verb-automation">
+                <header><h3><code>automation</code> · <code>param</code></h3><p>A trigger, then steps.</p></header>
+                <pre class="ob-syntax"><code>(automation name "Title" :on (task-created form) step ...)
+step: (wait n :days :after path) (when rule step ...) (email :employee template "Subject" "Body") (assign form)</code></pre>
+                <div class="ob-verb-body">
+                  <div>
+                    <p>Triggers are <code>(task-created form)</code>, <code>(task-completed form)</code>, and <code>(placement-created)</code>. Steps run in order; <code>when</code> runs its steps only when the rule is true. Email bodies render <code>{{ entity.field }}</code> variables. A <code>param</code> is a value each target account supplies, such as an email template.</p>
+                    <h4>Checked</h4>
+                    <ul><li>Task triggers may read task and employee facts; placement triggers read placement facts</li><li>Waiting after <code>task.due-at</code> requires the form’s <code>:due-in</code></li><li>Templates are <code>:sendgrid-template</code> parameters; variables exist and are in scope</li><li>Rendering a sensitive attribute is a warning</li></ul>
+                  </div>
+                  <pre class="ob-example" data-source><code>(param overdue-template :sendgrid-template "Supplied per target account.")
+
+(automation union-card-reminder "Union card reminder"
+  :on (task-created union-card)
+  (wait 2 :days :after task.due-at)
+  (when (not= task.status :completed)
+    (email :employee overdue-template "Your union card is overdue"
+      "Hi {{ employee.first_name }}, please complete your union card.")))</code></pre>
+                </div>
+                <details class="ob-lowered" data-verbs="automation param"><summary>Lowers to</summary><pre><code></code></pre></details>
+              </article>
+
+              <article class="ob-verb" id="verb-group">
+                <header><h3><code>group</code></h3><p>Permissions, plus what the group can see.</p></header>
+                <pre class="ob-syntax"><code>(group name "Title" :can [:entity/verb ...] :sees rule)</code></pre>
+                <div class="ob-verb-body">
+                  <div>
+                    <p><code>:can</code> grants permissions such as <code>:task/edit</code>. <code>:sees</code> is an access rule over the records the group may view, and it may read only attributes declared with <code>:scope</code>. That boundary is checked through named rules as well.</p>
+                    <h4>Checked</h4>
+                    <ul><li>Permissions come from a known set, with suggestions</li><li>Access rules read only <code>:scope</code> attributes</li></ul>
+                  </div>
+                  <pre class="ob-example" data-source><code>(group west-managers "West region managers"
+  :can [:placement/read :employee/read :task/read :task/edit]
+  :sees (= client.region :west))</code></pre>
+                </div>
+                <details class="ob-lowered" data-verbs="group"><summary>Lowers to</summary><pre><code></code></pre></details>
+              </article>
+
+              <article class="ob-verb" id="verb-integration">
+                <header><h3><code>integration</code></h3><p>Pin a provider; leave credentials with the account.</p></header>
+                <pre class="ob-syntax"><code>(integration name "provider@revision" :connection "reference" :setting value ...)</code></pre>
+                <div class="ob-verb-body">
+                  <div>
+                    <p>An integration names an exact provider revision, a connection reference the target account resolves, and only the settings it uses. The program never holds a credential.</p>
+                    <h4>Checked</h4>
+                    <ul><li>The provider revision is pinned</li><li>A <code>:connection</code> reference is present</li></ul>
+                  </div>
+                  <pre class="ob-example" data-source><code>(integration checkr "@onboarded-platform/checkr@1.4.0"
+  :connection "checkr"
+  :package "driver_pro"
+  :adjudication :manual)</code></pre>
+                </div>
+                <details class="ob-lowered" data-verbs="integration"><summary>Lowers to</summary><pre><code></code></pre></details>
+              </article>
+
+              <article class="ob-verb" id="verb-scenario">
+                <header><h3><code>scenario</code></h3><p>Facts in, outcomes out, on any day.</p></header>
+                <pre class="ob-syntax"><code>(scenario "Title" {path value ...} (expect ...) (day n (record path value) (complete form) (expect ...)))
+expect: :policies [..] :forms [..] :unknown {name [paths]} :tasks [..] :open [..] :emails [..]</code></pre>
+                <div class="ob-verb-body">
+                  <div>
+                    <p>A scenario creates a placement from its facts on day 0. Policies assign tasks, and automations run. <code>day</code> moves the clock forward, resuming any waits, then records facts, completes tasks, and checks expectations. When an expectation names policies or forms, undecided outcomes must be listed under <code>:unknown</code>.</p>
+                    <h4>Checked</h4>
+                    <ul><li>Facts are typed; task facts come from the simulation</li><li>Days increase; completed forms write only what they declare</li><li>Every policy and automation decision is seen true and false across scenarios</li></ul>
+                  </div>
+                  <pre class="ob-example" data-source><code>(scenario "union local recorded on day five"
+  {job.site-type :office placement.weekly-hours 32}
+  (expect :forms [] :unknown {union-card-obligation [placement.union-local]})
+  (day 5 (record placement.union-local :local-42)
+         (expect :policies [union-card-obligation] :tasks [union-card])))</code></pre>
+                </div>
+                <details class="ob-lowered" data-verbs="scenario"><summary>Lowers to</summary><pre><code></code></pre></details>
+              </article>
+            </section>
+
+            <section id="checks" class="ob-section" aria-labelledby="checks-title">
+              <span class="ob-label">04 / Checks</span>
+              <h2 id="checks-title">Mistakes are errors<br /><em>where they are written.</em></h2>
+              <p class="ob-intro">Each edit below was applied to the real file and run through the same checker; the output is recorded from that run. Tests require every one to produce exactly one located error.</p>
+              <div class="ob-checks" id="checks-panel" hidden>
+                <div class="ob-mistakes" id="mistakes" role="group" aria-label="Example mistake"></div>
+                <div class="ob-mistake">
+                  <div class="ob-mistake-copy" id="mistake-copy" aria-live="polite"></div>
+                  <div class="ob-code-panel"><div class="ob-code-bar"><span id="mistake-diff-label">Edit</span><span>Applied to northwind.account.lisp</span></div><pre><code id="mistake-diff"></code></pre></div>
+                  <div class="ob-code-panel ob-code-panel--error"><div class="ob-code-bar"><span>pnpm account:check</span><span>Recorded output</span></div><pre><code id="mistake-output"></code></pre></div>
+                </div>
+              </div>
+            </section>
+
+            <section id="simulator" class="ob-section" aria-labelledby="simulator-title">
+              <span class="ob-label">05 / Three-state policies</span>
+              <h2 id="simulator-title">Missing is not false.<br /><em>It is unknown.</em></h2>
+              <p class="ob-intro">Choose placement facts, including ones not recorded yet. The example’s policy evaluator ran on every combination. An unknown policy names the facts it is waiting for instead of quietly deciding no.</p>
+              <div class="ob-simulator" id="simulator-panel" hidden>
+                <form class="ob-sim-facts" id="sim-form"><span class="ob-label">Placement facts</span></form>
+                <div class="ob-sim-result" id="sim-result" aria-live="polite"></div>
+              </div>
+            </section>
+
+            <section id="scenarios" class="ob-section" aria-labelledby="scenarios-title">
+              <span class="ob-label">06 / Scenarios</span>
+              <h2 id="scenarios-title">Play a placement<br /><em>forward in time.</em></h2>
+              <p class="ob-intro">Policies assign tasks. Automations wait for due dates, decide, email, and assign. Pick a scenario to see its recorded timeline; the check requires every decision to be seen both true and false.</p>
+              <div class="ob-scenarios" id="scenarios-panel" hidden>
+                <div class="ob-scenario-list" id="scenario-list" role="group" aria-label="Scenario"></div>
+                <ol class="ob-timeline" id="timeline" aria-live="polite"></ol>
+              </div>
+              <div class="ob-coverage" id="coverage-panel" hidden>
+                <div><span class="ob-label">Decision coverage</span><h3>Every branch, both ways.</h3><p>Counts are scenarios that saw each outcome. Unknown is reported, but only true and false are required.</p></div>
+                <table><thead><tr><th scope="col">Decision</th><th scope="col">True</th><th scope="col">False</th><th scope="col">Unknown</th></tr></thead><tbody id="coverage"></tbody></table>
+              </div>
+            </section>
+
+            <section id="domain" class="ob-section" aria-labelledby="domain-title">
+              <span class="ob-label">07 / Under the hood</span>
+              <h2 id="domain-title">The domain the account<br /><em>configures.</em></h2>
+              <p class="ob-intro">Accounts belong to organizations. Placements describe employment context, tasks run against versioned forms, and policies, groups, and custom properties configure them. This TypeScript ontology runs on Open Ontology’s local in-memory Triplex runtime.</p>
+              <div id="explorer" class="ob-explorer" aria-labelledby="explorer-title">
+                <div class="ob-toolbar">
+                  <div><span class="ob-label">The model</span><h3 id="explorer-title">One workflow. A connected vocabulary.</h3></div>
+                  <a class="ob-download" href="/onboarded/model.json" download="onboarded-model.json">↓ Model + transcript</a>
+                </div>
+                <div class="ob-workspace" id="workspace" hidden>
+                  <aside class="ob-sidebar" aria-label="Ontology declarations">
+                    <label class="ob-search"><span class="oo-sr">Search objects, links, actions, and queries</span><span aria-hidden="true">⌕</span><input id="model-search" type="search" placeholder="Find a concept…" autocomplete="off" /></label>
+                    <div id="declaration-list"></div>
+                    <p id="search-count" class="oo-sr" role="status"></p>
+                    <p class="ob-sidebar-note">TypeScript → portable IR<br /><span>Local in-memory runtime · v0.1</span></p>
+                  </aside>
+                  <div class="ob-canvas">
+                    <div class="ob-canvas-heading"><span class="ob-label">Domain graph</span><span id="model-counts"></span></div>
+                    <div class="ob-graph-views" id="graph-views" role="group" aria-label="Domain graph view"></div>
+                    <div class="ob-graph" id="graph" aria-label="Connected ontology objects">
+                      <svg id="graph-lines" viewBox="0 0 600 500" aria-hidden="true"><defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7" fill="currentColor" /></marker></defs><g id="edges"></g></svg>
+                      <div id="graph-nodes"></div>
+                    </div>
+                    <div class="ob-legend"><span><i class="ob-key ob-key--account"></i> Domain records</span><span><i class="ob-key ob-key--workflow"></i> Configuration</span><span>→ Reference</span></div>
+                    <p class="ob-graph-caption" id="graph-caption" aria-live="polite"></p>
+                    <div class="ob-flow" aria-label="Inspect workflow declarations">
+                      <button type="button" data-select="start-task"><span>Action</span>start-task</button><span aria-hidden="true">→</span>
+                      <button type="button" data-select="request-review"><span>Action</span>request-review</button><span aria-hidden="true">→</span>
+                      <button type="button" data-select="review-queue"><span>Query</span>review-queue</button>
+                    </div>
+                  </div>
+                  <aside class="ob-inspector" aria-label="Selected declaration">
+                    <div class="ob-inspector-top"><span class="ob-label">Inspector</span><span class="ob-live">From the model</span></div>
+                    <div id="inspector-heading" aria-live="polite"></div>
+                    <div class="ob-switch" role="group" aria-label="Inspector view"><button type="button" id="definition-button" aria-pressed="true">Definition</button><button type="button" id="ir-button" aria-pressed="false">Portable IR</button></div>
+                    <div id="inspector-body"></div>
+                  </aside>
+                </div>
+                <p id="model-load-status" role="status" class="ob-fallback">The model connects organizations and accounts, employees and placements, tasks and versioned forms, and policy/access configuration. <a href="/onboarded/model.json">Read the model and runtime transcript as JSON ↗</a></p>
+              </div>
+
+              <div class="ob-transcript" aria-labelledby="transcript-title">
+                <div><span class="ob-label">A small, executable example</span><h3 id="transcript-title">Follow a task into review.</h3><p>A task uses a concrete form template. These controls explore a recorded local Triplex scenario: employee input, employer review, and reassignment to another dashboard user. The demo actions do not call Onboarded’s API.</p><code>pnpm example:onboarded</code></div>
+                <div class="ob-transcript-panel">
+                  <div class="ob-transcript-bar"><span>Local runtime transcript</span><div role="group" aria-label="Recorded workflow state"><button type="button" data-state="before" aria-pressed="true" disabled>01 Employee input</button><button type="button" data-state="after" aria-pressed="false" disabled>02 Employer review</button><button type="button" data-state="reassigned" aria-pressed="false" disabled>03 Reassigned</button></div></div>
+                  <p id="transcript-caption">start-task creates an employee task; request-review replaces its next action and employer assignee.</p>
+                  <pre><code id="transcript-output">Open /onboarded/model.json for the recorded query results.</code></pre>
+                </div>
+              </div>
+            </section>
+
+            <section id="status" class="ob-section" aria-labelledby="status-title">
+              <span class="ob-label">08 / Status</span>
+              <h2 id="status-title">What runs today,<br /><em>and what would come next.</em></h2>
+              <p class="ob-intro">The account program is example code, separate from the package’s portable ontology IR. It shows the shape of an Onboarded prelude; it is not one yet.</p>
+              <div class="ob-boundary">
+                <article><span class="ob-label">Runs in this repository</span><ul><li>Forma reader parsing, with every check reported at a line and column</li><li>Type, vocabulary, fact-scope, permission-scope, and reference checks</li><li>Lowering to directional account, property, form, policy, automation, group, and integration resources</li><li>Three-state policy evaluation and a day-by-day scenario simulator with decision coverage</li></ul></article>
+                <article><span class="ob-label">Not built</span><ul><li>Production resource formats or byte-identical snapshots of them</li><li>Planning against, or deploying to, a live Onboarded account</li><li>Form rendering, Liquid beyond simple variables, and runtime formula evaluation</li><li>Integration behavior, persistence, authorization, or an <code>onboarded</code> Forma prelude</li></ul></article>
+              </div>
+              <div class="ob-takeaway"><span class="ob-label">The direction</span><p>Write the account once, prove it with scenarios, and let a prelude elaborate the same declarations to the platform’s own configuration.</p></div>
+            </section>
+          </div>
+        </div>
+      </main>
+      <footer class="ob-footer"><a class="oo-brand" href="/">Open Ontology</a><p>Experimental v0.1 · Local in-memory runtime</p><a href="https://github.com/bjacobso/open-ontology/tree/main/examples/onboarded">Example source ↗</a></footer>
+    </div>
+  </body>
+</html>
