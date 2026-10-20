@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f6f5ef" />
+    <meta name="description" content="A design study for Zapier workflows as code: describe triggers, filters, actions, and cross-platform references in one reviewable program with Open Ontology." />
+    <title>Zapier workflows as code · Open Ontology</title>
+    <link rel="canonical" href="https://open-ontology.com/zapier" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="text/plain" href="/llms-full.txt" title="Open Ontology agent guide" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/site.css" />
+    <link rel="stylesheet" href="/zapier/zapier.css" />
+    <script defer src="/site.js"></script>
+    <script type="module" src="/zapier/zapier.js"></script>
+  </head>
+  <body>
+    <div class="oo zp">
+      <a class="oo-skip" href="#main">Skip to content</a>
+      <header class="oo-nav">
+        <a class="oo-brand" href="/"><img src="/favicon.svg" width="24" height="24" alt="" />Open Ontology</a>
+        <nav aria-label="Main navigation">
+          <a href="#workflow">The workflow</a>
+          <a href="#connections">The connections</a>
+          <a href="#status">Status</a>
+          <a class="oo-nav__guide" href="https://github.com/bjacobso/open-ontology">Explore the source</a>
+        </nav>
+      </header>
+
+      <main id="main">
+        <div class="zp-wrap">
+          <div class="zp-breadcrumb"><a href="/">Open Ontology</a><span aria-hidden="true">/</span><span>Platform studies</span><span aria-hidden="true">/</span><strong>Zapier</strong></div>
+          <section class="zp-hero" aria-labelledby="hero-title">
+            <div class="zp-hero-copy">
+              <p class="zp-eyebrow"><span class="zp-asterisk" aria-hidden="true"><svg viewBox="0 0 40 40" width="32" height="32" fill="none" stroke="currentColor" stroke-width="7"><path d="M20 1v38M1 20h38M6.5 6.5l27 27M6.5 33.5l27-27" /></svg></span> Zapier, as a program</p>
+              <h1 id="hero-title">Your Zaps.<br />In code.<br /><em>In context.</em></h1>
+              <p class="zp-lead">Your automation connects your tools.<br />Its configuration should connect, too.</p>
+              <p class="zp-description">A Salesforce opportunity. A Stripe customer. A Slack channel. Describe the workflow in one reviewable file, with explicit references to the systems it connects.</p>
+              <div class="zp-actions"><a class="zp-primary" href="#workflow">Follow the workflow <span aria-hidden="true">↘</span></a><a class="zp-text-link" href="#connections">See the bigger picture <span aria-hidden="true">↓</span></a></div>
+              <p class="zp-hero-note"><span aria-hidden="true"></span> Design study · Proposed prelude · No live connections</p>
+            </div>
+
+            <figure class="zp-blueprint">
+              <div class="zp-blueprint-bar"><span><i aria-hidden="true"></i> closed-won.zap.forma</span><span>WORKFLOW / 001</span></div>
+              <div class="zp-flow">
+                <div class="zp-node"><span class="zp-app zp-app--salesforce" aria-hidden="true">sf</span><div><span class="zp-node-type">01 / Trigger · Salesforce</span><strong>Opportunity updated</strong><code>sales.Opportunity</code></div><span class="zp-node-dot" aria-hidden="true"></span></div>
+                <div class="zp-wire"><span>opportunity</span></div>
+                <div class="zp-node zp-node--filter"><span class="zp-app zp-app--filter" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8Z" /></svg></span><div><span class="zp-node-type">02 / Filter</span><strong>Stage is Closed Won</strong><code>opportunity.StageName</code></div><span class="zp-node-dot" aria-hidden="true"></span></div>
+                <div class="zp-wire"><span>continue when true</span></div>
+                <div class="zp-node"><span class="zp-app zp-app--stripe" aria-hidden="true">s</span><div><span class="zp-node-type">03 / Action · Stripe</span><strong>Find a customer</strong><code>opportunity.AccountId</code></div><span class="zp-node-dot" aria-hidden="true"></span></div>
+                <div class="zp-wire"><span>customer</span></div>
+                <div class="zp-node"><span class="zp-app zp-app--slack" aria-hidden="true">#</span><div><span class="zp-node-type">04 / Action · Slack</span><strong>Tell the sales team</strong><code>workspace.channels.sales</code></div><span class="zp-node-dot" aria-hidden="true"></span></div>
+              </div>
+              <figcaption><span class="zp-connected" aria-hidden="true">→</span> Three platforms. One connected definition.<span class="zp-figure-label">Illustrative workflow</span></figcaption>
+            </figure>
+          </section>
+        </div>
+
+        <div class="zp-principles" aria-label="The proposed approach"><div class="zp-wrap"><p><span>01</span> Write the workflow</p><span aria-hidden="true">→</span><p><span>02</span> Check the connections</p><span aria-hidden="true">→</span><p><span>03</span> Review the change</p></div></div>
+
+        <div class="zp-wrap">
+          <section id="workflow" class="zp-section" aria-labelledby="workflow-title">
+            <div class="zp-section-heading"><p class="zp-label">01 / The workflow</p><h2 id="workflow-title">A Zap is already a program.<br /><em>Give it a source file.</em></h2><p>Triggers start it. Filters decide. Actions pass data to the next system. A proposed Zapier prelude would give those familiar concepts a small, declarative vocabulary.</p></div>
+            <div class="zp-source-layout">
+              <div class="zp-code-panel"><div class="zp-panel-bar"><span><span class="zp-file-icon" aria-hidden="true">( )</span> closed-won.zap.forma</span><span>Proposed syntax</span></div><pre><code class="lang-lisp">; Bring the connected systems into scope.
+(import "@acme/sales" :as sales)
+(import "@acme/billing" :as billing)
+(import "@acme/workspace" :as workspace)
+
+(zap closed-won "Welcome a new customer"
+  (trigger opportunity
+    (salesforce/updated sales.Opportunity))
+
+  (filter (= opportunity.StageName "Closed Won"))
+
+  (action customer
+    (stripe/find-customer billing.account
+      :salesforce-account opportunity.AccountId))
+
+  (action notify
+    (slack/send-message workspace.channels.sales
+      :text (str "New customer: " customer.name))))</code></pre><div class="zp-code-foot"><span>Forma / Zapier prelude concept</span><a href="#status">Implementation status ↗</a></div></div>
+              <div class="zp-annotations"><article><span class="zp-label">Import the real context</span><h3>References with a home.</h3><p>The sales model owns the opportunity. Billing owns the customer lookup. The workspace owns the channel. The workflow refers to those definitions.</p></article><article><span class="zp-label">Follow the data</span><h3>Every step has a name.</h3><p><code>opportunity</code> feeds the filter and customer lookup. <code>customer</code> feeds the message. The data dependencies are visible in the source.</p></article><article><span class="zp-label">Keep the platform vocabulary</span><h3>Still a Zap.</h3><p>The proposal describes a Zapier workflow in Zapier’s terms. A future adapter would need to map these declarations to supported platform resources.</p></article></div>
+            </div>
+            <p class="zp-disclosure">This source is a language design sketch. The imports, Zapier forms, and platform adapters shown here are proposed and cannot be executed by the current package.</p>
+          </section>
+
+          <section id="connections" class="zp-section" aria-labelledby="connections-title">
+            <div class="zp-section-heading"><p class="zp-label">02 / The connections</p><h2 id="connections-title">The lines between your apps<br /><em>are part of the model.</em></h2><p>A field mapping is a dependency. A channel is a reference. Open Ontology’s direction is to make these connections part of one checked program, across platform boundaries.</p></div>
+            <div class="zp-context-map" aria-label="Proposed dependencies: a Zapier workflow references Salesforce Opportunity, Stripe customer mapping, and a Slack sales channel">
+              <div class="zp-context-hub"><span class="zp-asterisk" aria-hidden="true"><svg viewBox="0 0 40 40" width="32" height="32" fill="none" stroke="currentColor" stroke-width="7"><path d="M20 1v38M1 20h38M6.5 6.5l27 27M6.5 33.5l27-27" /></svg></span><div><span class="zp-label">@acme/automations</span><h3>closed-won</h3><p>The workflow that connects them.</p></div></div>
+              <div class="zp-context-targets"><article><span class="zp-app zp-app--salesforce" aria-hidden="true">sf</span><span><strong>Salesforce</strong><code>sales.Opportunity.AccountId</code></span><span class="zp-reference">Field reference</span></article><article><span class="zp-app zp-app--stripe" aria-hidden="true">s</span><span><strong>Stripe</strong><code>billing.account</code></span><span class="zp-reference">Lookup contract</span></article><article><span class="zp-app zp-app--slack" aria-hidden="true">#</span><span><strong>Slack</strong><code>workspace.channels.sales</code></span><span class="zp-reference">Channel reference</span></article></div>
+            </div>
+            <div class="zp-benefits"><article><span class="zp-label">Shared definitions</span><h3>Define it where it belongs.</h3><p>Keep platform configuration in its own project. Let workflows import the definitions they depend on.</p></article><article><span class="zp-label">Visible dependencies</span><h3>See what a rename touches.</h3><p>A future cross-project checker could point from a changed field to the workflows that still reference it.</p></article><article><span class="zp-label">Agent-readable context</span><h3>Give agents the whole picture.</h3><p>Source files can describe the workflow, its inputs, and its dependencies together in a repository.</p></article></div>
+          </section>
+
+          <section id="review" class="zp-section" aria-labelledby="review-title">
+            <div class="zp-review-layout"><div class="zp-section-heading"><p class="zp-label">03 / The change</p><h2 id="review-title">Small edit.<br /><em>Visible consequences.</em></h2><p>The review should show what changes and which connections need attention. These static examples illustrate the feedback a future checker could provide.</p><div class="zp-review-options" role="group" aria-label="Illustrative configuration change" hidden><button type="button" data-example="channel" aria-pressed="true"><span aria-hidden="true">↗</span> Route to another channel</button><button type="button" data-example="field" aria-pressed="false"><span aria-hidden="true">→</span> Rename an upstream field</button></div></div>
+              <div class="zp-review-panel"><div class="zp-panel-bar"><span>Pull request / closed-won</span><span>Illustrative review</span></div><div id="review-content" aria-live="polite" aria-atomic="true"><div class="zp-diff"><p class="zp-diff-context">(slack/send-message</p><p class="zp-diff-remove">− workspace.channels.sales</p><p class="zp-diff-add">+ workspace.channels.customer-success</p><p class="zp-diff-context">  :text (str "New customer: " customer.name))</p></div><div class="zp-review-result"><span class="zp-result-icon" aria-hidden="true">↗</span><div><strong>A destination change you can review.</strong><p>The proposed reference resolves to a channel defined in the workspace project. The trigger, filter, and customer lookup keep their existing definitions.</p></div></div></div><div class="zp-review-foot">Static design examples · No checker runs in this page</div></div>
+            </div>
+          </section>
+
+          <section id="status" class="zp-section zp-status" aria-labelledby="status-title"><div class="zp-section-heading"><p class="zp-label">04 / A direction, with clear boundaries</p><h2 id="status-title">The idea is connected config.<br /><em>The starting point is open source.</em></h2><p>Open Ontology is experimental v0.1. This page explores how a Zapier prelude could fit into that work.</p></div><div class="zp-status-grid"><article><span class="zp-status-tag">Available in this repository</span><h3>The modeling foundation.</h3><p>TypeScript and Forma authoring, a portable JSON-safe ontology IR, model checks, and a local in-memory Triplex runtime. The agent guide documents the current ontology prelude.</p><a class="zp-text-link" href="/llms-full.txt">Read the current agent guide <span aria-hidden="true">↗</span></a></article><article><span class="zp-status-tag zp-status-tag--proposed">Proposed in this study</span><h3>A Zapier prelude.</h3><p>Zap declarations, connected platform imports, cross-project checking, and native workflow output. These need implementation and validation against Zapier’s supported interfaces. This page has no Zapier API connection or deployment capability.</p><a class="zp-text-link" href="https://github.com/bjacobso/open-ontology/blob/main/docs/architecture.md">Read the package boundary <span aria-hidden="true">↗</span></a></article></div></section>
+
+          <section class="zp-cta" aria-labelledby="cta-title"><span class="zp-asterisk" aria-hidden="true"><svg viewBox="0 0 40 40" width="32" height="32" fill="none" stroke="currentColor" stroke-width="7"><path d="M20 1v38M1 20h38M6.5 6.5l27 27M6.5 33.5l27-27" /></svg></span><div><p class="zp-label">Build the vocabulary with us</p><h2 id="cta-title">Make the connections explicit.</h2><p>Explore the foundation. Bring a workflow. Help shape the prelude.</p></div><a class="zp-primary" href="https://discord.gg/cjW4gxsdXK">Join the conversation <span aria-hidden="true">↗</span></a></section>
+        </div>
+      </main>
+      <footer class="zp-footer zp-wrap"><div><a class="oo-brand" href="/"><img src="/favicon.svg" width="22" height="22" alt="" />Open Ontology</a><p>Experimental v0.1 · Local in-memory runtime</p></div><nav aria-label="Footer navigation"><a href="https://help.zapier.com/hc/en-us/sections/14037543459341-Zap-editor">Zapier concepts ↗</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a><a href="/llms-full.txt">Agent guide ↗</a></nav></footer>
+    </div>
+  </body>
+</html>
