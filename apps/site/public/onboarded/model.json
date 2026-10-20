@@ -768,7 +768,7 @@
               "employee",
               "template"
             ],
-            "additionalProperties": false
+            "additionalProperties": true
           },
           "definitions": {}
         },
@@ -836,7 +836,7 @@
               "task",
               "user"
             ],
-            "additionalProperties": false
+            "additionalProperties": true
           },
           "definitions": {}
         },
