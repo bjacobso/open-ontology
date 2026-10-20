@@ -4,6 +4,8 @@ This static site preserves the layout and palette of the historical Open Ontolog
 
 `public/` is served directly as Cloudflare Worker static assets. No React app, old runtime, or workspace package is needed.
 
+`public/zapier/index.html` serves the `/zapier` landing page, a design study for a proposed Zapier prelude. Its workflow, Forma syntax, platform imports, and review feedback are illustrative. The review controls switch between static examples; there is no Zapier connection, checker, or deployment adapter behind the page. The page shares the site's typography and base styles, with scoped styles and progressive enhancement in `public/zapier/`.
+
 `public/onboarded/index.html` serves the unlisted `/onboarded` study. The page reads as a pitch followed by documentation: why, quick start, and a static guide to the nine verbs whose examples are quoted verbatim from `northwind.account.lisp` (a test checks the quotes and the hero numbers). `account.js` highlights those examples and adds the recorded material from `public/onboarded/account.json`: lowered resources per verb, diagnostics for ten example mistakes, a three-state policy simulator over precomputed results, and scenario timelines with decision coverage. `explorer.js` presents the domain ontology and runtime transcript from `public/onboarded/model.json`, with graph positions from `onboarded-views.json`. `pnpm site:export-onboarded` writes both artifacts from `examples/onboarded`, and tests check that they stay in sync. The browser evaluates nothing itself. `check.mjs` discovers HTML pages recursively and checks links to directory index routes as well as files.
 
 ```sh
