@@ -49,11 +49,11 @@
   },
   "dependencies": {
     "@formalang/ts": "0.3.0",
-    "@triplex-build/triplex": "0.2.0",
-    "effect": "4.1.1"
+    "@triplex-build/triplex": "0.2.0"
   },
   "devDependencies": {
     "@types/node": "25.9.1",
+    "effect": "4.1.1",
     "tsdown": "0.20.0",
     "tsx": "4.19.0",
     "typescript": "5.9.3",
@@ -61,7 +61,7 @@
     "wrangler": "4.142.0"
   },
   "peerDependencies": {
-    "effect": "4.1.1"
+    "effect": "^4.1.1"
   },
   "pnpm": {
     "overrides": {
