@@ -1,0 +1,99 @@
+name: PR preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+concurrency:
+  group: open-ontology-site-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    env:
+      CI: "true"
+      STAGE: pr-${{ github.event.pull_request.number }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Check Cloudflare credentials
+        id: credentials
+        run: |
+          if [[ -n "$CLOUDFLARE_API_TOKEN" && -n "$CLOUDFLARE_ACCOUNT_ID" ]]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Skipping preview deploy/cleanup: configure CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID."
+          fi
+      - uses: actions/checkout@v4
+        if: steps.credentials.outputs.available == 'true'
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: pnpm/action-setup@v4
+        if: steps.credentials.outputs.available == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.credentials.outputs.available == 'true'
+        with:
+          node-version: "24"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        if: steps.credentials.outputs.available == 'true'
+      - name: Check current PR state
+        if: steps.credentials.outputs.available == 'true' && github.event.action != 'closed'
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              ...context.repo, pull_number: context.issue.number,
+            });
+            core.setOutput("open", pr.state === "open" && pr.head.sha === context.payload.pull_request.head.sha);
+      - run: pnpm site:check
+        if: steps.credentials.outputs.available == 'true' && steps.pr.outputs.open == 'true'
+      - name: Deploy preview
+        if: steps.credentials.outputs.available == 'true' && steps.pr.outputs.open == 'true'
+        run: pnpm exec alchemy deploy --stage "$STAGE" --yes
+      - name: Read preview URL from deployment state
+        id: url
+        if: steps.credentials.outputs.available == 'true' && steps.pr.outputs.open == 'true'
+        run: |
+          pnpm exec alchemy state read "open-ontology/$STAGE/output" --backend cloudflare --name open-ontology > "$RUNNER_TEMP/preview-output.json"
+          node --input-type=module <<'NODE'
+          import { readFileSync, appendFileSync } from "node:fs";
+          const { url } = JSON.parse(readFileSync(`${process.env.RUNNER_TEMP}/preview-output.json`, "utf8"));
+          if (typeof url !== "string" || !/^https:\/\/[a-z0-9-]+\.[a-z0-9-]+\.workers\.dev\/?$/.test(url)) {
+            throw new Error("Expected a workers.dev preview URL from Alchemy state");
+          }
+          appendFileSync(process.env.GITHUB_OUTPUT, `url=${url}\n`);
+          NODE
+      - name: Destroy closed PR preview
+        if: steps.credentials.outputs.available == 'true' && github.event.action == 'closed'
+        run: pnpm exec alchemy destroy --stage "$STAGE" --yes
+      - name: Update sticky preview comment
+        if: >-
+          steps.credentials.outputs.available == 'true' &&
+          (steps.url.outputs.url != '' || github.event.action == 'closed')
+        uses: actions/github-script@v7
+        env:
+          PREVIEW_URL: ${{ steps.url.outputs.url }}
+        with:
+          script: |
+            const marker = "<!-- open-ontology-preview -->";
+            const closed = context.payload.action === "closed";
+            const body = `${marker}\n${closed
+              ? "PR preview removed."
+              : `Preview: ${process.env.PREVIEW_URL}\n\nCommit: ${context.payload.pull_request.head.sha}`}`;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              ...context.repo, issue_number: context.issue.number,
+            });
+            const comment = comments.find(c => c.user?.login === "github-actions[bot]" && c.body?.includes(marker));
+            if (comment) {
+              await github.rest.issues.updateComment({ ...context.repo, comment_id: comment.id, body });
+            } else if (!closed) {
+              await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
+            }

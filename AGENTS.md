@@ -25,7 +25,8 @@ For focused work, use `pnpm typecheck`, `pnpm test`, `pnpm build`, or `pnpm site
 - `docs/architecture.md`: package boundary and operational limits.
 - `apps/site/public/`: directly served static assets, including `llms.txt` and `llms-full.txt`; no docs build.
 - `apps/site/check.mjs`: static assets, agent-file structure, and local/repository link checks.
-- `.github/workflows/deploy-site.yml`: checks PRs and deploys the static site after merges to `main`.
+- `alchemy.run.ts`: Alchemy static-asset Worker; only `prod` binds `open-ontology.com`.
+- `.github/workflows/`: CI checks, production deployment after successful CI on `main`, and same-repository PR previews with close cleanup.
 
 ## Conventions and boundaries
 
