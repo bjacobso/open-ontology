@@ -45,14 +45,17 @@
     "account:check": "tsx scripts/check-account.ts",
     "site:check": "node apps/site/check.mjs",
     "site:dev": "wrangler dev --config apps/site/wrangler.jsonc",
-    "site:deploy": "wrangler deploy --config apps/site/wrangler.jsonc"
+    "site:deploy": "alchemy deploy --stage prod --yes"
   },
   "dependencies": {
     "@formalang/ts": "0.3.0",
     "@triplex-build/triplex": "0.2.0"
   },
   "devDependencies": {
+    "@alchemy.run/cloudflare": "2.0.0-beta.84",
+    "@effect/platform-node": "4.1.1",
     "@types/node": "25.9.1",
+    "alchemy": "2.0.0-beta.84",
     "effect": "4.1.1",
     "tsdown": "0.20.0",
     "tsx": "4.19.0",
@@ -69,7 +72,8 @@
       "@triplex-build/triplex@0.2.0>effect": "4.1.1"
     },
     "patchedDependencies": {
-      "@triplex-build/triplex@0.2.0": "patches/@triplex-build__triplex@0.2.0.patch"
+      "@triplex-build/triplex@0.2.0": "patches/@triplex-build__triplex@0.2.0.patch",
+      "alchemy@2.0.0-beta.84": "patches/alchemy@2.0.0-beta.84.patch"
     }
   },
   "engines": {
