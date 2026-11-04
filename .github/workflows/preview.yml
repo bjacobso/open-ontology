@@ -55,6 +55,11 @@ jobs:
             core.setOutput("open", pr.state === "open" && pr.head.sha === context.payload.pull_request.head.sha);
       - run: pnpm site:check
         if: steps.credentials.outputs.available == 'true' && steps.pr.outputs.open == 'true'
+      - name: Verify Cloudflare API access
+        if: >-
+          steps.credentials.outputs.available == 'true' &&
+          (steps.pr.outputs.open == 'true' || github.event.action == 'closed')
+        run: pnpm exec tsx scripts/check-cloudflare-auth.ts
       - name: Deploy preview
         if: steps.credentials.outputs.available == 'true' && steps.pr.outputs.open == 'true'
         run: pnpm exec alchemy deploy --stage "$STAGE" --yes
