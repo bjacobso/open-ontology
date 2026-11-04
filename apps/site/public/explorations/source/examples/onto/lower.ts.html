@@ -1,189 +1,196 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f6f5ef">
 <title>examples/onto/lower.ts · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
-<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css">
-<link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index"></head>
-<body class="explore"><a class="skip" href="#main">Skip to content</a><header class="explore-nav"><a href="/">Open Ontology</a><nav aria-label="Main navigation"><a href="/explorations/">Explorations</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
-<main id="main"><p class="eyebrow">Full source · ts</p><h1 class="source-title">examples/onto/lower.ts</h1>
-<p><a href="/explorations/raw/examples/onto/lower.ts">Raw source</a> · <a href="https://github.com/bjacobso/open-ontology/blob/main/examples/onto/lower.ts">View on GitHub ↗</a></p>
-<p>Click a line number to copy its location from your address bar.</p><pre class="source-code" tabindex="0"><span class="source-line" id="L1"><a class="line-number" href="#L1" aria-label="Line 1">1</a><code>import { readFileSync } from &quot;node:fs&quot;;</code></span>
-<span class="source-line" id="L2"><a class="line-number" href="#L2" aria-label="Line 2">2</a><code>import { bootstrapFromSources, elaborateSources, type ElaboratedDeclaration } from &quot;@open-ontology/onto-forma/descriptor&quot;;</code></span>
-<span class="source-line" id="L3"><a class="line-number" href="#L3" aria-label="Line 3">3</a><code>import { preludeSource } from &quot;@open-ontology/onto-forma/preludes&quot;;</code></span>
-<span class="source-line" id="L4"><a class="line-number" href="#L4" aria-label="Line 4">4</a><code>import {</code></span>
-<span class="source-line" id="L5"><a class="line-number" href="#L5" aria-label="Line 5">5</a><code>  EntityId, boolean, datetime, number, ref, string, type TransactOp, type TripleValue,</code></span>
-<span class="source-line" id="L6"><a class="line-number" href="#L6" aria-label="Line 6">6</a><code>} from &quot;@triplex-build/triplex&quot;;</code></span>
-<span class="source-line" id="L7"><a class="line-number" href="#L7" aria-label="Line 7">7</a><code>import type { ActionTypeIR, OntologyIR, OntologyValueTypeIR, PropertyIR, QueryTypeIR } from &quot;../../src/ir.js&quot;;</code></span>
-<span class="source-line" id="L8"><a class="line-number" href="#L8" aria-label="Line 8">8</a><code> </code></span>
-<span class="source-line" id="L9"><a class="line-number" href="#L9" aria-label="Line 9">9</a><code>export interface Field {</code></span>
-<span class="source-line" id="L10"><a class="line-number" href="#L10" aria-label="Line 10">10</a><code>  readonly name: string;</code></span>
-<span class="source-line" id="L11"><a class="line-number" href="#L11" aria-label="Line 11">11</a><code>  readonly type: unknown;</code></span>
-<span class="source-line" id="L12"><a class="line-number" href="#L12" aria-label="Line 12">12</a><code>  readonly link?: string;</code></span>
-<span class="source-line" id="L13"><a class="line-number" href="#L13" aria-label="Line 13">13</a><code>  readonly many: boolean;</code></span>
-<span class="source-line" id="L14"><a class="line-number" href="#L14" aria-label="Line 14">14</a><code>  readonly states?: readonly string[];</code></span>
-<span class="source-line" id="L15"><a class="line-number" href="#L15" aria-label="Line 15">15</a><code>  readonly final: readonly string[];</code></span>
-<span class="source-line" id="L16"><a class="line-number" href="#L16" aria-label="Line 16">16</a><code>}</code></span>
-<span class="source-line" id="L17"><a class="line-number" href="#L17" aria-label="Line 17">17</a><code>export interface Noun {</code></span>
-<span class="source-line" id="L18"><a class="line-number" href="#L18" aria-label="Line 18">18</a><code>  readonly kind: &quot;Actor&quot; | &quot;Object&quot;;</code></span>
-<span class="source-line" id="L19"><a class="line-number" href="#L19" aria-label="Line 19">19</a><code>  readonly name: string;</code></span>
-<span class="source-line" id="L20"><a class="line-number" href="#L20" aria-label="Line 20">20</a><code>  readonly doc: string;</code></span>
-<span class="source-line" id="L21"><a class="line-number" href="#L21" aria-label="Line 21">21</a><code>  readonly fields: readonly Field[];</code></span>
-<span class="source-line" id="L22"><a class="line-number" href="#L22" aria-label="Line 22">22</a><code>}</code></span>
-<span class="source-line" id="L23"><a class="line-number" href="#L23" aria-label="Line 23">23</a><code>export interface Expression {</code></span>
-<span class="source-line" id="L24"><a class="line-number" href="#L24" aria-label="Line 24">24</a><code>  readonly kind: &quot;raw-expr&quot;;</code></span>
-<span class="source-line" id="L25"><a class="line-number" href="#L25" aria-label="Line 25">25</a><code>  readonly expr: unknown;</code></span>
-<span class="source-line" id="L26"><a class="line-number" href="#L26" aria-label="Line 26">26</a><code>}</code></span>
-<span class="source-line" id="L27"><a class="line-number" href="#L27" aria-label="Line 27">27</a><code>export interface Step {</code></span>
-<span class="source-line" id="L28"><a class="line-number" href="#L28" aria-label="Line 28">28</a><code>  readonly kind: &quot;Step&quot;;</code></span>
-<span class="source-line" id="L29"><a class="line-number" href="#L29" aria-label="Line 29">29</a><code>  readonly actor: string;</code></span>
-<span class="source-line" id="L30"><a class="line-number" href="#L30" aria-label="Line 30">30</a><code>  readonly verb: string;</code></span>
-<span class="source-line" id="L31"><a class="line-number" href="#L31" aria-label="Line 31">31</a><code>  readonly object: string;</code></span>
-<span class="source-line" id="L32"><a class="line-number" href="#L32" aria-label="Line 32">32</a><code>  readonly counterpart?: string;</code></span>
-<span class="source-line" id="L33"><a class="line-number" href="#L33" aria-label="Line 33">33</a><code>  readonly creates: boolean;</code></span>
-<span class="source-line" id="L34"><a class="line-number" href="#L34" aria-label="Line 34">34</a><code>  readonly requires: readonly Expression[];</code></span>
-<span class="source-line" id="L35"><a class="line-number" href="#L35" aria-label="Line 35">35</a><code>  readonly sets: readonly { readonly field: string; readonly value: string }[];</code></span>
-<span class="source-line" id="L36"><a class="line-number" href="#L36" aria-label="Line 36">36</a><code>}</code></span>
-<span class="source-line" id="L37"><a class="line-number" href="#L37" aria-label="Line 37">37</a><code>type Declaration = Noun</code></span>
-<span class="source-line" id="L38"><a class="line-number" href="#L38" aria-label="Line 38">38</a><code>  | { readonly kind: &quot;Project&quot;; readonly name: string; readonly doc: string }</code></span>
-<span class="source-line" id="L39"><a class="line-number" href="#L39" aria-label="Line 39">39</a><code>  | { readonly kind: &quot;Story&quot;; readonly name: string; readonly doc: string; readonly steps: readonly Step[] }</code></span>
-<span class="source-line" id="L40"><a class="line-number" href="#L40" aria-label="Line 40">40</a><code>  | { readonly kind: &quot;Seed&quot;; readonly of: string; readonly rows: readonly Readonly&lt;Record&lt;string, unknown&gt;&gt;[] }</code></span>
-<span class="source-line" id="L41"><a class="line-number" href="#L41" aria-label="Line 41">41</a><code>  | { readonly kind: &quot;Rule&quot;; readonly name: string; readonly of: string; readonly holds: Expression }</code></span>
-<span class="source-line" id="L42"><a class="line-number" href="#L42" aria-label="Line 42">42</a><code>  | { readonly kind: &quot;Formula&quot;; readonly of: string; readonly field: string; readonly body: Expression };</code></span>
-<span class="source-line" id="L43"><a class="line-number" href="#L43" aria-label="Line 43">43</a><code> </code></span>
-<span class="source-line" id="L44"><a class="line-number" href="#L44" aria-label="Line 44">44</a><code>export const ontoPrelude = readFileSync(new URL(&quot;./onto.lisp&quot;, import.meta.url), &quot;utf8&quot;);</code></span>
-<span class="source-line" id="L45"><a class="line-number" href="#L45" aria-label="Line 45">45</a><code>export const hotelSource = readFileSync(new URL(&quot;./hotel.forma&quot;, import.meta.url), &quot;utf8&quot;);</code></span>
-<span class="source-line" id="L46"><a class="line-number" href="#L46" aria-label="Line 46">46</a><code>const prelude = bootstrapFromSources(preludeSource(&quot;compiler.lisp&quot;), ontoPrelude);</code></span>
-<span class="source-line" id="L47"><a class="line-number" href="#L47" aria-label="Line 47">47</a><code>export const elaborateHotel = (source = hotelSource) =&gt;</code></span>
-<span class="source-line" id="L48"><a class="line-number" href="#L48" aria-label="Line 48">48</a><code>  elaborateSources([{ sourceId: &quot;hotel.forma&quot;, source }], { prelude });</code></span>
-<span class="source-line" id="L49"><a class="line-number" href="#L49" aria-label="Line 49">49</a><code> </code></span>
-<span class="source-line" id="L50"><a class="line-number" href="#L50" aria-label="Line 50">50</a><code>export const kebab = (name: string): string =&gt; name.replace(/([a-z0-9])([A-Z])/g, &quot;$1-$2&quot;).toLowerCase();</code></span>
-<span class="source-line" id="L51"><a class="line-number" href="#L51" aria-label="Line 51">51</a><code>export const attribute = (owner: string, field: string): `:${string}/${string}` =&gt; `:${kebab(owner)}/${field}`;</code></span>
-<span class="source-line" id="L52"><a class="line-number" href="#L52" aria-label="Line 52">52</a><code>export const declarationsOf = (declarations: readonly ElaboratedDeclaration[]): readonly Declaration[] =&gt;</code></span>
-<span class="source-line" id="L53"><a class="line-number" href="#L53" aria-label="Line 53">53</a><code>  declarations.map(({ payload }) =&gt; payload as unknown as Declaration);</code></span>
-<span class="source-line" id="L54"><a class="line-number" href="#L54" aria-label="Line 54">54</a><code>export const nounsOf = (declarations: readonly ElaboratedDeclaration[]): readonly Noun[] =&gt;</code></span>
-<span class="source-line" id="L55"><a class="line-number" href="#L55" aria-label="Line 55">55</a><code>  declarationsOf(declarations).filter((d): d is Noun =&gt; d.kind === &quot;Actor&quot; || d.kind === &quot;Object&quot;);</code></span>
-<span class="source-line" id="L56"><a class="line-number" href="#L56" aria-label="Line 56">56</a><code>export const stepsOf = (declarations: readonly ElaboratedDeclaration[]) =&gt;</code></span>
-<span class="source-line" id="L57"><a class="line-number" href="#L57" aria-label="Line 57">57</a><code>  declarationsOf(declarations).flatMap((d) =&gt; d.kind === &quot;Story&quot;</code></span>
-<span class="source-line" id="L58"><a class="line-number" href="#L58" aria-label="Line 58">58</a><code>    ? d.steps.map((step) =&gt; ({ name: `${kebab(d.name)}-${step.verb}`, step })) : []);</code></span>
-<span class="source-line" id="L59"><a class="line-number" href="#L59" aria-label="Line 59">59</a><code> </code></span>
-<span class="source-line" id="L60"><a class="line-number" href="#L60" aria-label="Line 60">60</a><code>const valueType = (field: Field): OntologyValueTypeIR =&gt; {</code></span>
-<span class="source-line" id="L61"><a class="line-number" href="#L61" aria-label="Line 61">61</a><code>  if (field.link) return { kind: &quot;ref&quot;, target: field.link };</code></span>
-<span class="source-line" id="L62"><a class="line-number" href="#L62" aria-label="Line 62">62</a><code>  if (field.states || field.type === &quot;String&quot;) return { kind: &quot;string&quot; };</code></span>
-<span class="source-line" id="L63"><a class="line-number" href="#L63" aria-label="Line 63">63</a><code>  if (field.type === &quot;Int&quot;) return { kind: &quot;number&quot; };</code></span>
-<span class="source-line" id="L64"><a class="line-number" href="#L64" aria-label="Line 64">64</a><code>  if (field.type === &quot;Instant&quot;) return { kind: &quot;datetime&quot; };</code></span>
-<span class="source-line" id="L65"><a class="line-number" href="#L65" aria-label="Line 65">65</a><code>  if (field.type === &quot;Bool&quot;) return { kind: &quot;boolean&quot; };</code></span>
-<span class="source-line" id="L66"><a class="line-number" href="#L66" aria-label="Line 66">66</a><code>  throw new TypeError(`Unsupported Onto field type: ${JSON.stringify(field.type)}`);</code></span>
-<span class="source-line" id="L67"><a class="line-number" href="#L67" aria-label="Line 67">67</a><code>};</code></span>
-<span class="source-line" id="L68"><a class="line-number" href="#L68" aria-label="Line 68">68</a><code>const property = (owner: string, field: Field): PropertyIR =&gt; ({</code></span>
-<span class="source-line" id="L69"><a class="line-number" href="#L69" aria-label="Line 69">69</a><code>  name: field.name, key: attribute(owner, field.name), valueType: valueType(field),</code></span>
-<span class="source-line" id="L70"><a class="line-number" href="#L70" aria-label="Line 70">70</a><code>  required: false, cardinality: field.many ? &quot;many&quot; : &quot;one&quot;, unique: false,</code></span>
-<span class="source-line" id="L71"><a class="line-number" href="#L71" aria-label="Line 71">71</a><code>});</code></span>
-<span class="source-line" id="L72"><a class="line-number" href="#L72" aria-label="Line 72">72</a><code> </code></span>
-<span class="source-line" id="L73"><a class="line-number" href="#L73" aria-label="Line 73">73</a><code>const lowerStep = (name: string, step: Step, nouns: readonly Noun[]): ActionTypeIR =&gt; {</code></span>
-<span class="source-line" id="L74"><a class="line-number" href="#L74" aria-label="Line 74">74</a><code>  const noun = nouns.find((n) =&gt; n.name === step.object);</code></span>
-<span class="source-line" id="L75"><a class="line-number" href="#L75" aria-label="Line 75">75</a><code>  if (!noun) throw new TypeError(`Unknown step object ${step.object}`);</code></span>
-<span class="source-line" id="L76"><a class="line-number" href="#L76" aria-label="Line 76">76</a><code>  // Create inputs supply the single-valued facts. Collection membership remains explicit facts.</code></span>
-<span class="source-line" id="L77"><a class="line-number" href="#L77" aria-label="Line 77">77</a><code>  const fields = step.creates ? noun.fields.filter((f) =&gt; !f.many &amp;&amp; !step.sets.some((s) =&gt; s.field === f.name)) : [];</code></span>
-<span class="source-line" id="L78"><a class="line-number" href="#L78" aria-label="Line 78">78</a><code>  const id = { kind: &quot;input&quot; as const, name: &quot;id&quot; };</code></span>
-<span class="source-line" id="L79"><a class="line-number" href="#L79" aria-label="Line 79">79</a><code>  return {</code></span>
-<span class="source-line" id="L80"><a class="line-number" href="#L80" aria-label="Line 80">80</a><code>    kind: &quot;action-type&quot;, name,</code></span>
-<span class="source-line" id="L81"><a class="line-number" href="#L81" aria-label="Line 81">81</a><code>    input: [{ name: &quot;id&quot;, valueType: { kind: &quot;string&quot; } },</code></span>
-<span class="source-line" id="L82"><a class="line-number" href="#L82" aria-label="Line 82">82</a><code>      ...fields.map((f) =&gt; ({ name: f.name, valueType: valueType(f) }))],</code></span>
-<span class="source-line" id="L83"><a class="line-number" href="#L83" aria-label="Line 83">83</a><code>    changes: step.creates ? [{</code></span>
-<span class="source-line" id="L84"><a class="line-number" href="#L84" aria-label="Line 84">84</a><code>      kind: &quot;create-object&quot;, objectType: step.object, id,</code></span>
-<span class="source-line" id="L85"><a class="line-number" href="#L85" aria-label="Line 85">85</a><code>      properties: Object.fromEntries([</code></span>
-<span class="source-line" id="L86"><a class="line-number" href="#L86" aria-label="Line 86">86</a><code>        ...fields.map((f) =&gt; [attribute(step.object, f.name), { kind: &quot;input&quot;, name: f.name }]),</code></span>
-<span class="source-line" id="L87"><a class="line-number" href="#L87" aria-label="Line 87">87</a><code>        ...step.sets.map((s) =&gt; [attribute(step.object, s.field), s.value]),</code></span>
-<span class="source-line" id="L88"><a class="line-number" href="#L88" aria-label="Line 88">88</a><code>      ]),</code></span>
-<span class="source-line" id="L89"><a class="line-number" href="#L89" aria-label="Line 89">89</a><code>    }] : step.sets.flatMap((s) =&gt; [</code></span>
-<span class="source-line" id="L90"><a class="line-number" href="#L90" aria-label="Line 90">90</a><code>      { kind: &quot;clear-property&quot; as const, object: id, property: attribute(step.object, s.field) },</code></span>
-<span class="source-line" id="L91"><a class="line-number" href="#L91" aria-label="Line 91">91</a><code>      { kind: &quot;set-property&quot; as const, object: id, property: attribute(step.object, s.field), value: s.value },</code></span>
-<span class="source-line" id="L92"><a class="line-number" href="#L92" aria-label="Line 92">92</a><code>    ]),</code></span>
-<span class="source-line" id="L93"><a class="line-number" href="#L93" aria-label="Line 93">93</a><code>  };</code></span>
-<span class="source-line" id="L94"><a class="line-number" href="#L94" aria-label="Line 94">94</a><code>};</code></span>
-<span class="source-line" id="L95"><a class="line-number" href="#L95" aria-label="Line 95">95</a><code> </code></span>
-<span class="source-line" id="L96"><a class="line-number" href="#L96" aria-label="Line 96">96</a><code>// Match the expression, not just the formula name: a changed body must be reported.</code></span>
-<span class="source-line" id="L97"><a class="line-number" href="#L97" aria-label="Line 97">97</a><code>const serviceCharges = [&quot;sum&quot;, [&quot;map&quot;, [&quot;fn&quot;, [&quot;s&quot;], &quot;s.charge&quot;],</code></span>
-<span class="source-line" id="L98"><a class="line-number" href="#L98" aria-label="Line 98">98</a><code>  [&quot;filter&quot;, [&quot;fn&quot;, [&quot;s&quot;], [&quot;is?&quot;, &quot;s.status&quot;, &quot;:fulfilled&quot;]], &quot;reservation.services&quot;]]];</code></span>
-<span class="source-line" id="L99"><a class="line-number" href="#L99" aria-label="Line 99">99</a><code>const supportsRule = (d: Declaration) =&gt; d.kind === &quot;Rule&quot; &amp;&amp; d.of === &quot;Reservation&quot;</code></span>
-<span class="source-line" id="L100"><a class="line-number" href="#L100" aria-label="Line 100">100</a><code>  &amp;&amp; d.name === &quot;check-out-after-check-in&quot; &amp;&amp; JSON.stringify(d.holds.expr)</code></span>
-<span class="source-line" id="L101"><a class="line-number" href="#L101" aria-label="Line 101">101</a><code>    === JSON.stringify([&quot;after?&quot;, &quot;reservation.check-out&quot;, &quot;reservation.check-in&quot;]);</code></span>
-<span class="source-line" id="L102"><a class="line-number" href="#L102" aria-label="Line 102">102</a><code>const supportsFormula = (d: Declaration) =&gt; d.kind === &quot;Formula&quot; &amp;&amp; d.of === &quot;Reservation&quot;</code></span>
-<span class="source-line" id="L103"><a class="line-number" href="#L103" aria-label="Line 103">103</a><code>  &amp;&amp; d.field === &quot;service-charges&quot; &amp;&amp; JSON.stringify(d.body.expr) === JSON.stringify(serviceCharges);</code></span>
-<span class="source-line" id="L104"><a class="line-number" href="#L104" aria-label="Line 104">104</a><code> </code></span>
-<span class="source-line" id="L105"><a class="line-number" href="#L105" aria-label="Line 105">105</a><code>/** Pure third-party language IR → portable ontology IR. No reads or writes. */</code></span>
-<span class="source-line" id="L106"><a class="line-number" href="#L106" aria-label="Line 106">106</a><code>export const lowerOnto = (declarations: readonly ElaboratedDeclaration[]): OntologyIR =&gt; {</code></span>
-<span class="source-line" id="L107"><a class="line-number" href="#L107" aria-label="Line 107">107</a><code>  const ds = declarationsOf(declarations);</code></span>
-<span class="source-line" id="L108"><a class="line-number" href="#L108" aria-label="Line 108">108</a><code>  const project = ds.find((d) =&gt; d.kind === &quot;Project&quot;);</code></span>
-<span class="source-line" id="L109"><a class="line-number" href="#L109" aria-label="Line 109">109</a><code>  if (!project) throw new TypeError(&quot;An Onto model needs a project&quot;);</code></span>
-<span class="source-line" id="L110"><a class="line-number" href="#L110" aria-label="Line 110">110</a><code>  const nouns = nounsOf(declarations);</code></span>
-<span class="source-line" id="L111"><a class="line-number" href="#L111" aria-label="Line 111">111</a><code>  return {</code></span>
-<span class="source-line" id="L112"><a class="line-number" href="#L112" aria-label="Line 112">112</a><code>    kind: &quot;ontology&quot;, name: project.name, version: &quot;1&quot;,</code></span>
-<span class="source-line" id="L113"><a class="line-number" href="#L113" aria-label="Line 113">113</a><code>    objectTypes: nouns.map((n) =&gt; ({ kind: &quot;object-type&quot;, name: n.name, description: n.doc,</code></span>
-<span class="source-line" id="L114"><a class="line-number" href="#L114" aria-label="Line 114">114</a><code>      properties: n.fields.map((f) =&gt; property(n.name, f)) })),</code></span>
-<span class="source-line" id="L115"><a class="line-number" href="#L115" aria-label="Line 115">115</a><code>    linkTypes: [],</code></span>
-<span class="source-line" id="L116"><a class="line-number" href="#L116" aria-label="Line 116">116</a><code>    actionTypes: stepsOf(declarations).map(({ name, step }) =&gt; lowerStep(name, step, nouns)),</code></span>
-<span class="source-line" id="L117"><a class="line-number" href="#L117" aria-label="Line 117">117</a><code>    queryTypes: ds.flatMap((d): readonly QueryTypeIR[] =&gt; {</code></span>
-<span class="source-line" id="L118"><a class="line-number" href="#L118" aria-label="Line 118">118</a><code>      if (supportsRule(d)) return [{</code></span>
-<span class="source-line" id="L119"><a class="line-number" href="#L119" aria-label="Line 119">119</a><code>        kind: &quot;query-type&quot;, name: &quot;check-out-after-check-in&quot;,</code></span>
-<span class="source-line" id="L120"><a class="line-number" href="#L120" aria-label="Line 120">120</a><code>        description: &quot;Reservations satisfying the date-order rule; observation only, not invariant enforcement.&quot;,</code></span>
-<span class="source-line" id="L121"><a class="line-number" href="#L121" aria-label="Line 121">121</a><code>        query: { find: [&quot;?reservation&quot;], where: [</code></span>
-<span class="source-line" id="L122"><a class="line-number" href="#L122" aria-label="Line 122">122</a><code>          [&quot;?reservation&quot;, &quot;:reservation/check-in&quot;, &quot;?checkIn&quot;],</code></span>
-<span class="source-line" id="L123"><a class="line-number" href="#L123" aria-label="Line 123">123</a><code>          [&quot;?reservation&quot;, &quot;:reservation/check-out&quot;, &quot;?checkOut&quot;], [&quot;&gt;&quot;, &quot;?checkOut&quot;, &quot;?checkIn&quot;],</code></span>
-<span class="source-line" id="L124"><a class="line-number" href="#L124" aria-label="Line 124">124</a><code>        ] },</code></span>
-<span class="source-line" id="L125"><a class="line-number" href="#L125" aria-label="Line 125">125</a><code>      }];</code></span>
-<span class="source-line" id="L126"><a class="line-number" href="#L126" aria-label="Line 126">126</a><code>      if (supportsFormula(d)) return [{</code></span>
-<span class="source-line" id="L127"><a class="line-number" href="#L127" aria-label="Line 127">127</a><code>        kind: &quot;query-type&quot;, name: &quot;service-charges&quot;,</code></span>
-<span class="source-line" id="L128"><a class="line-number" href="#L128" aria-label="Line 128">128</a><code>        description: &quot;Sum of fulfilled service charges by reservation; absent groups mean zero.&quot;,</code></span>
-<span class="source-line" id="L129"><a class="line-number" href="#L129" aria-label="Line 129">129</a><code>        query: {</code></span>
-<span class="source-line" id="L130"><a class="line-number" href="#L130" aria-label="Line 130">130</a><code>          find: [&quot;?reservation&quot;, &quot;?total&quot;],</code></span>
-<span class="source-line" id="L131"><a class="line-number" href="#L131" aria-label="Line 131">131</a><code>          where: [[&quot;?reservation&quot;, &quot;:reservation/services&quot;, &quot;?service&quot;],</code></span>
-<span class="source-line" id="L132"><a class="line-number" href="#L132" aria-label="Line 132">132</a><code>            [&quot;?service&quot;, &quot;:service/status&quot;, &quot;fulfilled&quot;], [&quot;?service&quot;, &quot;:service/charge&quot;, &quot;?charge&quot;]],</code></span>
-<span class="source-line" id="L133"><a class="line-number" href="#L133" aria-label="Line 133">133</a><code>          aggregate: [[&quot;sum&quot;, &quot;?charge&quot;, &quot;?total&quot;]],</code></span>
-<span class="source-line" id="L134"><a class="line-number" href="#L134" aria-label="Line 134">134</a><code>        },</code></span>
-<span class="source-line" id="L135"><a class="line-number" href="#L135" aria-label="Line 135">135</a><code>      }];</code></span>
-<span class="source-line" id="L136"><a class="line-number" href="#L136" aria-label="Line 136">136</a><code>      return [];</code></span>
-<span class="source-line" id="L137"><a class="line-number" href="#L137" aria-label="Line 137">137</a><code>    }),</code></span>
-<span class="source-line" id="L138"><a class="line-number" href="#L138" aria-label="Line 138">138</a><code>  };</code></span>
-<span class="source-line" id="L139"><a class="line-number" href="#L139" aria-label="Line 139">139</a><code>};</code></span>
-<span class="source-line" id="L140"><a class="line-number" href="#L140" aria-label="Line 140">140</a><code> </code></span>
-<span class="source-line" id="L141"><a class="line-number" href="#L141" aria-label="Line 141">141</a><code>/** Features retained in language IR but absent from the portable executable contract. */</code></span>
-<span class="source-line" id="L142"><a class="line-number" href="#L142" aria-label="Line 142">142</a><code>export const notLowered = (declarations: readonly ElaboratedDeclaration[]): readonly string[] =&gt;</code></span>
-<span class="source-line" id="L143"><a class="line-number" href="#L143" aria-label="Line 143">143</a><code>  declarationsOf(declarations).flatMap((d) =&gt; {</code></span>
-<span class="source-line" id="L144"><a class="line-number" href="#L144" aria-label="Line 144">144</a><code>    if (d.kind === &quot;Rule&quot;) return [supportsRule(d)</code></span>
-<span class="source-line" id="L145"><a class="line-number" href="#L145" aria-label="Line 145">145</a><code>      ? `rule ${d.name}: satisfaction query only; no invariant enforcement`</code></span>
-<span class="source-line" id="L146"><a class="line-number" href="#L146" aria-label="Line 146">146</a><code>      : `rule ${d.name}: checked as Bool; no faithful Datalog lowering or invariant enforcement`];</code></span>
-<span class="source-line" id="L147"><a class="line-number" href="#L147" aria-label="Line 147">147</a><code>    if (d.kind === &quot;Formula&quot; &amp;&amp; !supportsFormula(d)) return [`formula ${d.of}.${d.field}: no faithful Datalog lowering for this expression`];</code></span>
-<span class="source-line" id="L148"><a class="line-number" href="#L148" aria-label="Line 148">148</a><code>    return [];</code></span>
-<span class="source-line" id="L149"><a class="line-number" href="#L149" aria-label="Line 149">149</a><code>  }).concat([</code></span>
-<span class="source-line" id="L150"><a class="line-number" href="#L150" aria-label="Line 150">150</a><code>    &quot;requires and final states: example host guards, absent from ActionTypeIR&quot;,</code></span>
-<span class="source-line" id="L151"><a class="line-number" href="#L151" aria-label="Line 151">151</a><code>    &quot;actor type, joins and counterpart: descriptive only; no identity or authorization enforcement&quot;,</code></span>
-<span class="source-line" id="L152"><a class="line-number" href="#L152" aria-label="Line 152">152</a><code>    &quot;Union members: checked by the prelude; stored as strings without runtime enum constraints&quot;,</code></span>
-<span class="source-line" id="L153"><a class="line-number" href="#L153" aria-label="Line 153">153</a><code>    &quot;Many references: schema retained; membership facts must be transacted explicitly&quot;,</code></span>
-<span class="source-line" id="L154"><a class="line-number" href="#L154" aria-label="Line 154">154</a><code>  ]);</code></span>
-<span class="source-line" id="L155"><a class="line-number" href="#L155" aria-label="Line 155">155</a><code> </code></span>
-<span class="source-line" id="L156"><a class="line-number" href="#L156" aria-label="Line 156">156</a><code>export const encode = (field: Field, value: unknown): TripleValue =&gt; {</code></span>
-<span class="source-line" id="L157"><a class="line-number" href="#L157" aria-label="Line 157">157</a><code>  switch (valueType(field).kind) {</code></span>
-<span class="source-line" id="L158"><a class="line-number" href="#L158" aria-label="Line 158">158</a><code>    case &quot;ref&quot;: return ref(EntityId.make(String(value)));</code></span>
-<span class="source-line" id="L159"><a class="line-number" href="#L159" aria-label="Line 159">159</a><code>    case &quot;number&quot;: return number(Number(value));</code></span>
-<span class="source-line" id="L160"><a class="line-number" href="#L160" aria-label="Line 160">160</a><code>    case &quot;datetime&quot;: return datetime(typeof value === &quot;number&quot; ? value : Date.parse(String(value)));</code></span>
-<span class="source-line" id="L161"><a class="line-number" href="#L161" aria-label="Line 161">161</a><code>    case &quot;string&quot;: return string(String(value));</code></span>
-<span class="source-line" id="L162"><a class="line-number" href="#L162" aria-label="Line 162">162</a><code>    case &quot;boolean&quot;: return boolean(Boolean(value));</code></span>
-<span class="source-line" id="L163"><a class="line-number" href="#L163" aria-label="Line 163">163</a><code>    default: throw new TypeError(`Unsupported seed value for ${field.name}`);</code></span>
-<span class="source-line" id="L164"><a class="line-number" href="#L164" aria-label="Line 164">164</a><code>  }</code></span>
-<span class="source-line" id="L165"><a class="line-number" href="#L165" aria-label="Line 165">165</a><code>};</code></span>
-<span class="source-line" id="L166"><a class="line-number" href="#L166" aria-label="Line 166">166</a><code>/** Stable seed ids are row-index based, e.g. room-class:2 is Deluxe. */</code></span>
-<span class="source-line" id="L167"><a class="line-number" href="#L167" aria-label="Line 167">167</a><code>export const seedOperations = (declarations: readonly ElaboratedDeclaration[]): readonly TransactOp[] =&gt; {</code></span>
-<span class="source-line" id="L168"><a class="line-number" href="#L168" aria-label="Line 168">168</a><code>  const nouns = nounsOf(declarations);</code></span>
-<span class="source-line" id="L169"><a class="line-number" href="#L169" aria-label="Line 169">169</a><code>  return declarationsOf(declarations).flatMap((d) =&gt; {</code></span>
-<span class="source-line" id="L170"><a class="line-number" href="#L170" aria-label="Line 170">170</a><code>    if (d.kind !== &quot;Seed&quot;) return [];</code></span>
-<span class="source-line" id="L171"><a class="line-number" href="#L171" aria-label="Line 171">171</a><code>    const noun = nouns.find((n) =&gt; n.name === d.of)!;</code></span>
-<span class="source-line" id="L172"><a class="line-number" href="#L172" aria-label="Line 172">172</a><code>    return d.rows.flatMap((row, i) =&gt; Object.entries(row).flatMap(([name, value]) =&gt; {</code></span>
-<span class="source-line" id="L173"><a class="line-number" href="#L173" aria-label="Line 173">173</a><code>      const field = noun.fields.find((f) =&gt; f.name === name);</code></span>
-<span class="source-line" id="L174"><a class="line-number" href="#L174" aria-label="Line 174">174</a><code>      if (!field) throw new TypeError(`Unknown seed field ${name}`);</code></span>
-<span class="source-line" id="L175"><a class="line-number" href="#L175" aria-label="Line 175">175</a><code>      return (field.many ? value as readonly unknown[] : [value]).map((v): TransactOp =&gt; ({</code></span>
-<span class="source-line" id="L176"><a class="line-number" href="#L176" aria-label="Line 176">176</a><code>        op: &quot;assert&quot;, entityId: EntityId.make(`${kebab(d.of)}:${i + 1}`), entityType: d.of,</code></span>
-<span class="source-line" id="L177"><a class="line-number" href="#L177" aria-label="Line 177">177</a><code>        attribute: attribute(d.of, name), value: encode(field, v),</code></span>
-<span class="source-line" id="L178"><a class="line-number" href="#L178" aria-label="Line 178">178</a><code>      }));</code></span>
-<span class="source-line" id="L179"><a class="line-number" href="#L179" aria-label="Line 179">179</a><code>    }));</code></span>
-<span class="source-line" id="L180"><a class="line-number" href="#L180" aria-label="Line 180">180</a><code>  });</code></span>
-<span class="source-line" id="L181"><a class="line-number" href="#L181" aria-label="Line 181">181</a><code>};</code></span></pre></main><footer>Experimental v0.1 · Local in-memory runtime. <a href="/explorations/">All explorations</a></footer></body></html>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Instrument+Serif:ital@0;1&amp;family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css"><script defer src="/site.js"></script></head>
+<body><div class="oo ox"><a class="oo-skip" href="#main">Skip to content</a>
+<header class="oo-nav"><a class="oo-brand" href="/" aria-label="Open Ontology home"><img src="/favicon.svg" width="24" height="24" alt=""><span>Open Ontology</span></a><nav aria-label="Main navigation"><a class="oo-nav__section" href="/#std">Standard library</a><a class="oo-nav__section" href="/#preludes">Preludes</a><a class="oo-nav__section" href="/explorations/" aria-current="page">Explorations</a><a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main" class="oo-main"><section class="ox-hero ox-hero--source"><nav class="ox-crumbs" aria-label="Breadcrumb"><a href="/">Open Ontology</a><span aria-hidden="true">/</span><a href="/explorations/">Explorations</a><span aria-hidden="true">/</span>Source</nav>
+<p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Full source · ts · 181 lines</p>
+<h1 class="oo-pkg ox-path">examples/onto/lower.ts</h1>
+<div class="oo-actions"><a class="oo-primary" href="/explorations/raw/examples/onto/lower.ts">Raw source <span aria-hidden="true">↗</span></a><a class="oo-secondary" href="https://github.com/bjacobso/open-ontology/blob/main/examples/onto/lower.ts">View on GitHub <span aria-hidden="true">↗</span></a></div>
+<p class="oo-meta"><span>Click a line number to link to that line</span></p></section>
+<div class="oo-panel ox-source"><div class="oo-panel__head"><span>examples/onto/lower.ts</span><span>ts</span></div><pre tabindex="0"><span class="ox-line" id="L1"><a class="ox-line__n" href="#L1" aria-label="Line 1">1</a><code>import { readFileSync } from &quot;node:fs&quot;;</code></span>
+<span class="ox-line" id="L2"><a class="ox-line__n" href="#L2" aria-label="Line 2">2</a><code>import { bootstrapFromSources, elaborateSources, type ElaboratedDeclaration } from &quot;@open-ontology/onto-forma/descriptor&quot;;</code></span>
+<span class="ox-line" id="L3"><a class="ox-line__n" href="#L3" aria-label="Line 3">3</a><code>import { preludeSource } from &quot;@open-ontology/onto-forma/preludes&quot;;</code></span>
+<span class="ox-line" id="L4"><a class="ox-line__n" href="#L4" aria-label="Line 4">4</a><code>import {</code></span>
+<span class="ox-line" id="L5"><a class="ox-line__n" href="#L5" aria-label="Line 5">5</a><code>  EntityId, boolean, datetime, number, ref, string, type TransactOp, type TripleValue,</code></span>
+<span class="ox-line" id="L6"><a class="ox-line__n" href="#L6" aria-label="Line 6">6</a><code>} from &quot;@triplex-build/triplex&quot;;</code></span>
+<span class="ox-line" id="L7"><a class="ox-line__n" href="#L7" aria-label="Line 7">7</a><code>import type { ActionTypeIR, OntologyIR, OntologyValueTypeIR, PropertyIR, QueryTypeIR } from &quot;../../src/ir.js&quot;;</code></span>
+<span class="ox-line" id="L8"><a class="ox-line__n" href="#L8" aria-label="Line 8">8</a><code> </code></span>
+<span class="ox-line" id="L9"><a class="ox-line__n" href="#L9" aria-label="Line 9">9</a><code>export interface Field {</code></span>
+<span class="ox-line" id="L10"><a class="ox-line__n" href="#L10" aria-label="Line 10">10</a><code>  readonly name: string;</code></span>
+<span class="ox-line" id="L11"><a class="ox-line__n" href="#L11" aria-label="Line 11">11</a><code>  readonly type: unknown;</code></span>
+<span class="ox-line" id="L12"><a class="ox-line__n" href="#L12" aria-label="Line 12">12</a><code>  readonly link?: string;</code></span>
+<span class="ox-line" id="L13"><a class="ox-line__n" href="#L13" aria-label="Line 13">13</a><code>  readonly many: boolean;</code></span>
+<span class="ox-line" id="L14"><a class="ox-line__n" href="#L14" aria-label="Line 14">14</a><code>  readonly states?: readonly string[];</code></span>
+<span class="ox-line" id="L15"><a class="ox-line__n" href="#L15" aria-label="Line 15">15</a><code>  readonly final: readonly string[];</code></span>
+<span class="ox-line" id="L16"><a class="ox-line__n" href="#L16" aria-label="Line 16">16</a><code>}</code></span>
+<span class="ox-line" id="L17"><a class="ox-line__n" href="#L17" aria-label="Line 17">17</a><code>export interface Noun {</code></span>
+<span class="ox-line" id="L18"><a class="ox-line__n" href="#L18" aria-label="Line 18">18</a><code>  readonly kind: &quot;Actor&quot; | &quot;Object&quot;;</code></span>
+<span class="ox-line" id="L19"><a class="ox-line__n" href="#L19" aria-label="Line 19">19</a><code>  readonly name: string;</code></span>
+<span class="ox-line" id="L20"><a class="ox-line__n" href="#L20" aria-label="Line 20">20</a><code>  readonly doc: string;</code></span>
+<span class="ox-line" id="L21"><a class="ox-line__n" href="#L21" aria-label="Line 21">21</a><code>  readonly fields: readonly Field[];</code></span>
+<span class="ox-line" id="L22"><a class="ox-line__n" href="#L22" aria-label="Line 22">22</a><code>}</code></span>
+<span class="ox-line" id="L23"><a class="ox-line__n" href="#L23" aria-label="Line 23">23</a><code>export interface Expression {</code></span>
+<span class="ox-line" id="L24"><a class="ox-line__n" href="#L24" aria-label="Line 24">24</a><code>  readonly kind: &quot;raw-expr&quot;;</code></span>
+<span class="ox-line" id="L25"><a class="ox-line__n" href="#L25" aria-label="Line 25">25</a><code>  readonly expr: unknown;</code></span>
+<span class="ox-line" id="L26"><a class="ox-line__n" href="#L26" aria-label="Line 26">26</a><code>}</code></span>
+<span class="ox-line" id="L27"><a class="ox-line__n" href="#L27" aria-label="Line 27">27</a><code>export interface Step {</code></span>
+<span class="ox-line" id="L28"><a class="ox-line__n" href="#L28" aria-label="Line 28">28</a><code>  readonly kind: &quot;Step&quot;;</code></span>
+<span class="ox-line" id="L29"><a class="ox-line__n" href="#L29" aria-label="Line 29">29</a><code>  readonly actor: string;</code></span>
+<span class="ox-line" id="L30"><a class="ox-line__n" href="#L30" aria-label="Line 30">30</a><code>  readonly verb: string;</code></span>
+<span class="ox-line" id="L31"><a class="ox-line__n" href="#L31" aria-label="Line 31">31</a><code>  readonly object: string;</code></span>
+<span class="ox-line" id="L32"><a class="ox-line__n" href="#L32" aria-label="Line 32">32</a><code>  readonly counterpart?: string;</code></span>
+<span class="ox-line" id="L33"><a class="ox-line__n" href="#L33" aria-label="Line 33">33</a><code>  readonly creates: boolean;</code></span>
+<span class="ox-line" id="L34"><a class="ox-line__n" href="#L34" aria-label="Line 34">34</a><code>  readonly requires: readonly Expression[];</code></span>
+<span class="ox-line" id="L35"><a class="ox-line__n" href="#L35" aria-label="Line 35">35</a><code>  readonly sets: readonly { readonly field: string; readonly value: string }[];</code></span>
+<span class="ox-line" id="L36"><a class="ox-line__n" href="#L36" aria-label="Line 36">36</a><code>}</code></span>
+<span class="ox-line" id="L37"><a class="ox-line__n" href="#L37" aria-label="Line 37">37</a><code>type Declaration = Noun</code></span>
+<span class="ox-line" id="L38"><a class="ox-line__n" href="#L38" aria-label="Line 38">38</a><code>  | { readonly kind: &quot;Project&quot;; readonly name: string; readonly doc: string }</code></span>
+<span class="ox-line" id="L39"><a class="ox-line__n" href="#L39" aria-label="Line 39">39</a><code>  | { readonly kind: &quot;Story&quot;; readonly name: string; readonly doc: string; readonly steps: readonly Step[] }</code></span>
+<span class="ox-line" id="L40"><a class="ox-line__n" href="#L40" aria-label="Line 40">40</a><code>  | { readonly kind: &quot;Seed&quot;; readonly of: string; readonly rows: readonly Readonly&lt;Record&lt;string, unknown&gt;&gt;[] }</code></span>
+<span class="ox-line" id="L41"><a class="ox-line__n" href="#L41" aria-label="Line 41">41</a><code>  | { readonly kind: &quot;Rule&quot;; readonly name: string; readonly of: string; readonly holds: Expression }</code></span>
+<span class="ox-line" id="L42"><a class="ox-line__n" href="#L42" aria-label="Line 42">42</a><code>  | { readonly kind: &quot;Formula&quot;; readonly of: string; readonly field: string; readonly body: Expression };</code></span>
+<span class="ox-line" id="L43"><a class="ox-line__n" href="#L43" aria-label="Line 43">43</a><code> </code></span>
+<span class="ox-line" id="L44"><a class="ox-line__n" href="#L44" aria-label="Line 44">44</a><code>export const ontoPrelude = readFileSync(new URL(&quot;./onto.lisp&quot;, import.meta.url), &quot;utf8&quot;);</code></span>
+<span class="ox-line" id="L45"><a class="ox-line__n" href="#L45" aria-label="Line 45">45</a><code>export const hotelSource = readFileSync(new URL(&quot;./hotel.forma&quot;, import.meta.url), &quot;utf8&quot;);</code></span>
+<span class="ox-line" id="L46"><a class="ox-line__n" href="#L46" aria-label="Line 46">46</a><code>const prelude = bootstrapFromSources(preludeSource(&quot;compiler.lisp&quot;), ontoPrelude);</code></span>
+<span class="ox-line" id="L47"><a class="ox-line__n" href="#L47" aria-label="Line 47">47</a><code>export const elaborateHotel = (source = hotelSource) =&gt;</code></span>
+<span class="ox-line" id="L48"><a class="ox-line__n" href="#L48" aria-label="Line 48">48</a><code>  elaborateSources([{ sourceId: &quot;hotel.forma&quot;, source }], { prelude });</code></span>
+<span class="ox-line" id="L49"><a class="ox-line__n" href="#L49" aria-label="Line 49">49</a><code> </code></span>
+<span class="ox-line" id="L50"><a class="ox-line__n" href="#L50" aria-label="Line 50">50</a><code>export const kebab = (name: string): string =&gt; name.replace(/([a-z0-9])([A-Z])/g, &quot;$1-$2&quot;).toLowerCase();</code></span>
+<span class="ox-line" id="L51"><a class="ox-line__n" href="#L51" aria-label="Line 51">51</a><code>export const attribute = (owner: string, field: string): `:${string}/${string}` =&gt; `:${kebab(owner)}/${field}`;</code></span>
+<span class="ox-line" id="L52"><a class="ox-line__n" href="#L52" aria-label="Line 52">52</a><code>export const declarationsOf = (declarations: readonly ElaboratedDeclaration[]): readonly Declaration[] =&gt;</code></span>
+<span class="ox-line" id="L53"><a class="ox-line__n" href="#L53" aria-label="Line 53">53</a><code>  declarations.map(({ payload }) =&gt; payload as unknown as Declaration);</code></span>
+<span class="ox-line" id="L54"><a class="ox-line__n" href="#L54" aria-label="Line 54">54</a><code>export const nounsOf = (declarations: readonly ElaboratedDeclaration[]): readonly Noun[] =&gt;</code></span>
+<span class="ox-line" id="L55"><a class="ox-line__n" href="#L55" aria-label="Line 55">55</a><code>  declarationsOf(declarations).filter((d): d is Noun =&gt; d.kind === &quot;Actor&quot; || d.kind === &quot;Object&quot;);</code></span>
+<span class="ox-line" id="L56"><a class="ox-line__n" href="#L56" aria-label="Line 56">56</a><code>export const stepsOf = (declarations: readonly ElaboratedDeclaration[]) =&gt;</code></span>
+<span class="ox-line" id="L57"><a class="ox-line__n" href="#L57" aria-label="Line 57">57</a><code>  declarationsOf(declarations).flatMap((d) =&gt; d.kind === &quot;Story&quot;</code></span>
+<span class="ox-line" id="L58"><a class="ox-line__n" href="#L58" aria-label="Line 58">58</a><code>    ? d.steps.map((step) =&gt; ({ name: `${kebab(d.name)}-${step.verb}`, step })) : []);</code></span>
+<span class="ox-line" id="L59"><a class="ox-line__n" href="#L59" aria-label="Line 59">59</a><code> </code></span>
+<span class="ox-line" id="L60"><a class="ox-line__n" href="#L60" aria-label="Line 60">60</a><code>const valueType = (field: Field): OntologyValueTypeIR =&gt; {</code></span>
+<span class="ox-line" id="L61"><a class="ox-line__n" href="#L61" aria-label="Line 61">61</a><code>  if (field.link) return { kind: &quot;ref&quot;, target: field.link };</code></span>
+<span class="ox-line" id="L62"><a class="ox-line__n" href="#L62" aria-label="Line 62">62</a><code>  if (field.states || field.type === &quot;String&quot;) return { kind: &quot;string&quot; };</code></span>
+<span class="ox-line" id="L63"><a class="ox-line__n" href="#L63" aria-label="Line 63">63</a><code>  if (field.type === &quot;Int&quot;) return { kind: &quot;number&quot; };</code></span>
+<span class="ox-line" id="L64"><a class="ox-line__n" href="#L64" aria-label="Line 64">64</a><code>  if (field.type === &quot;Instant&quot;) return { kind: &quot;datetime&quot; };</code></span>
+<span class="ox-line" id="L65"><a class="ox-line__n" href="#L65" aria-label="Line 65">65</a><code>  if (field.type === &quot;Bool&quot;) return { kind: &quot;boolean&quot; };</code></span>
+<span class="ox-line" id="L66"><a class="ox-line__n" href="#L66" aria-label="Line 66">66</a><code>  throw new TypeError(`Unsupported Onto field type: ${JSON.stringify(field.type)}`);</code></span>
+<span class="ox-line" id="L67"><a class="ox-line__n" href="#L67" aria-label="Line 67">67</a><code>};</code></span>
+<span class="ox-line" id="L68"><a class="ox-line__n" href="#L68" aria-label="Line 68">68</a><code>const property = (owner: string, field: Field): PropertyIR =&gt; ({</code></span>
+<span class="ox-line" id="L69"><a class="ox-line__n" href="#L69" aria-label="Line 69">69</a><code>  name: field.name, key: attribute(owner, field.name), valueType: valueType(field),</code></span>
+<span class="ox-line" id="L70"><a class="ox-line__n" href="#L70" aria-label="Line 70">70</a><code>  required: false, cardinality: field.many ? &quot;many&quot; : &quot;one&quot;, unique: false,</code></span>
+<span class="ox-line" id="L71"><a class="ox-line__n" href="#L71" aria-label="Line 71">71</a><code>});</code></span>
+<span class="ox-line" id="L72"><a class="ox-line__n" href="#L72" aria-label="Line 72">72</a><code> </code></span>
+<span class="ox-line" id="L73"><a class="ox-line__n" href="#L73" aria-label="Line 73">73</a><code>const lowerStep = (name: string, step: Step, nouns: readonly Noun[]): ActionTypeIR =&gt; {</code></span>
+<span class="ox-line" id="L74"><a class="ox-line__n" href="#L74" aria-label="Line 74">74</a><code>  const noun = nouns.find((n) =&gt; n.name === step.object);</code></span>
+<span class="ox-line" id="L75"><a class="ox-line__n" href="#L75" aria-label="Line 75">75</a><code>  if (!noun) throw new TypeError(`Unknown step object ${step.object}`);</code></span>
+<span class="ox-line" id="L76"><a class="ox-line__n" href="#L76" aria-label="Line 76">76</a><code>  // Create inputs supply the single-valued facts. Collection membership remains explicit facts.</code></span>
+<span class="ox-line" id="L77"><a class="ox-line__n" href="#L77" aria-label="Line 77">77</a><code>  const fields = step.creates ? noun.fields.filter((f) =&gt; !f.many &amp;&amp; !step.sets.some((s) =&gt; s.field === f.name)) : [];</code></span>
+<span class="ox-line" id="L78"><a class="ox-line__n" href="#L78" aria-label="Line 78">78</a><code>  const id = { kind: &quot;input&quot; as const, name: &quot;id&quot; };</code></span>
+<span class="ox-line" id="L79"><a class="ox-line__n" href="#L79" aria-label="Line 79">79</a><code>  return {</code></span>
+<span class="ox-line" id="L80"><a class="ox-line__n" href="#L80" aria-label="Line 80">80</a><code>    kind: &quot;action-type&quot;, name,</code></span>
+<span class="ox-line" id="L81"><a class="ox-line__n" href="#L81" aria-label="Line 81">81</a><code>    input: [{ name: &quot;id&quot;, valueType: { kind: &quot;string&quot; } },</code></span>
+<span class="ox-line" id="L82"><a class="ox-line__n" href="#L82" aria-label="Line 82">82</a><code>      ...fields.map((f) =&gt; ({ name: f.name, valueType: valueType(f) }))],</code></span>
+<span class="ox-line" id="L83"><a class="ox-line__n" href="#L83" aria-label="Line 83">83</a><code>    changes: step.creates ? [{</code></span>
+<span class="ox-line" id="L84"><a class="ox-line__n" href="#L84" aria-label="Line 84">84</a><code>      kind: &quot;create-object&quot;, objectType: step.object, id,</code></span>
+<span class="ox-line" id="L85"><a class="ox-line__n" href="#L85" aria-label="Line 85">85</a><code>      properties: Object.fromEntries([</code></span>
+<span class="ox-line" id="L86"><a class="ox-line__n" href="#L86" aria-label="Line 86">86</a><code>        ...fields.map((f) =&gt; [attribute(step.object, f.name), { kind: &quot;input&quot;, name: f.name }]),</code></span>
+<span class="ox-line" id="L87"><a class="ox-line__n" href="#L87" aria-label="Line 87">87</a><code>        ...step.sets.map((s) =&gt; [attribute(step.object, s.field), s.value]),</code></span>
+<span class="ox-line" id="L88"><a class="ox-line__n" href="#L88" aria-label="Line 88">88</a><code>      ]),</code></span>
+<span class="ox-line" id="L89"><a class="ox-line__n" href="#L89" aria-label="Line 89">89</a><code>    }] : step.sets.flatMap((s) =&gt; [</code></span>
+<span class="ox-line" id="L90"><a class="ox-line__n" href="#L90" aria-label="Line 90">90</a><code>      { kind: &quot;clear-property&quot; as const, object: id, property: attribute(step.object, s.field) },</code></span>
+<span class="ox-line" id="L91"><a class="ox-line__n" href="#L91" aria-label="Line 91">91</a><code>      { kind: &quot;set-property&quot; as const, object: id, property: attribute(step.object, s.field), value: s.value },</code></span>
+<span class="ox-line" id="L92"><a class="ox-line__n" href="#L92" aria-label="Line 92">92</a><code>    ]),</code></span>
+<span class="ox-line" id="L93"><a class="ox-line__n" href="#L93" aria-label="Line 93">93</a><code>  };</code></span>
+<span class="ox-line" id="L94"><a class="ox-line__n" href="#L94" aria-label="Line 94">94</a><code>};</code></span>
+<span class="ox-line" id="L95"><a class="ox-line__n" href="#L95" aria-label="Line 95">95</a><code> </code></span>
+<span class="ox-line" id="L96"><a class="ox-line__n" href="#L96" aria-label="Line 96">96</a><code>// Match the expression, not just the formula name: a changed body must be reported.</code></span>
+<span class="ox-line" id="L97"><a class="ox-line__n" href="#L97" aria-label="Line 97">97</a><code>const serviceCharges = [&quot;sum&quot;, [&quot;map&quot;, [&quot;fn&quot;, [&quot;s&quot;], &quot;s.charge&quot;],</code></span>
+<span class="ox-line" id="L98"><a class="ox-line__n" href="#L98" aria-label="Line 98">98</a><code>  [&quot;filter&quot;, [&quot;fn&quot;, [&quot;s&quot;], [&quot;is?&quot;, &quot;s.status&quot;, &quot;:fulfilled&quot;]], &quot;reservation.services&quot;]]];</code></span>
+<span class="ox-line" id="L99"><a class="ox-line__n" href="#L99" aria-label="Line 99">99</a><code>const supportsRule = (d: Declaration) =&gt; d.kind === &quot;Rule&quot; &amp;&amp; d.of === &quot;Reservation&quot;</code></span>
+<span class="ox-line" id="L100"><a class="ox-line__n" href="#L100" aria-label="Line 100">100</a><code>  &amp;&amp; d.name === &quot;check-out-after-check-in&quot; &amp;&amp; JSON.stringify(d.holds.expr)</code></span>
+<span class="ox-line" id="L101"><a class="ox-line__n" href="#L101" aria-label="Line 101">101</a><code>    === JSON.stringify([&quot;after?&quot;, &quot;reservation.check-out&quot;, &quot;reservation.check-in&quot;]);</code></span>
+<span class="ox-line" id="L102"><a class="ox-line__n" href="#L102" aria-label="Line 102">102</a><code>const supportsFormula = (d: Declaration) =&gt; d.kind === &quot;Formula&quot; &amp;&amp; d.of === &quot;Reservation&quot;</code></span>
+<span class="ox-line" id="L103"><a class="ox-line__n" href="#L103" aria-label="Line 103">103</a><code>  &amp;&amp; d.field === &quot;service-charges&quot; &amp;&amp; JSON.stringify(d.body.expr) === JSON.stringify(serviceCharges);</code></span>
+<span class="ox-line" id="L104"><a class="ox-line__n" href="#L104" aria-label="Line 104">104</a><code> </code></span>
+<span class="ox-line" id="L105"><a class="ox-line__n" href="#L105" aria-label="Line 105">105</a><code>/** Pure third-party language IR → portable ontology IR. No reads or writes. */</code></span>
+<span class="ox-line" id="L106"><a class="ox-line__n" href="#L106" aria-label="Line 106">106</a><code>export const lowerOnto = (declarations: readonly ElaboratedDeclaration[]): OntologyIR =&gt; {</code></span>
+<span class="ox-line" id="L107"><a class="ox-line__n" href="#L107" aria-label="Line 107">107</a><code>  const ds = declarationsOf(declarations);</code></span>
+<span class="ox-line" id="L108"><a class="ox-line__n" href="#L108" aria-label="Line 108">108</a><code>  const project = ds.find((d) =&gt; d.kind === &quot;Project&quot;);</code></span>
+<span class="ox-line" id="L109"><a class="ox-line__n" href="#L109" aria-label="Line 109">109</a><code>  if (!project) throw new TypeError(&quot;An Onto model needs a project&quot;);</code></span>
+<span class="ox-line" id="L110"><a class="ox-line__n" href="#L110" aria-label="Line 110">110</a><code>  const nouns = nounsOf(declarations);</code></span>
+<span class="ox-line" id="L111"><a class="ox-line__n" href="#L111" aria-label="Line 111">111</a><code>  return {</code></span>
+<span class="ox-line" id="L112"><a class="ox-line__n" href="#L112" aria-label="Line 112">112</a><code>    kind: &quot;ontology&quot;, name: project.name, version: &quot;1&quot;,</code></span>
+<span class="ox-line" id="L113"><a class="ox-line__n" href="#L113" aria-label="Line 113">113</a><code>    objectTypes: nouns.map((n) =&gt; ({ kind: &quot;object-type&quot;, name: n.name, description: n.doc,</code></span>
+<span class="ox-line" id="L114"><a class="ox-line__n" href="#L114" aria-label="Line 114">114</a><code>      properties: n.fields.map((f) =&gt; property(n.name, f)) })),</code></span>
+<span class="ox-line" id="L115"><a class="ox-line__n" href="#L115" aria-label="Line 115">115</a><code>    linkTypes: [],</code></span>
+<span class="ox-line" id="L116"><a class="ox-line__n" href="#L116" aria-label="Line 116">116</a><code>    actionTypes: stepsOf(declarations).map(({ name, step }) =&gt; lowerStep(name, step, nouns)),</code></span>
+<span class="ox-line" id="L117"><a class="ox-line__n" href="#L117" aria-label="Line 117">117</a><code>    queryTypes: ds.flatMap((d): readonly QueryTypeIR[] =&gt; {</code></span>
+<span class="ox-line" id="L118"><a class="ox-line__n" href="#L118" aria-label="Line 118">118</a><code>      if (supportsRule(d)) return [{</code></span>
+<span class="ox-line" id="L119"><a class="ox-line__n" href="#L119" aria-label="Line 119">119</a><code>        kind: &quot;query-type&quot;, name: &quot;check-out-after-check-in&quot;,</code></span>
+<span class="ox-line" id="L120"><a class="ox-line__n" href="#L120" aria-label="Line 120">120</a><code>        description: &quot;Reservations satisfying the date-order rule; observation only, not invariant enforcement.&quot;,</code></span>
+<span class="ox-line" id="L121"><a class="ox-line__n" href="#L121" aria-label="Line 121">121</a><code>        query: { find: [&quot;?reservation&quot;], where: [</code></span>
+<span class="ox-line" id="L122"><a class="ox-line__n" href="#L122" aria-label="Line 122">122</a><code>          [&quot;?reservation&quot;, &quot;:reservation/check-in&quot;, &quot;?checkIn&quot;],</code></span>
+<span class="ox-line" id="L123"><a class="ox-line__n" href="#L123" aria-label="Line 123">123</a><code>          [&quot;?reservation&quot;, &quot;:reservation/check-out&quot;, &quot;?checkOut&quot;], [&quot;&gt;&quot;, &quot;?checkOut&quot;, &quot;?checkIn&quot;],</code></span>
+<span class="ox-line" id="L124"><a class="ox-line__n" href="#L124" aria-label="Line 124">124</a><code>        ] },</code></span>
+<span class="ox-line" id="L125"><a class="ox-line__n" href="#L125" aria-label="Line 125">125</a><code>      }];</code></span>
+<span class="ox-line" id="L126"><a class="ox-line__n" href="#L126" aria-label="Line 126">126</a><code>      if (supportsFormula(d)) return [{</code></span>
+<span class="ox-line" id="L127"><a class="ox-line__n" href="#L127" aria-label="Line 127">127</a><code>        kind: &quot;query-type&quot;, name: &quot;service-charges&quot;,</code></span>
+<span class="ox-line" id="L128"><a class="ox-line__n" href="#L128" aria-label="Line 128">128</a><code>        description: &quot;Sum of fulfilled service charges by reservation; absent groups mean zero.&quot;,</code></span>
+<span class="ox-line" id="L129"><a class="ox-line__n" href="#L129" aria-label="Line 129">129</a><code>        query: {</code></span>
+<span class="ox-line" id="L130"><a class="ox-line__n" href="#L130" aria-label="Line 130">130</a><code>          find: [&quot;?reservation&quot;, &quot;?total&quot;],</code></span>
+<span class="ox-line" id="L131"><a class="ox-line__n" href="#L131" aria-label="Line 131">131</a><code>          where: [[&quot;?reservation&quot;, &quot;:reservation/services&quot;, &quot;?service&quot;],</code></span>
+<span class="ox-line" id="L132"><a class="ox-line__n" href="#L132" aria-label="Line 132">132</a><code>            [&quot;?service&quot;, &quot;:service/status&quot;, &quot;fulfilled&quot;], [&quot;?service&quot;, &quot;:service/charge&quot;, &quot;?charge&quot;]],</code></span>
+<span class="ox-line" id="L133"><a class="ox-line__n" href="#L133" aria-label="Line 133">133</a><code>          aggregate: [[&quot;sum&quot;, &quot;?charge&quot;, &quot;?total&quot;]],</code></span>
+<span class="ox-line" id="L134"><a class="ox-line__n" href="#L134" aria-label="Line 134">134</a><code>        },</code></span>
+<span class="ox-line" id="L135"><a class="ox-line__n" href="#L135" aria-label="Line 135">135</a><code>      }];</code></span>
+<span class="ox-line" id="L136"><a class="ox-line__n" href="#L136" aria-label="Line 136">136</a><code>      return [];</code></span>
+<span class="ox-line" id="L137"><a class="ox-line__n" href="#L137" aria-label="Line 137">137</a><code>    }),</code></span>
+<span class="ox-line" id="L138"><a class="ox-line__n" href="#L138" aria-label="Line 138">138</a><code>  };</code></span>
+<span class="ox-line" id="L139"><a class="ox-line__n" href="#L139" aria-label="Line 139">139</a><code>};</code></span>
+<span class="ox-line" id="L140"><a class="ox-line__n" href="#L140" aria-label="Line 140">140</a><code> </code></span>
+<span class="ox-line" id="L141"><a class="ox-line__n" href="#L141" aria-label="Line 141">141</a><code>/** Features retained in language IR but absent from the portable executable contract. */</code></span>
+<span class="ox-line" id="L142"><a class="ox-line__n" href="#L142" aria-label="Line 142">142</a><code>export const notLowered = (declarations: readonly ElaboratedDeclaration[]): readonly string[] =&gt;</code></span>
+<span class="ox-line" id="L143"><a class="ox-line__n" href="#L143" aria-label="Line 143">143</a><code>  declarationsOf(declarations).flatMap((d) =&gt; {</code></span>
+<span class="ox-line" id="L144"><a class="ox-line__n" href="#L144" aria-label="Line 144">144</a><code>    if (d.kind === &quot;Rule&quot;) return [supportsRule(d)</code></span>
+<span class="ox-line" id="L145"><a class="ox-line__n" href="#L145" aria-label="Line 145">145</a><code>      ? `rule ${d.name}: satisfaction query only; no invariant enforcement`</code></span>
+<span class="ox-line" id="L146"><a class="ox-line__n" href="#L146" aria-label="Line 146">146</a><code>      : `rule ${d.name}: checked as Bool; no faithful Datalog lowering or invariant enforcement`];</code></span>
+<span class="ox-line" id="L147"><a class="ox-line__n" href="#L147" aria-label="Line 147">147</a><code>    if (d.kind === &quot;Formula&quot; &amp;&amp; !supportsFormula(d)) return [`formula ${d.of}.${d.field}: no faithful Datalog lowering for this expression`];</code></span>
+<span class="ox-line" id="L148"><a class="ox-line__n" href="#L148" aria-label="Line 148">148</a><code>    return [];</code></span>
+<span class="ox-line" id="L149"><a class="ox-line__n" href="#L149" aria-label="Line 149">149</a><code>  }).concat([</code></span>
+<span class="ox-line" id="L150"><a class="ox-line__n" href="#L150" aria-label="Line 150">150</a><code>    &quot;requires and final states: example host guards, absent from ActionTypeIR&quot;,</code></span>
+<span class="ox-line" id="L151"><a class="ox-line__n" href="#L151" aria-label="Line 151">151</a><code>    &quot;actor type, joins and counterpart: descriptive only; no identity or authorization enforcement&quot;,</code></span>
+<span class="ox-line" id="L152"><a class="ox-line__n" href="#L152" aria-label="Line 152">152</a><code>    &quot;Union members: checked by the prelude; stored as strings without runtime enum constraints&quot;,</code></span>
+<span class="ox-line" id="L153"><a class="ox-line__n" href="#L153" aria-label="Line 153">153</a><code>    &quot;Many references: schema retained; membership facts must be transacted explicitly&quot;,</code></span>
+<span class="ox-line" id="L154"><a class="ox-line__n" href="#L154" aria-label="Line 154">154</a><code>  ]);</code></span>
+<span class="ox-line" id="L155"><a class="ox-line__n" href="#L155" aria-label="Line 155">155</a><code> </code></span>
+<span class="ox-line" id="L156"><a class="ox-line__n" href="#L156" aria-label="Line 156">156</a><code>export const encode = (field: Field, value: unknown): TripleValue =&gt; {</code></span>
+<span class="ox-line" id="L157"><a class="ox-line__n" href="#L157" aria-label="Line 157">157</a><code>  switch (valueType(field).kind) {</code></span>
+<span class="ox-line" id="L158"><a class="ox-line__n" href="#L158" aria-label="Line 158">158</a><code>    case &quot;ref&quot;: return ref(EntityId.make(String(value)));</code></span>
+<span class="ox-line" id="L159"><a class="ox-line__n" href="#L159" aria-label="Line 159">159</a><code>    case &quot;number&quot;: return number(Number(value));</code></span>
+<span class="ox-line" id="L160"><a class="ox-line__n" href="#L160" aria-label="Line 160">160</a><code>    case &quot;datetime&quot;: return datetime(typeof value === &quot;number&quot; ? value : Date.parse(String(value)));</code></span>
+<span class="ox-line" id="L161"><a class="ox-line__n" href="#L161" aria-label="Line 161">161</a><code>    case &quot;string&quot;: return string(String(value));</code></span>
+<span class="ox-line" id="L162"><a class="ox-line__n" href="#L162" aria-label="Line 162">162</a><code>    case &quot;boolean&quot;: return boolean(Boolean(value));</code></span>
+<span class="ox-line" id="L163"><a class="ox-line__n" href="#L163" aria-label="Line 163">163</a><code>    default: throw new TypeError(`Unsupported seed value for ${field.name}`);</code></span>
+<span class="ox-line" id="L164"><a class="ox-line__n" href="#L164" aria-label="Line 164">164</a><code>  }</code></span>
+<span class="ox-line" id="L165"><a class="ox-line__n" href="#L165" aria-label="Line 165">165</a><code>};</code></span>
+<span class="ox-line" id="L166"><a class="ox-line__n" href="#L166" aria-label="Line 166">166</a><code>/** Stable seed ids are row-index based, e.g. room-class:2 is Deluxe. */</code></span>
+<span class="ox-line" id="L167"><a class="ox-line__n" href="#L167" aria-label="Line 167">167</a><code>export const seedOperations = (declarations: readonly ElaboratedDeclaration[]): readonly TransactOp[] =&gt; {</code></span>
+<span class="ox-line" id="L168"><a class="ox-line__n" href="#L168" aria-label="Line 168">168</a><code>  const nouns = nounsOf(declarations);</code></span>
+<span class="ox-line" id="L169"><a class="ox-line__n" href="#L169" aria-label="Line 169">169</a><code>  return declarationsOf(declarations).flatMap((d) =&gt; {</code></span>
+<span class="ox-line" id="L170"><a class="ox-line__n" href="#L170" aria-label="Line 170">170</a><code>    if (d.kind !== &quot;Seed&quot;) return [];</code></span>
+<span class="ox-line" id="L171"><a class="ox-line__n" href="#L171" aria-label="Line 171">171</a><code>    const noun = nouns.find((n) =&gt; n.name === d.of)!;</code></span>
+<span class="ox-line" id="L172"><a class="ox-line__n" href="#L172" aria-label="Line 172">172</a><code>    return d.rows.flatMap((row, i) =&gt; Object.entries(row).flatMap(([name, value]) =&gt; {</code></span>
+<span class="ox-line" id="L173"><a class="ox-line__n" href="#L173" aria-label="Line 173">173</a><code>      const field = noun.fields.find((f) =&gt; f.name === name);</code></span>
+<span class="ox-line" id="L174"><a class="ox-line__n" href="#L174" aria-label="Line 174">174</a><code>      if (!field) throw new TypeError(`Unknown seed field ${name}`);</code></span>
+<span class="ox-line" id="L175"><a class="ox-line__n" href="#L175" aria-label="Line 175">175</a><code>      return (field.many ? value as readonly unknown[] : [value]).map((v): TransactOp =&gt; ({</code></span>
+<span class="ox-line" id="L176"><a class="ox-line__n" href="#L176" aria-label="Line 176">176</a><code>        op: &quot;assert&quot;, entityId: EntityId.make(`${kebab(d.of)}:${i + 1}`), entityType: d.of,</code></span>
+<span class="ox-line" id="L177"><a class="ox-line__n" href="#L177" aria-label="Line 177">177</a><code>        attribute: attribute(d.of, name), value: encode(field, v),</code></span>
+<span class="ox-line" id="L178"><a class="ox-line__n" href="#L178" aria-label="Line 178">178</a><code>      }));</code></span>
+<span class="ox-line" id="L179"><a class="ox-line__n" href="#L179" aria-label="Line 179">179</a><code>    }));</code></span>
+<span class="ox-line" id="L180"><a class="ox-line__n" href="#L180" aria-label="Line 180">180</a><code>  });</code></span>
+<span class="ox-line" id="L181"><a class="ox-line__n" href="#L181" aria-label="Line 181">181</a><code>};</code></span></pre></div></main>
+<footer class="oo-footer"><span class="oo-footer__brand"><b>Open Ontology</b> Experimental v0.1 · Local in-memory runtime.</span><nav aria-label="Footer navigation"><a href="/explorations/">All explorations</a><a href="/explorations/catalog.json">catalog.json</a><a href="/llms.txt">llms.txt</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">Source ↗</a></nav></footer>
+</div></body></html>

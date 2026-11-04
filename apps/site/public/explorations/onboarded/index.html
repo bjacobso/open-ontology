@@ -1,20 +1,25 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f6f5ef">
 <title>Onboarded · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
-<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css">
-<link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index"></head>
-<body class="explore"><a class="skip" href="#main">Skip to content</a><header class="explore-nav"><a href="/">Open Ontology</a><nav aria-label="Main navigation"><a href="/explorations/">Explorations</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
-<main id="main"><a class="back" href="/explorations/">← All explorations</a>
-<p class="eyebrow">domain <span class="status runnable">Runs locally</span></p>
-<h1>Onboarded</h1><p class="lead">Illustrative account language with checked scenarios, plus a TypeScript ontology and local Triplex transcript. The account checker is handwritten example code, not a Forma prelude.</p>
-<nav class="page-nav" aria-label="Notebook sections"><a href="#readme">Readme</a><a href="#sources">Sources</a><a href="#run">Run example</a></nav>
-<div class="notebook"><aside><p class="eyebrow">In this exploration</p><a href="#sources">Language &amp; source</a><a href="#readme">Documentation</a><a href="#run">Model &amp; results</a><a href="/explorations/#adding">Add an exploration ↗</a></aside><div class="notebook-body">
-<section id="sources"><h2>Language &amp; source</h2><ul class="source-list"><li><span>model</span><a href="/explorations/source/examples/onboarded/northwind.account.lisp.html#L1">examples/onboarded/northwind.account.lisp</a><a class="raw-link" href="/explorations/raw/examples/onboarded/northwind.account.lisp">raw ↗</a></li><li><span>compiler</span><a href="/explorations/source/examples/onboarded/account/elaborate.ts.html#L1">examples/onboarded/account/elaborate.ts</a><a class="raw-link" href="/explorations/raw/examples/onboarded/account/elaborate.ts">raw ↗</a></li><li><span>model</span><a href="/explorations/source/examples/onboarded/model.ts.html#L1">examples/onboarded/model.ts</a><a class="raw-link" href="/explorations/raw/examples/onboarded/model.ts">raw ↗</a></li><li><span>operations</span><a href="/explorations/source/examples/onboarded/scenario.ts.html#L1">examples/onboarded/scenario.ts</a><a class="raw-link" href="/explorations/raw/examples/onboarded/scenario.ts">raw ↗</a></li><li><span>runner</span><a href="/explorations/source/examples/onboarded/run.ts.html#L1">examples/onboarded/run.ts</a><a class="raw-link" href="/explorations/raw/examples/onboarded/run.ts">raw ↗</a></li></ul><ul><li><a href="https://open-ontology.com/onboarded">Account explorer ↗</a></li></ul></section>
-<section id="readme" class="markdown"><p class="eyebrow">Documentation <a href="/explorations/raw/examples/onboarded/README.md">Raw Markdown ↗</a></p><h1>Onboarded domain study</h1>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Instrument+Serif:ital@0;1&amp;family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css"><script defer src="/site.js"></script></head>
+<body><div class="oo ox"><a class="oo-skip" href="#main">Skip to content</a>
+<header class="oo-nav"><a class="oo-brand" href="/" aria-label="Open Ontology home"><img src="/favicon.svg" width="24" height="24" alt=""><span>Open Ontology</span></a><nav aria-label="Main navigation"><a class="oo-nav__section" href="/#std">Standard library</a><a class="oo-nav__section" href="/#preludes">Preludes</a><a class="oo-nav__section" href="/explorations/" aria-current="page">Explorations</a><a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main" class="oo-main"><section class="oo-hero ox-hero"><div class="oo-hero__copy"><nav class="ox-crumbs" aria-label="Breadcrumb"><a href="/">Open Ontology</a><span aria-hidden="true">/</span><a href="/explorations/">Explorations</a><span aria-hidden="true">/</span><strong>Onboarded</strong></nav>
+<p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Domain · Runs locally</p>
+<h1>Onboarded</h1><p class="oo-lead">Illustrative account language with checked scenarios, plus a TypeScript ontology and local Triplex transcript. The account checker is handwritten example code, not a Forma prelude.</p>
+<div class="oo-actions"><a class="oo-primary" href="#run">Run the example <span aria-hidden="true">↓</span></a><a class="oo-secondary" href="#sources">Sources <span aria-hidden="true">↓</span></a></div>
+<p class="oo-meta"><span class="oo-status oo-status--today">Runs locally</span><a href="https://github.com/bjacobso/open-ontology/blob/main/test/onboarded.test.ts">test/onboarded.test.ts ↗</a><a href="/explorations/onboarded/output.json">output.json</a></p></div><figure class="oo-hero__side"><div class="oo-repl"><div class="oo-repl__bar" aria-hidden="true"><span></span><span></span><span></span><b>open-ontology</b><em>runs locally</em></div><pre class="ox-cmd"><code><span class="oo-prompt">$</span> pnpm install --frozen-lockfile
+<span class="oo-prompt">$</span> pnpm example:onboarded
+<span class="oo-dim"># covered by test/onboarded.test.ts</span></code></pre></div><figcaption class="oo-hero__note">↑ the exact command · <a href="#run">checked output</a></figcaption></figure></section>
+<div class="ox-notebook"><aside><p class="ox-aside__label">In this exploration</p><nav aria-label="Notebook sections"><a href="#sources"><span>01</span>Language &amp; source</a><a href="#readme"><span>02</span>Documentation</a><a href="#run"><span>03</span>Model &amp; results</a><a href="/explorations/#adding"><span>+</span>Add an exploration</a></nav></aside><div class="ox-notebook__body"><section id="sources" class="oo-section ox-section"><div class="oo-head"><p class="oo-overline"><span>01</span>Language &amp; source</p><h2>Every file, line-linked.</h2><p>Each source opens with stable line anchors; raw links serve the exact bytes in this repository.</p></div>
+<ul class="ox-files"><li><span class="ox-role">model</span><a class="ox-file" href="/explorations/source/examples/onboarded/northwind.account.lisp.html#L1">examples/onboarded/northwind.account.lisp</a><a class="ox-raw" href="/explorations/raw/examples/onboarded/northwind.account.lisp">raw ↗</a></li><li><span class="ox-role">compiler</span><a class="ox-file" href="/explorations/source/examples/onboarded/account/elaborate.ts.html#L1">examples/onboarded/account/elaborate.ts</a><a class="ox-raw" href="/explorations/raw/examples/onboarded/account/elaborate.ts">raw ↗</a></li><li><span class="ox-role">model</span><a class="ox-file" href="/explorations/source/examples/onboarded/model.ts.html#L1">examples/onboarded/model.ts</a><a class="ox-raw" href="/explorations/raw/examples/onboarded/model.ts">raw ↗</a></li><li><span class="ox-role">operations</span><a class="ox-file" href="/explorations/source/examples/onboarded/scenario.ts.html#L1">examples/onboarded/scenario.ts</a><a class="ox-raw" href="/explorations/raw/examples/onboarded/scenario.ts">raw ↗</a></li><li><span class="ox-role">runner</span><a class="ox-file" href="/explorations/source/examples/onboarded/run.ts.html#L1">examples/onboarded/run.ts</a><a class="ox-raw" href="/explorations/raw/examples/onboarded/run.ts">raw ↗</a></li></ul><div class="oo-links ox-links"><a href="https://open-ontology.com/onboarded">Account explorer <span>↗</span></a></div></section>
+<section id="readme" class="oo-section ox-section"><p class="oo-overline"><span>02</span>Documentation</p><article class="ox-prose"><h1>Onboarded domain study</h1>
 <p>This is a selected, illustrative study informed directionally by supplied Onboarded schema and API context. The complete attachments stay in the workspace&#39;s private <code>.context</code> directory; the example contains hand-authored declarations and synthetic facts. The unlisted <code>/onboarded</code> site page presents both parts.</p>
 <h2>Northwind account program</h2>
 <p><a href="/explorations/source/examples/onboarded/northwind.account.lisp.html"><code>northwind.account.lisp</code></a> configures one synthetic account end to end in nine verbs:</p>
-<table>
+<div class="ox-table"><table>
 <thead>
 <tr>
 <th>Verb</th>
@@ -57,7 +62,7 @@
 <td><code>scenario</code></td>
 <td>Facts, then <code>expect</code>, <code>record</code>, and <code>complete</code> on day 0 and later <code>(day n ...)</code></td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p>The Forma reader parses the file. The TypeScript elaborator in <a href="https://github.com/bjacobso/open-ontology/blob/main/examples/onboarded/account"><code>account/</code></a> is example code, not a Forma prelude or package export:</p>
 <ul>
 <li><a href="/explorations/source/examples/onboarded/account/elaborate.ts.html"><code>elaborate.ts</code></a> resolves names and attribute paths; checks types and choice literals, field/attribute compatibility, deprecated writes, sensitive-attribute flags, policy and trigger fact scopes, <code>:scope</code>-only access rules, key namespaces, and due dates required by waits. Every problem is reported with a line and column, without cascading errors.</li>
@@ -72,7 +77,7 @@ pnpm account:check examples/onboarded/northwind.account.lisp --json
 <p>Nothing here calls Onboarded, plans against or deploys to an account, renders forms, evaluates runtime formulas, runs integrations, or enforces access rules.</p>
 <h2>Domain ontology</h2>
 <p>The <a href="/explorations/source/examples/onboarded/model.ts.html">TypeScript model</a> exports twenty object types, two demo actions, and three Datalog queries, explored in four graph views:</p>
-<table>
+<div class="ox-table"><table>
 <thead>
 <tr>
 <th>View</th>
@@ -95,7 +100,7 @@ pnpm account:check examples/onboarded/northwind.account.lisp --json
 <td>Policy &amp; scope</td>
 <td>Policies reference form lineages through policy forms; custom properties carry permission-scope flags; automations and inference rules describe account configuration.</td>
 </tr>
-</tbody></table>
+</tbody></table></div>
 <p>Placements describe an employee&#39;s employment context, while tasks share employee/account/employer dimensions. There is no direct <code>Task.placement</code> reference in this model. Client/job-type dimensions, suggested tasks, runtime page/field submissions, files, external integrations, connected organizations, and distribution are omitted. An employee&#39;s name is reduced to one synthetic display field. Optional/shared configuration ownership is retained where useful, but this example does not reproduce the complete schema or API contracts.</p>
 <pre><code class="language-sh">pnpm model:check examples/onboarded/model.ts
 pnpm example:onboarded
@@ -103,11 +108,9 @@ pnpm example:onboarded
 <p>The local scenario seeds an example form lineage/version/template and creates a task. <code>request-review</code> replaces its next action and employer assignee; repeating it with another user leaves only the new assignee in the review queue. <code>employee-input</code> and <code>employer-review</code> are demo next-action values. The <code>requires_action</code> status remains unchanged. These actions exercise local Triplex mutations and queries, with no Onboarded API requests or production workflow semantics. User-group rules, policy rules, field rules, automation trigger descriptions, and authorization inference configuration are modeled as opaque data in this ontology.</p>
 <h2>Site artifacts</h2>
 <p><code>pnpm site:export-onboarded</code> writes two browser artifacts. <code>model.json</code> holds the ontology IR, the runtime transcript, and the graph views from <code>apps/site/onboarded-views.json</code>, where diagram positions are defined and arrows come from reference properties. <code>account.json</code> holds the Northwind source, its lowered resources per declaration, the checker output, scenario timelines, decision coverage, each mistake&#39;s recorded diagnostic, and the policy evaluator&#39;s result for every combination of the simulator&#39;s facts. Tests verify that both artifacts match the checked-in sources.</p>
-</section>
-<section id="run"><p class="eyebrow">Executable notebook</p><h2>Run the example</h2><p>Run in a clone with Node 24 and pnpm 10.11.0. Each run starts a fresh in-memory Triplex host.</p>
-<pre><code>pnpm install --frozen-lockfile
-pnpm example:onboarded</code></pre>
-<h3>The model</h3><p><a href="/explorations/source/examples/onboarded/northwind.account.lisp.html#L1">Full model with line links</a> · <a href="/explorations/raw/examples/onboarded/northwind.account.lisp">Raw</a></p><pre tabindex="0"><code>; Northwind: one Onboarded account, end to end, in one file.
+<p class="ox-prose__src"><a href="/explorations/source/examples/onboarded/README.md.html#L1">examples/onboarded/README.md</a> · <a href="/explorations/raw/examples/onboarded/README.md">Raw Markdown ↗</a></p></article></section>
+<section id="run" class="oo-section ox-section"><div class="oo-head"><p class="oo-overline"><span>03</span>Executable notebook</p><h2>Run it, then <em>read what it did.</em></h2><p>Run in a clone with Node 24 and pnpm 10.11.0. Each run starts a fresh in-memory Triplex host. This static page does not run code in your browser; the output below is regenerated by running the example during site checks.</p></div>
+<div class="ox-run"><div class="oo-panel"><div class="oo-panel__head"><span><a href="/explorations/source/examples/onboarded/northwind.account.lisp.html#L1">examples/onboarded/northwind.account.lisp</a></span><span>model</span></div><pre tabindex="0"><code class="lang-lisp">; Northwind: one Onboarded account, end to end, in one file.
 ;
 ; Illustrative and synthetic. The Forma reader parses this file; the example's account
 ; elaborator checks it, lowers it to directional resource IR, and simulates its scenarios.
@@ -260,9 +263,8 @@ pnpm example:onboarded</code></pre>
   (day 31 (expect :emails []))
   (day 32 (expect :open [union-card]
                   :emails [{:to :employee :body &quot;Hi Ben, please complete your union card.&quot;}])))
-</code></pre>
-<h3>Checked output</h3><p>This output is regenerated by running the example during site checks. Run the command locally to execute it; this static page does not run code in your browser. <a href="/explorations/onboarded/output.json">Output as JSON</a></p>
-<pre tabindex="0"><code>{
+</code></pre></div>
+<div class="oo-panel oo-panel--out"><div class="oo-panel__head"><span><a href="/explorations/onboarded/output.json">output.json</a></span><span>pnpm example:onboarded</span></div><pre tabindex="0"><code>{
   &quot;forms&quot;: [
     {
       &quot;?lineageName&quot;: &quot;Example onboarding form&quot;,
@@ -306,5 +308,6 @@ pnpm example:onboarded</code></pre>
     ]
   }
 }
-</code></pre></section>
-</div></div></main><footer>Experimental v0.1 · Local in-memory runtime. <a href="/explorations/">All explorations</a></footer></body></html>
+</code></pre></div></div></section></div></div></main>
+<footer class="oo-footer"><span class="oo-footer__brand"><b>Open Ontology</b> Experimental v0.1 · Local in-memory runtime.</span><nav aria-label="Footer navigation"><a href="/explorations/">All explorations</a><a href="/explorations/catalog.json">catalog.json</a><a href="/llms.txt">llms.txt</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">Source ↗</a></nav></footer>
+</div></body></html>

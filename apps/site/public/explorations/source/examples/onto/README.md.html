@@ -1,168 +1,175 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f6f5ef">
 <title>examples/onto/README.md · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
-<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css">
-<link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index"></head>
-<body class="explore"><a class="skip" href="#main">Skip to content</a><header class="explore-nav"><a href="/">Open Ontology</a><nav aria-label="Main navigation"><a href="/explorations/">Explorations</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
-<main id="main"><p class="eyebrow">Full source · md</p><h1 class="source-title">examples/onto/README.md</h1>
-<p><a href="/explorations/raw/examples/onto/README.md">Raw source</a> · <a href="https://github.com/bjacobso/open-ontology/blob/main/examples/onto/README.md">View on GitHub ↗</a></p>
-<p>Click a line number to copy its location from your address bar.</p><pre class="source-code" tabindex="0"><span class="source-line" id="L1"><a class="line-number" href="#L1" aria-label="Line 1">1</a><code># An OntoLang-style language, running on Triplex</code></span>
-<span class="source-line" id="L2"><a class="line-number" href="#L2" aria-label="Line 2">2</a><code> </code></span>
-<span class="source-line" id="L3"><a class="line-number" href="#L3" aria-label="Line 3">3</a><code>[OntoLang](https://onto.space/ontolang) describes actors, typed business records,</code></span>
-<span class="source-line" id="L4"><a class="line-number" href="#L4" aria-label="Line 4">4</a><code>formulas, rules and stories. This independent example loads an OntoLang-shaped</code></span>
-<span class="source-line" id="L5"><a class="line-number" href="#L5" aria-label="Line 5">5</a><code>language as a Forma prelude, lowers its language IR to Open Ontology's portable</code></span>
-<span class="source-line" id="L6"><a class="line-number" href="#L6" aria-label="Line 6">6</a><code>`OntologyIR`, and runs the hotel story on the local in-memory Triplex runtime.</code></span>
-<span class="source-line" id="L7"><a class="line-number" href="#L7" aria-label="Line 7">7</a><code>It is experimental, with no Onto runtime integration, persistence or authorization.</code></span>
-<span class="source-line" id="L8"><a class="line-number" href="#L8" aria-label="Line 8">8</a><code> </code></span>
-<span class="source-line" id="L9"><a class="line-number" href="#L9" aria-label="Line 9">9</a><code>## Read and run</code></span>
-<span class="source-line" id="L10"><a class="line-number" href="#L10" aria-label="Line 10">10</a><code> </code></span>
-<span class="source-line" id="L11"><a class="line-number" href="#L11" aria-label="Line 11">11</a><code>1. Read the language: [onto.lisp](onto.lisp).</code></span>
-<span class="source-line" id="L12"><a class="line-number" href="#L12" aria-label="Line 12">12</a><code>2. Read the business model: [hotel.forma](hotel.forma).</code></span>
-<span class="source-line" id="L13"><a class="line-number" href="#L13" aria-label="Line 13">13</a><code>3. Run the operations: `pnpm example:onto` from the repository root.</code></span>
-<span class="source-line" id="L14"><a class="line-number" href="#L14" aria-label="Line 14">14</a><code>4. Compare the complete [checked output](output.json) and [lowered IR](../../test/fixtures/onto-hotel.ir.json).</code></span>
-<span class="source-line" id="L15"><a class="line-number" href="#L15" aria-label="Line 15">15</a><code> </code></span>
-<span class="source-line" id="L16"><a class="line-number" href="#L16" aria-label="Line 16">16</a><code>Use Node 24 and pnpm 10.11.0; install with `pnpm install --frozen-lockfile`.</code></span>
-<span class="source-line" id="L17"><a class="line-number" href="#L17" aria-label="Line 17">17</a><code>The example's checker is `elaborateHotel()` in [lower.ts](lower.ts), exercised by</code></span>
-<span class="source-line" id="L18"><a class="line-number" href="#L18" aria-label="Line 18">18</a><code>`pnpm exec vitest run test/onto-example.test.ts`. The generic `model:check`</code></span>
-<span class="source-line" id="L19"><a class="line-number" href="#L19" aria-label="Line 19">19</a><code>command accepts the package's ontology DSL, not this external language.</code></span>
-<span class="source-line" id="L20"><a class="line-number" href="#L20" aria-label="Line 20">20</a><code> </code></span>
-<span class="source-line" id="L21"><a class="line-number" href="#L21" aria-label="Line 21">21</a><code>The website's example notebook presents this README, full source with line</code></span>
-<span class="source-line" id="L22"><a class="line-number" href="#L22" aria-label="Line 22">22</a><code>anchors, model, run command and tested output together. It is a static reading</code></span>
-<span class="source-line" id="L23"><a class="line-number" href="#L23" aria-label="Line 23">23</a><code>notebook; execute the command in a clone. The browser does not host Triplex.</code></span>
-<span class="source-line" id="L24"><a class="line-number" href="#L24" aria-label="Line 24">24</a><code> </code></span>
-<span class="source-line" id="L25"><a class="line-number" href="#L25" aria-label="Line 25">25</a><code>## Three layers</code></span>
-<span class="source-line" id="L26"><a class="line-number" href="#L26" aria-label="Line 26">26</a><code> </code></span>
-<span class="source-line" id="L27"><a class="line-number" href="#L27" aria-label="Line 27">27</a><code>| Layer | Source | Responsibility |</code></span>
-<span class="source-line" id="L28"><a class="line-number" href="#L28" aria-label="Line 28">28</a><code>| --- | --- | --- |</code></span>
-<span class="source-line" id="L29"><a class="line-number" href="#L29" aria-label="Line 29">29</a><code>| Language | `onto.lisp` | Syntax, types, scopes, expression inference, diagnostics, language IR |</code></span>
-<span class="source-line" id="L30"><a class="line-number" href="#L30" aria-label="Line 30">30</a><code>| Business model | `hotel.forma` | Actors, hotel objects, rules, formulas, stories, seed data |</code></span>
-<span class="source-line" id="L31"><a class="line-number" href="#L31" aria-label="Line 31">31</a><code>| Operations | `lower.ts`, `guards.ts`, `scenario.ts` | Portable IR, seed transactions, observed facts, guarded commands, queries and journal |</code></span>
-<span class="source-line" id="L32"><a class="line-number" href="#L32" aria-label="Line 32">32</a><code> </code></span>
-<span class="source-line" id="L33"><a class="line-number" href="#L33" aria-label="Line 33">33</a><code>The path is `bootstrapFromSources` → `elaborateSources` → `lowerOnto` →</code></span>
-<span class="source-line" id="L34"><a class="line-number" href="#L34" aria-label="Line 34">34</a><code>`toTriplexConfig` / `makeOntologyRuntime` → `triples.transact`. The prelude stays</code></span>
-<span class="source-line" id="L35"><a class="line-number" href="#L35" aria-label="Line 35">35</a><code>in this example; it is not a bundled package language. `lowerOnto` is pure;</code></span>
-<span class="source-line" id="L36"><a class="line-number" href="#L36" aria-label="Line 36">36</a><code>seed operations and host guard metadata are separate from the JSON-safe IR.</code></span>
-<span class="source-line" id="L37"><a class="line-number" href="#L37" aria-label="Line 37">37</a><code> </code></span>
-<span class="source-line" id="L38"><a class="line-number" href="#L38" aria-label="Line 38">38</a><code>## OntoLang to Forma</code></span>
-<span class="source-line" id="L39"><a class="line-number" href="#L39" aria-label="Line 39">39</a><code> </code></span>
-<span class="source-line" id="L40"><a class="line-number" href="#L40" aria-label="Line 40">40</a><code>| OntoLang | Forma (`onto.lisp`) |</code></span>
-<span class="source-line" id="L41"><a class="line-number" href="#L41" aria-label="Line 41">41</a><code>| --- | --- |</code></span>
-<span class="source-line" id="L42"><a class="line-number" href="#L42" aria-label="Line 42">42</a><code>| `actor Guest @type person` | `(actor Guest :person &quot;doc&quot; {fields})` (+ `:joins :sign-up`/`:invite`/`:none`) |</code></span>
-<span class="source-line" id="L43"><a class="line-number" href="#L43" aria-label="Line 43">43</a><code>| `object Reservation`, `status: a \| b @final` | `(object Reservation &quot;doc&quot; :final {:status [...]} {fields})`, `:status (Union :a :b)` |</code></span>
-<span class="source-line" id="L44"><a class="line-number" href="#L44" aria-label="Line 44">44</a><code>| `guest: Guest`, `services: Service[]` | `(One Guest)`, `(Many Service)` |</code></span>
-<span class="source-line" id="L45"><a class="line-number" href="#L45" aria-label="Line 45">45</a><code>| `string`/`int`/`timestamp` | `String`/`Int`/`Instant` |</code></span>
-<span class="source-line" id="L46"><a class="line-number" href="#L46" aria-label="Line 46">46</a><code>| `@rule …` | `(rule name Object &quot;doc&quot; expr)` |</code></span>
-<span class="source-line" id="L47"><a class="line-number" href="#L47" aria-label="Line 47">47</a><code>| `total: int = …` | `(formula Object field Type &quot;doc&quot; expr)` |</code></span>
-<span class="source-line" id="L48"><a class="line-number" href="#L48" aria-label="Line 48">48</a><code>| story sentence + `requires`/`sets` | `(step Actor verb Object :to Actor :requires [...] :sets {...})` inside `(story …)` |</code></span>
-<span class="source-line" id="L49"><a class="line-number" href="#L49" aria-label="Line 49">49</a><code>| `seed RoomClass` | `(seed RoomClass [{...}])` |</code></span>
-<span class="source-line" id="L50"><a class="line-number" href="#L50" aria-label="Line 50">50</a><code> </code></span>
-<span class="source-line" id="L51"><a class="line-number" href="#L51" aria-label="Line 51">51</a><code>## What executes</code></span>
-<span class="source-line" id="L52"><a class="line-number" href="#L52" aria-label="Line 52">52</a><code> </code></span>
-<span class="source-line" id="L53"><a class="line-number" href="#L53" aria-label="Line 53">53</a><code>All 17 declarations elaborate without diagnostics. Actors and objects become</code></span>
-<span class="source-line" id="L54"><a class="line-number" href="#L54" aria-label="Line 54">54</a><code>nine object types. Links become `ref` properties, `Many` preserves cardinality,</code></span>
-<span class="source-line" id="L55"><a class="line-number" href="#L55" aria-label="Line 55">55</a><code>and unions become string properties. Attribute keys are explicit, for example</code></span>
-<span class="source-line" id="L56"><a class="line-number" href="#L56" aria-label="Line 56">56</a><code>`:room-class/rate` and `:reservation/check-in`. The five story steps become</code></span>
-<span class="source-line" id="L57"><a class="line-number" href="#L57" aria-label="Line 57">57</a><code>five actions. The runtime requires kebab-case action names, so the check-in</code></span>
-<span class="source-line" id="L58"><a class="line-number" href="#L58" aria-label="Line 58">58</a><code>name is `hotel-booking-checks-in`. Updating a status clears then sets it.</code></span>
-<span class="source-line" id="L59"><a class="line-number" href="#L59" aria-label="Line 59">59</a><code>`:new true` produces `create-object`; the host also rejects an existing id.</code></span>
-<span class="source-line" id="L60"><a class="line-number" href="#L60" aria-label="Line 60">60</a><code> </code></span>
-<span class="source-line" id="L61"><a class="line-number" href="#L61" aria-label="Line 61">61</a><code>The run seeds three room classes, supplies a guest, room and invoice fixture,</code></span>
-<span class="source-line" id="L62"><a class="line-number" href="#L62" aria-label="Line 62">62</a><code>then submits, confirms, rejects an early check-in, accepts check-in at exactly</code></span>
-<span class="source-line" id="L63"><a class="line-number" href="#L63" aria-label="Line 63">63</a><code>15:00 UTC on November 4, 2026, requests a service and fulfils it. Reusing the</code></span>
-<span class="source-line" id="L64"><a class="line-number" href="#L64" aria-label="Line 64">64</a><code>request sentence on that fulfilled service is rejected because it is final.</code></span>
-<span class="source-line" id="L65"><a class="line-number" href="#L65" aria-label="Line 65">65</a><code>Reservation `declined` and `checked-out` are also terminal (tested).</code></span>
-<span class="source-line" id="L66"><a class="line-number" href="#L66" aria-label="Line 66">66</a><code> </code></span>
-<span class="source-line" id="L67"><a class="line-number" href="#L67" aria-label="Line 67">67</a><code>`Reservation.service-charges` becomes a named Datalog sum query over explicitly</code></span>
-<span class="source-line" id="L68"><a class="line-number" href="#L68" aria-label="Line 68">68</a><code>linked, fulfilled services. It returns 75 after fulfilment. Like a grouped SQL</code></span>
-<span class="source-line" id="L69"><a class="line-number" href="#L69" aria-label="Line 69">69</a><code>sum, the sparse query returns no row when no fulfilled service matches; a</code></span>
-<span class="source-line" id="L70"><a class="line-number" href="#L70" aria-label="Line 70">70</a><code>missing reservation group represents zero. It does not store a derived field.</code></span>
-<span class="source-line" id="L71"><a class="line-number" href="#L71" aria-label="Line 71">71</a><code>The date-order rule also becomes the named `check-out-after-check-in` query,</code></span>
-<span class="source-line" id="L72"><a class="line-number" href="#L72" aria-label="Line 72">72</a><code>which returns reservations satisfying the comparison; it does not reject writes.</code></span>
-<span class="source-line" id="L73"><a class="line-number" href="#L73" aria-label="Line 73">73</a><code>The run prints both named queries, room classes, story outcomes, and journal</code></span>
-<span class="source-line" id="L74"><a class="line-number" href="#L74" aria-label="Line 74">74</a><code>actor and command ids. Rejected commands have no journal entry.</code></span>
-<span class="source-line" id="L75"><a class="line-number" href="#L75" aria-label="Line 75">75</a><code> </code></span>
-<span class="source-line" id="L76"><a class="line-number" href="#L76" aria-label="Line 76">76</a><code>Creation inputs supply all single-valued fields that the sentence does not</code></span>
-<span class="source-line" id="L77"><a class="line-number" href="#L77" aria-label="Line 77">77</a><code>set, including reference ids. Collection membership is explicit facts. The</code></span>
-<span class="source-line" id="L78"><a class="line-number" href="#L78" aria-label="Line 78">78</a><code>fixture separately asserts `Reservation.services`: the language does not</code></span>
-<span class="source-line" id="L79"><a class="line-number" href="#L79" aria-label="Line 79">79</a><code>specify automatic inverse maintenance from `Service.reservation`.</code></span>
-<span class="source-line" id="L80"><a class="line-number" href="#L80" aria-label="Line 80">80</a><code> </code></span>
-<span class="source-line" id="L81"><a class="line-number" href="#L81" aria-label="Line 81">81</a><code>## Guards and atomicity</code></span>
-<span class="source-line" id="L82"><a class="line-number" href="#L82" aria-label="Line 82">82</a><code> </code></span>
-<span class="source-line" id="L83"><a class="line-number" href="#L83" aria-label="Line 83">83</a><code>[guards.ts](guards.ts) interprets `requires` against entity views read from</code></span>
-<span class="source-line" id="L84"><a class="line-number" href="#L84" aria-label="Line 84">84</a><code>Triplex: `is?`, `known?`, `in?`, `before?`, `after?`, `days-between`, `sum`,</code></span>
-<span class="source-line" id="L85"><a class="line-number" href="#L85" aria-label="Line 85">85</a><code>`now`, Boolean operators, arithmetic, and the `map`/`filter` lambdas used by</code></span>
-<span class="source-line" id="L86"><a class="line-number" href="#L86" aria-label="Line 86">86</a><code>the service formula. `known?` on a link requires the target to have live facts.</code></span>
-<span class="source-line" id="L87"><a class="line-number" href="#L87" aria-label="Line 87">87</a><code>Dates are UTC epoch milliseconds; `days-between` counts complete 24-hour days.</code></span>
-<span class="source-line" id="L88"><a class="line-number" href="#L88" aria-label="Line 88">88</a><code>The scenario passes fixed command times. The journal's commit clock belongs</code></span>
-<span class="source-line" id="L89"><a class="line-number" href="#L89" aria-label="Line 89">89</a><code>to the Triplex host, and is separate from that business clock.</code></span>
-<span class="source-line" id="L90"><a class="line-number" href="#L90" aria-label="Line 90">90</a><code> </code></span>
-<span class="source-line" id="L91"><a class="line-number" href="#L91" aria-label="Line 91">91</a><code>**The example's guard and write are atomic with respect to observed entity</code></span>
-<span class="source-line" id="L92"><a class="line-number" href="#L92" aria-label="Line 92">92</a><code>facts.** Triplex 0.2.0 exposes `TransactionMeta.preconditions` with `EntityState`</code></span>
-<span class="source-line" id="L93"><a class="line-number" href="#L93" aria-label="Line 93">93</a><code>(the complete observed live triple-id set) and `TripleLive` (compare and</code></span>
-<span class="source-line" id="L94"><a class="line-number" href="#L94" aria-label="Line 94">94</a><code>retract). `makeOntologyRuntime.invoke` does not forward preconditions. The</code></span>
-<span class="source-line" id="L95"><a class="line-number" href="#L95" aria-label="Line 95">95</a><code>example decorates the scoped `Triples` service so its actual `transact` adds</code></span>
-<span class="source-line" id="L96"><a class="line-number" href="#L96" aria-label="Line 96">96</a><code>`EntityState` preconditions for every entity read, including linked records</code></span>
-<span class="source-line" id="L97"><a class="line-number" href="#L97" aria-label="Line 97">97</a><code>and the absence of a creation target. Triplex compares these inside its write</code></span>
-<span class="source-line" id="L98"><a class="line-number" href="#L98" aria-label="Line 98">98</a><code>transaction; conflicts reject the whole write. No `src/` changes are needed.</code></span>
-<span class="source-line" id="L99"><a class="line-number" href="#L99" aria-label="Line 99">99</a><code>Tests inject a competing write after evaluation to prove all three cases.</code></span>
-<span class="source-line" id="L100"><a class="line-number" href="#L100" aria-label="Line 100">100</a><code> </code></span>
-<span class="source-line" id="L101"><a class="line-number" href="#L101" aria-label="Line 101">101</a><code>This is a bounded interpreter over three levels of links and ordinary,</code></span>
-<span class="source-line" id="L102"><a class="line-number" href="#L102" aria-label="Line 102">102</a><code>non-scheduled facts, not a general query guard system. Time is a command input;</code></span>
-<span class="source-line" id="L103"><a class="line-number" href="#L103" aria-label="Line 103">103</a><code>wall-clock passage is not a protected database fact. Direct runtime invocations</code></span>
-<span class="source-line" id="L104"><a class="line-number" href="#L104" aria-label="Line 104">104</a><code>or raw transactions bypass these example guards. There is no backend enum,</code></span>
-<span class="source-line" id="L105"><a class="line-number" href="#L105" aria-label="Line 105">105</a><code>transition or invariant enforcement. Follow-up work belongs in Triplex:</code></span>
-<span class="source-line" id="L106"><a class="line-number" href="#L106" aria-label="Line 106">106</a><code>command configuration nodes with guards and transition constraints, applied to</code></span>
-<span class="source-line" id="L107"><a class="line-number" href="#L107" aria-label="Line 107">107</a><code>all command entry points. `ActionTypeIR` would also need a portable guard contract.</code></span>
-<span class="source-line" id="L108"><a class="line-number" href="#L108" aria-label="Line 108">108</a><code> </code></span>
-<span class="source-line" id="L109"><a class="line-number" href="#L109" aria-label="Line 109">109</a><code>## Not lowered</code></span>
-<span class="source-line" id="L110"><a class="line-number" href="#L110" aria-label="Line 110">110</a><code> </code></span>
-<span class="source-line" id="L111"><a class="line-number" href="#L111" aria-label="Line 111">111</a><code>`notLowered()` reports these limitations and the run prints them:</code></span>
-<span class="source-line" id="L112"><a class="line-number" href="#L112" aria-label="Line 112">112</a><code> </code></span>
-<span class="source-line" id="L113"><a class="line-number" href="#L113" aria-label="Line 113">113</a><code>- Rule `check-out-after-check-in`: a named satisfaction query runs, but there is no invariant enforcement.</code></span>
-<span class="source-line" id="L114"><a class="line-number" href="#L114" aria-label="Line 114">114</a><code>- Rule `past-bookings-are-settled`: its Boolean expression is checked; no clock-driven invariant enforcement.</code></span>
-<span class="source-line" id="L115"><a class="line-number" href="#L115" aria-label="Line 115">115</a><code>- Formula `Invoice.total`: checked, but its date arithmetic and derived-field composition have no faithful lowering here. The interpreter's vocabulary is tested; the run does not compute invoice totals.</code></span>
-<span class="source-line" id="L116"><a class="line-number" href="#L116" aria-label="Line 116">116</a><code>- `requires` and final states: example host guards, absent from `ActionTypeIR`.</code></span>
-<span class="source-line" id="L117"><a class="line-number" href="#L117" aria-label="Line 117">117</a><code>- Actor type, joins and counterpart: descriptive data; no identity or authorization enforcement.</code></span>
-<span class="source-line" id="L118"><a class="line-number" href="#L118" aria-label="Line 118">118</a><code>- Union members: prelude checks, stored as strings without runtime enum constraints.</code></span>
-<span class="source-line" id="L119"><a class="line-number" href="#L119" aria-label="Line 119">119</a><code>- Many references: schema retained, collection membership transacted explicitly.</code></span>
-<span class="source-line" id="L120"><a class="line-number" href="#L120" aria-label="Line 120">120</a><code> </code></span>
-<span class="source-line" id="L121"><a class="line-number" href="#L121" aria-label="Line 121">121</a><code>Only the exact service-charge and date-order expressions are recognized for query</code></span>
-<span class="source-line" id="L122"><a class="line-number" href="#L122" aria-label="Line 122">122</a><code>lowering. Changing either causes it to be reported rather than silently reusing</code></span>
-<span class="source-line" id="L123"><a class="line-number" href="#L123" aria-label="Line 123">123</a><code>the old query.</code></span>
-<span class="source-line" id="L124"><a class="line-number" href="#L124" aria-label="Line 124">124</a><code>Other unsupported field types throw an error. The rule query is an observation; the business rules do not become write-time</code></span>
-<span class="source-line" id="L125"><a class="line-number" href="#L125" aria-label="Line 125">125</a><code>Datalog constraints or scheduled background jobs.</code></span>
-<span class="source-line" id="L126"><a class="line-number" href="#L126" aria-label="Line 126">126</a><code> </code></span>
-<span class="source-line" id="L127"><a class="line-number" href="#L127" aria-label="Line 127">127</a><code>## Diagnostics</code></span>
-<span class="source-line" id="L128"><a class="line-number" href="#L128" aria-label="Line 128">128</a><code> </code></span>
-<span class="source-line" id="L129"><a class="line-number" href="#L129" aria-label="Line 129">129</a><code>The test creates each broken variant with a string replacement and asserts the</code></span>
-<span class="source-line" id="L130"><a class="line-number" href="#L130" aria-label="Line 130">130</a><code>code, severity and message. Expression inference follows linked record views,</code></span>
-<span class="source-line" id="L131"><a class="line-number" href="#L131" aria-label="Line 131">131</a><code>including `invoice.reservation.room-class.rate`.</code></span>
-<span class="source-line" id="L132"><a class="line-number" href="#L132" aria-label="Line 132">132</a><code> </code></span>
-<span class="source-line" id="L133"><a class="line-number" href="#L133" aria-label="Line 133">133</a><code>| Broken variant in `hotel.forma` | Diagnostic |</code></span>
-<span class="source-line" id="L134"><a class="line-number" href="#L134" aria-label="Line 134">134</a><code>| --- | --- |</code></span>
-<span class="source-line" id="L135"><a class="line-number" href="#L135" aria-label="Line 135">135</a><code>| `reservation.check-in` → `reservation.checkin` in a rule | `elaborate/hole-type`: missing record field |</code></span>
-<span class="source-line" id="L136"><a class="line-number" href="#L136" aria-label="Line 136">136</a><code>| `invoice.reservation.room-class.rate` → `.name` | `elaborate/hole-type`: type mismatch |</code></span>
-<span class="source-line" id="L137"><a class="line-number" href="#L137" aria-label="Line 137">137</a><code>| `:sets {:status :checked-in}` → `:checked_in` | `onto/unknown-state` |</code></span>
-<span class="source-line" id="L138"><a class="line-number" href="#L138" aria-label="Line 138">138</a><code>| `(is? reservation.status :confirmed)` → `:confirmd` | `onto/unknown-state`, lists valid states |</code></span>
-<span class="source-line" id="L139"><a class="line-number" href="#L139" aria-label="Line 139">139</a><code>| Remove `:new true` from Guest submits Reservation | Warning `onto/unguarded-transition` |</code></span>
-<span class="source-line" id="L140"><a class="line-number" href="#L140" aria-label="Line 140">140</a><code>| `:room (One Room)` → `(One Suite)` | `onto/unknown-link` and `elaborate/hole-type`: unknown type Suite |</code></span>
-<span class="source-line" id="L141"><a class="line-number" href="#L141" aria-label="Line 141">141</a><code>| `(formula Invoice total Int` → `String` | `elaborate/hole-type`: expected String, found Int |</code></span>
-<span class="source-line" id="L142"><a class="line-number" href="#L142" aria-label="Line 142">142</a><code>| `(step Concierge fulfils Service` → `Booking` | `elaborate/hole-type`: unknown reference Booking |</code></span>
-<span class="source-line" id="L143"><a class="line-number" href="#L143" aria-label="Line 143">143</a><code>| Seed `:rate 200` → `:price 200` | `onto/unknown-field` |</code></span>
-<span class="source-line" id="L144"><a class="line-number" href="#L144" aria-label="Line 144">144</a><code> </code></span>
-<span class="source-line" id="L145"><a class="line-number" href="#L145" aria-label="Line 145">145</a><code>Removing `:new true` exposes a real ambiguity: a submission sentence with no</code></span>
-<span class="source-line" id="L146"><a class="line-number" href="#L146" aria-label="Line 146">146</a><code>current-state guard could otherwise revive a declined reservation.</code></span>
-<span class="source-line" id="L147"><a class="line-number" href="#L147" aria-label="Line 147">147</a><code> </code></span>
-<span class="source-line" id="L148"><a class="line-number" href="#L148" aria-label="Line 148">148</a><code>The supplied monomorphic `is?` workaround stays in the prelude. Forma's</code></span>
-<span class="source-line" id="L149"><a class="line-number" href="#L149" aria-label="Line 149">149</a><code>keyword inference and missing-hole destructuring issues were addressed upstream</code></span>
-<span class="source-line" id="L150"><a class="line-number" href="#L150" aria-label="Line 150">150</a><code>in [Forma PR 110](https://github.com/bjacobso/forma/pull/110); this example does</code></span>
-<span class="source-line" id="L151"><a class="line-number" href="#L151" aria-label="Line 151">151</a><code>not implement either compiler fix.</code></span>
-<span class="source-line" id="L152"><a class="line-number" href="#L152" aria-label="Line 152">152</a><code> </code></span>
-<span class="source-line" id="L153"><a class="line-number" href="#L153" aria-label="Line 153">153</a><code>## Forma package provenance</code></span>
-<span class="source-line" id="L154"><a class="line-number" href="#L154" aria-label="Line 154">154</a><code> </code></span>
-<span class="source-line" id="L155"><a class="line-number" href="#L155" aria-label="Line 155">155</a><code>The npm 0.3.0 tarball predates the descriptor API used here. This example uses</code></span>
-<span class="source-line" id="L156"><a class="line-number" href="#L156" aria-label="Line 156">156</a><code>an isolated, MIT-licensed snapshot of latest Forma `main` (resolved to commit</code></span>
-<span class="source-line" id="L157"><a class="line-number" href="#L157" aria-label="Line 157">157</a><code>`535cd41ec7f81f3229b810df6f374ebfa04c16c7`) as the development package</code></span>
-<span class="source-line" id="L158"><a class="line-number" href="#L158" aria-label="Line 158">158</a><code>`@open-ontology/onto-forma`; the package's existing `@formalang/ts` dependency</code></span>
-<span class="source-line" id="L159"><a class="line-number" href="#L159" aria-label="Line 159">159</a><code>stays unchanged. See [the provenance and rebuild instructions](../../vendor/README.md).</code></span>
-<span class="source-line" id="L160"><a class="line-number" href="#L160" aria-label="Line 160">160</a><code>Both APIs are consumed through package exports; no sibling project source is imported.</code></span></pre></main><footer>Experimental v0.1 · Local in-memory runtime. <a href="/explorations/">All explorations</a></footer></body></html>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Instrument+Serif:ital@0;1&amp;family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css"><script defer src="/site.js"></script></head>
+<body><div class="oo ox"><a class="oo-skip" href="#main">Skip to content</a>
+<header class="oo-nav"><a class="oo-brand" href="/" aria-label="Open Ontology home"><img src="/favicon.svg" width="24" height="24" alt=""><span>Open Ontology</span></a><nav aria-label="Main navigation"><a class="oo-nav__section" href="/#std">Standard library</a><a class="oo-nav__section" href="/#preludes">Preludes</a><a class="oo-nav__section" href="/explorations/" aria-current="page">Explorations</a><a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main" class="oo-main"><section class="ox-hero ox-hero--source"><nav class="ox-crumbs" aria-label="Breadcrumb"><a href="/">Open Ontology</a><span aria-hidden="true">/</span><a href="/explorations/">Explorations</a><span aria-hidden="true">/</span>Source</nav>
+<p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Full source · md · 160 lines</p>
+<h1 class="oo-pkg ox-path">examples/onto/README.md</h1>
+<div class="oo-actions"><a class="oo-primary" href="/explorations/raw/examples/onto/README.md">Raw source <span aria-hidden="true">↗</span></a><a class="oo-secondary" href="https://github.com/bjacobso/open-ontology/blob/main/examples/onto/README.md">View on GitHub <span aria-hidden="true">↗</span></a></div>
+<p class="oo-meta"><span>Click a line number to link to that line</span></p></section>
+<div class="oo-panel ox-source"><div class="oo-panel__head"><span>examples/onto/README.md</span><span>md</span></div><pre tabindex="0"><span class="ox-line" id="L1"><a class="ox-line__n" href="#L1" aria-label="Line 1">1</a><code># An OntoLang-style language, running on Triplex</code></span>
+<span class="ox-line" id="L2"><a class="ox-line__n" href="#L2" aria-label="Line 2">2</a><code> </code></span>
+<span class="ox-line" id="L3"><a class="ox-line__n" href="#L3" aria-label="Line 3">3</a><code>[OntoLang](https://onto.space/ontolang) describes actors, typed business records,</code></span>
+<span class="ox-line" id="L4"><a class="ox-line__n" href="#L4" aria-label="Line 4">4</a><code>formulas, rules and stories. This independent example loads an OntoLang-shaped</code></span>
+<span class="ox-line" id="L5"><a class="ox-line__n" href="#L5" aria-label="Line 5">5</a><code>language as a Forma prelude, lowers its language IR to Open Ontology's portable</code></span>
+<span class="ox-line" id="L6"><a class="ox-line__n" href="#L6" aria-label="Line 6">6</a><code>`OntologyIR`, and runs the hotel story on the local in-memory Triplex runtime.</code></span>
+<span class="ox-line" id="L7"><a class="ox-line__n" href="#L7" aria-label="Line 7">7</a><code>It is experimental, with no Onto runtime integration, persistence or authorization.</code></span>
+<span class="ox-line" id="L8"><a class="ox-line__n" href="#L8" aria-label="Line 8">8</a><code> </code></span>
+<span class="ox-line" id="L9"><a class="ox-line__n" href="#L9" aria-label="Line 9">9</a><code>## Read and run</code></span>
+<span class="ox-line" id="L10"><a class="ox-line__n" href="#L10" aria-label="Line 10">10</a><code> </code></span>
+<span class="ox-line" id="L11"><a class="ox-line__n" href="#L11" aria-label="Line 11">11</a><code>1. Read the language: [onto.lisp](onto.lisp).</code></span>
+<span class="ox-line" id="L12"><a class="ox-line__n" href="#L12" aria-label="Line 12">12</a><code>2. Read the business model: [hotel.forma](hotel.forma).</code></span>
+<span class="ox-line" id="L13"><a class="ox-line__n" href="#L13" aria-label="Line 13">13</a><code>3. Run the operations: `pnpm example:onto` from the repository root.</code></span>
+<span class="ox-line" id="L14"><a class="ox-line__n" href="#L14" aria-label="Line 14">14</a><code>4. Compare the complete [checked output](output.json) and [lowered IR](../../test/fixtures/onto-hotel.ir.json).</code></span>
+<span class="ox-line" id="L15"><a class="ox-line__n" href="#L15" aria-label="Line 15">15</a><code> </code></span>
+<span class="ox-line" id="L16"><a class="ox-line__n" href="#L16" aria-label="Line 16">16</a><code>Use Node 24 and pnpm 10.11.0; install with `pnpm install --frozen-lockfile`.</code></span>
+<span class="ox-line" id="L17"><a class="ox-line__n" href="#L17" aria-label="Line 17">17</a><code>The example's checker is `elaborateHotel()` in [lower.ts](lower.ts), exercised by</code></span>
+<span class="ox-line" id="L18"><a class="ox-line__n" href="#L18" aria-label="Line 18">18</a><code>`pnpm exec vitest run test/onto-example.test.ts`. The generic `model:check`</code></span>
+<span class="ox-line" id="L19"><a class="ox-line__n" href="#L19" aria-label="Line 19">19</a><code>command accepts the package's ontology DSL, not this external language.</code></span>
+<span class="ox-line" id="L20"><a class="ox-line__n" href="#L20" aria-label="Line 20">20</a><code> </code></span>
+<span class="ox-line" id="L21"><a class="ox-line__n" href="#L21" aria-label="Line 21">21</a><code>The website's example notebook presents this README, full source with line</code></span>
+<span class="ox-line" id="L22"><a class="ox-line__n" href="#L22" aria-label="Line 22">22</a><code>anchors, model, run command and tested output together. It is a static reading</code></span>
+<span class="ox-line" id="L23"><a class="ox-line__n" href="#L23" aria-label="Line 23">23</a><code>notebook; execute the command in a clone. The browser does not host Triplex.</code></span>
+<span class="ox-line" id="L24"><a class="ox-line__n" href="#L24" aria-label="Line 24">24</a><code> </code></span>
+<span class="ox-line" id="L25"><a class="ox-line__n" href="#L25" aria-label="Line 25">25</a><code>## Three layers</code></span>
+<span class="ox-line" id="L26"><a class="ox-line__n" href="#L26" aria-label="Line 26">26</a><code> </code></span>
+<span class="ox-line" id="L27"><a class="ox-line__n" href="#L27" aria-label="Line 27">27</a><code>| Layer | Source | Responsibility |</code></span>
+<span class="ox-line" id="L28"><a class="ox-line__n" href="#L28" aria-label="Line 28">28</a><code>| --- | --- | --- |</code></span>
+<span class="ox-line" id="L29"><a class="ox-line__n" href="#L29" aria-label="Line 29">29</a><code>| Language | `onto.lisp` | Syntax, types, scopes, expression inference, diagnostics, language IR |</code></span>
+<span class="ox-line" id="L30"><a class="ox-line__n" href="#L30" aria-label="Line 30">30</a><code>| Business model | `hotel.forma` | Actors, hotel objects, rules, formulas, stories, seed data |</code></span>
+<span class="ox-line" id="L31"><a class="ox-line__n" href="#L31" aria-label="Line 31">31</a><code>| Operations | `lower.ts`, `guards.ts`, `scenario.ts` | Portable IR, seed transactions, observed facts, guarded commands, queries and journal |</code></span>
+<span class="ox-line" id="L32"><a class="ox-line__n" href="#L32" aria-label="Line 32">32</a><code> </code></span>
+<span class="ox-line" id="L33"><a class="ox-line__n" href="#L33" aria-label="Line 33">33</a><code>The path is `bootstrapFromSources` → `elaborateSources` → `lowerOnto` →</code></span>
+<span class="ox-line" id="L34"><a class="ox-line__n" href="#L34" aria-label="Line 34">34</a><code>`toTriplexConfig` / `makeOntologyRuntime` → `triples.transact`. The prelude stays</code></span>
+<span class="ox-line" id="L35"><a class="ox-line__n" href="#L35" aria-label="Line 35">35</a><code>in this example; it is not a bundled package language. `lowerOnto` is pure;</code></span>
+<span class="ox-line" id="L36"><a class="ox-line__n" href="#L36" aria-label="Line 36">36</a><code>seed operations and host guard metadata are separate from the JSON-safe IR.</code></span>
+<span class="ox-line" id="L37"><a class="ox-line__n" href="#L37" aria-label="Line 37">37</a><code> </code></span>
+<span class="ox-line" id="L38"><a class="ox-line__n" href="#L38" aria-label="Line 38">38</a><code>## OntoLang to Forma</code></span>
+<span class="ox-line" id="L39"><a class="ox-line__n" href="#L39" aria-label="Line 39">39</a><code> </code></span>
+<span class="ox-line" id="L40"><a class="ox-line__n" href="#L40" aria-label="Line 40">40</a><code>| OntoLang | Forma (`onto.lisp`) |</code></span>
+<span class="ox-line" id="L41"><a class="ox-line__n" href="#L41" aria-label="Line 41">41</a><code>| --- | --- |</code></span>
+<span class="ox-line" id="L42"><a class="ox-line__n" href="#L42" aria-label="Line 42">42</a><code>| `actor Guest @type person` | `(actor Guest :person &quot;doc&quot; {fields})` (+ `:joins :sign-up`/`:invite`/`:none`) |</code></span>
+<span class="ox-line" id="L43"><a class="ox-line__n" href="#L43" aria-label="Line 43">43</a><code>| `object Reservation`, `status: a \| b @final` | `(object Reservation &quot;doc&quot; :final {:status [...]} {fields})`, `:status (Union :a :b)` |</code></span>
+<span class="ox-line" id="L44"><a class="ox-line__n" href="#L44" aria-label="Line 44">44</a><code>| `guest: Guest`, `services: Service[]` | `(One Guest)`, `(Many Service)` |</code></span>
+<span class="ox-line" id="L45"><a class="ox-line__n" href="#L45" aria-label="Line 45">45</a><code>| `string`/`int`/`timestamp` | `String`/`Int`/`Instant` |</code></span>
+<span class="ox-line" id="L46"><a class="ox-line__n" href="#L46" aria-label="Line 46">46</a><code>| `@rule …` | `(rule name Object &quot;doc&quot; expr)` |</code></span>
+<span class="ox-line" id="L47"><a class="ox-line__n" href="#L47" aria-label="Line 47">47</a><code>| `total: int = …` | `(formula Object field Type &quot;doc&quot; expr)` |</code></span>
+<span class="ox-line" id="L48"><a class="ox-line__n" href="#L48" aria-label="Line 48">48</a><code>| story sentence + `requires`/`sets` | `(step Actor verb Object :to Actor :requires [...] :sets {...})` inside `(story …)` |</code></span>
+<span class="ox-line" id="L49"><a class="ox-line__n" href="#L49" aria-label="Line 49">49</a><code>| `seed RoomClass` | `(seed RoomClass [{...}])` |</code></span>
+<span class="ox-line" id="L50"><a class="ox-line__n" href="#L50" aria-label="Line 50">50</a><code> </code></span>
+<span class="ox-line" id="L51"><a class="ox-line__n" href="#L51" aria-label="Line 51">51</a><code>## What executes</code></span>
+<span class="ox-line" id="L52"><a class="ox-line__n" href="#L52" aria-label="Line 52">52</a><code> </code></span>
+<span class="ox-line" id="L53"><a class="ox-line__n" href="#L53" aria-label="Line 53">53</a><code>All 17 declarations elaborate without diagnostics. Actors and objects become</code></span>
+<span class="ox-line" id="L54"><a class="ox-line__n" href="#L54" aria-label="Line 54">54</a><code>nine object types. Links become `ref` properties, `Many` preserves cardinality,</code></span>
+<span class="ox-line" id="L55"><a class="ox-line__n" href="#L55" aria-label="Line 55">55</a><code>and unions become string properties. Attribute keys are explicit, for example</code></span>
+<span class="ox-line" id="L56"><a class="ox-line__n" href="#L56" aria-label="Line 56">56</a><code>`:room-class/rate` and `:reservation/check-in`. The five story steps become</code></span>
+<span class="ox-line" id="L57"><a class="ox-line__n" href="#L57" aria-label="Line 57">57</a><code>five actions. The runtime requires kebab-case action names, so the check-in</code></span>
+<span class="ox-line" id="L58"><a class="ox-line__n" href="#L58" aria-label="Line 58">58</a><code>name is `hotel-booking-checks-in`. Updating a status clears then sets it.</code></span>
+<span class="ox-line" id="L59"><a class="ox-line__n" href="#L59" aria-label="Line 59">59</a><code>`:new true` produces `create-object`; the host also rejects an existing id.</code></span>
+<span class="ox-line" id="L60"><a class="ox-line__n" href="#L60" aria-label="Line 60">60</a><code> </code></span>
+<span class="ox-line" id="L61"><a class="ox-line__n" href="#L61" aria-label="Line 61">61</a><code>The run seeds three room classes, supplies a guest, room and invoice fixture,</code></span>
+<span class="ox-line" id="L62"><a class="ox-line__n" href="#L62" aria-label="Line 62">62</a><code>then submits, confirms, rejects an early check-in, accepts check-in at exactly</code></span>
+<span class="ox-line" id="L63"><a class="ox-line__n" href="#L63" aria-label="Line 63">63</a><code>15:00 UTC on November 4, 2026, requests a service and fulfils it. Reusing the</code></span>
+<span class="ox-line" id="L64"><a class="ox-line__n" href="#L64" aria-label="Line 64">64</a><code>request sentence on that fulfilled service is rejected because it is final.</code></span>
+<span class="ox-line" id="L65"><a class="ox-line__n" href="#L65" aria-label="Line 65">65</a><code>Reservation `declined` and `checked-out` are also terminal (tested).</code></span>
+<span class="ox-line" id="L66"><a class="ox-line__n" href="#L66" aria-label="Line 66">66</a><code> </code></span>
+<span class="ox-line" id="L67"><a class="ox-line__n" href="#L67" aria-label="Line 67">67</a><code>`Reservation.service-charges` becomes a named Datalog sum query over explicitly</code></span>
+<span class="ox-line" id="L68"><a class="ox-line__n" href="#L68" aria-label="Line 68">68</a><code>linked, fulfilled services. It returns 75 after fulfilment. Like a grouped SQL</code></span>
+<span class="ox-line" id="L69"><a class="ox-line__n" href="#L69" aria-label="Line 69">69</a><code>sum, the sparse query returns no row when no fulfilled service matches; a</code></span>
+<span class="ox-line" id="L70"><a class="ox-line__n" href="#L70" aria-label="Line 70">70</a><code>missing reservation group represents zero. It does not store a derived field.</code></span>
+<span class="ox-line" id="L71"><a class="ox-line__n" href="#L71" aria-label="Line 71">71</a><code>The date-order rule also becomes the named `check-out-after-check-in` query,</code></span>
+<span class="ox-line" id="L72"><a class="ox-line__n" href="#L72" aria-label="Line 72">72</a><code>which returns reservations satisfying the comparison; it does not reject writes.</code></span>
+<span class="ox-line" id="L73"><a class="ox-line__n" href="#L73" aria-label="Line 73">73</a><code>The run prints both named queries, room classes, story outcomes, and journal</code></span>
+<span class="ox-line" id="L74"><a class="ox-line__n" href="#L74" aria-label="Line 74">74</a><code>actor and command ids. Rejected commands have no journal entry.</code></span>
+<span class="ox-line" id="L75"><a class="ox-line__n" href="#L75" aria-label="Line 75">75</a><code> </code></span>
+<span class="ox-line" id="L76"><a class="ox-line__n" href="#L76" aria-label="Line 76">76</a><code>Creation inputs supply all single-valued fields that the sentence does not</code></span>
+<span class="ox-line" id="L77"><a class="ox-line__n" href="#L77" aria-label="Line 77">77</a><code>set, including reference ids. Collection membership is explicit facts. The</code></span>
+<span class="ox-line" id="L78"><a class="ox-line__n" href="#L78" aria-label="Line 78">78</a><code>fixture separately asserts `Reservation.services`: the language does not</code></span>
+<span class="ox-line" id="L79"><a class="ox-line__n" href="#L79" aria-label="Line 79">79</a><code>specify automatic inverse maintenance from `Service.reservation`.</code></span>
+<span class="ox-line" id="L80"><a class="ox-line__n" href="#L80" aria-label="Line 80">80</a><code> </code></span>
+<span class="ox-line" id="L81"><a class="ox-line__n" href="#L81" aria-label="Line 81">81</a><code>## Guards and atomicity</code></span>
+<span class="ox-line" id="L82"><a class="ox-line__n" href="#L82" aria-label="Line 82">82</a><code> </code></span>
+<span class="ox-line" id="L83"><a class="ox-line__n" href="#L83" aria-label="Line 83">83</a><code>[guards.ts](guards.ts) interprets `requires` against entity views read from</code></span>
+<span class="ox-line" id="L84"><a class="ox-line__n" href="#L84" aria-label="Line 84">84</a><code>Triplex: `is?`, `known?`, `in?`, `before?`, `after?`, `days-between`, `sum`,</code></span>
+<span class="ox-line" id="L85"><a class="ox-line__n" href="#L85" aria-label="Line 85">85</a><code>`now`, Boolean operators, arithmetic, and the `map`/`filter` lambdas used by</code></span>
+<span class="ox-line" id="L86"><a class="ox-line__n" href="#L86" aria-label="Line 86">86</a><code>the service formula. `known?` on a link requires the target to have live facts.</code></span>
+<span class="ox-line" id="L87"><a class="ox-line__n" href="#L87" aria-label="Line 87">87</a><code>Dates are UTC epoch milliseconds; `days-between` counts complete 24-hour days.</code></span>
+<span class="ox-line" id="L88"><a class="ox-line__n" href="#L88" aria-label="Line 88">88</a><code>The scenario passes fixed command times. The journal's commit clock belongs</code></span>
+<span class="ox-line" id="L89"><a class="ox-line__n" href="#L89" aria-label="Line 89">89</a><code>to the Triplex host, and is separate from that business clock.</code></span>
+<span class="ox-line" id="L90"><a class="ox-line__n" href="#L90" aria-label="Line 90">90</a><code> </code></span>
+<span class="ox-line" id="L91"><a class="ox-line__n" href="#L91" aria-label="Line 91">91</a><code>**The example's guard and write are atomic with respect to observed entity</code></span>
+<span class="ox-line" id="L92"><a class="ox-line__n" href="#L92" aria-label="Line 92">92</a><code>facts.** Triplex 0.2.0 exposes `TransactionMeta.preconditions` with `EntityState`</code></span>
+<span class="ox-line" id="L93"><a class="ox-line__n" href="#L93" aria-label="Line 93">93</a><code>(the complete observed live triple-id set) and `TripleLive` (compare and</code></span>
+<span class="ox-line" id="L94"><a class="ox-line__n" href="#L94" aria-label="Line 94">94</a><code>retract). `makeOntologyRuntime.invoke` does not forward preconditions. The</code></span>
+<span class="ox-line" id="L95"><a class="ox-line__n" href="#L95" aria-label="Line 95">95</a><code>example decorates the scoped `Triples` service so its actual `transact` adds</code></span>
+<span class="ox-line" id="L96"><a class="ox-line__n" href="#L96" aria-label="Line 96">96</a><code>`EntityState` preconditions for every entity read, including linked records</code></span>
+<span class="ox-line" id="L97"><a class="ox-line__n" href="#L97" aria-label="Line 97">97</a><code>and the absence of a creation target. Triplex compares these inside its write</code></span>
+<span class="ox-line" id="L98"><a class="ox-line__n" href="#L98" aria-label="Line 98">98</a><code>transaction; conflicts reject the whole write. No `src/` changes are needed.</code></span>
+<span class="ox-line" id="L99"><a class="ox-line__n" href="#L99" aria-label="Line 99">99</a><code>Tests inject a competing write after evaluation to prove all three cases.</code></span>
+<span class="ox-line" id="L100"><a class="ox-line__n" href="#L100" aria-label="Line 100">100</a><code> </code></span>
+<span class="ox-line" id="L101"><a class="ox-line__n" href="#L101" aria-label="Line 101">101</a><code>This is a bounded interpreter over three levels of links and ordinary,</code></span>
+<span class="ox-line" id="L102"><a class="ox-line__n" href="#L102" aria-label="Line 102">102</a><code>non-scheduled facts, not a general query guard system. Time is a command input;</code></span>
+<span class="ox-line" id="L103"><a class="ox-line__n" href="#L103" aria-label="Line 103">103</a><code>wall-clock passage is not a protected database fact. Direct runtime invocations</code></span>
+<span class="ox-line" id="L104"><a class="ox-line__n" href="#L104" aria-label="Line 104">104</a><code>or raw transactions bypass these example guards. There is no backend enum,</code></span>
+<span class="ox-line" id="L105"><a class="ox-line__n" href="#L105" aria-label="Line 105">105</a><code>transition or invariant enforcement. Follow-up work belongs in Triplex:</code></span>
+<span class="ox-line" id="L106"><a class="ox-line__n" href="#L106" aria-label="Line 106">106</a><code>command configuration nodes with guards and transition constraints, applied to</code></span>
+<span class="ox-line" id="L107"><a class="ox-line__n" href="#L107" aria-label="Line 107">107</a><code>all command entry points. `ActionTypeIR` would also need a portable guard contract.</code></span>
+<span class="ox-line" id="L108"><a class="ox-line__n" href="#L108" aria-label="Line 108">108</a><code> </code></span>
+<span class="ox-line" id="L109"><a class="ox-line__n" href="#L109" aria-label="Line 109">109</a><code>## Not lowered</code></span>
+<span class="ox-line" id="L110"><a class="ox-line__n" href="#L110" aria-label="Line 110">110</a><code> </code></span>
+<span class="ox-line" id="L111"><a class="ox-line__n" href="#L111" aria-label="Line 111">111</a><code>`notLowered()` reports these limitations and the run prints them:</code></span>
+<span class="ox-line" id="L112"><a class="ox-line__n" href="#L112" aria-label="Line 112">112</a><code> </code></span>
+<span class="ox-line" id="L113"><a class="ox-line__n" href="#L113" aria-label="Line 113">113</a><code>- Rule `check-out-after-check-in`: a named satisfaction query runs, but there is no invariant enforcement.</code></span>
+<span class="ox-line" id="L114"><a class="ox-line__n" href="#L114" aria-label="Line 114">114</a><code>- Rule `past-bookings-are-settled`: its Boolean expression is checked; no clock-driven invariant enforcement.</code></span>
+<span class="ox-line" id="L115"><a class="ox-line__n" href="#L115" aria-label="Line 115">115</a><code>- Formula `Invoice.total`: checked, but its date arithmetic and derived-field composition have no faithful lowering here. The interpreter's vocabulary is tested; the run does not compute invoice totals.</code></span>
+<span class="ox-line" id="L116"><a class="ox-line__n" href="#L116" aria-label="Line 116">116</a><code>- `requires` and final states: example host guards, absent from `ActionTypeIR`.</code></span>
+<span class="ox-line" id="L117"><a class="ox-line__n" href="#L117" aria-label="Line 117">117</a><code>- Actor type, joins and counterpart: descriptive data; no identity or authorization enforcement.</code></span>
+<span class="ox-line" id="L118"><a class="ox-line__n" href="#L118" aria-label="Line 118">118</a><code>- Union members: prelude checks, stored as strings without runtime enum constraints.</code></span>
+<span class="ox-line" id="L119"><a class="ox-line__n" href="#L119" aria-label="Line 119">119</a><code>- Many references: schema retained, collection membership transacted explicitly.</code></span>
+<span class="ox-line" id="L120"><a class="ox-line__n" href="#L120" aria-label="Line 120">120</a><code> </code></span>
+<span class="ox-line" id="L121"><a class="ox-line__n" href="#L121" aria-label="Line 121">121</a><code>Only the exact service-charge and date-order expressions are recognized for query</code></span>
+<span class="ox-line" id="L122"><a class="ox-line__n" href="#L122" aria-label="Line 122">122</a><code>lowering. Changing either causes it to be reported rather than silently reusing</code></span>
+<span class="ox-line" id="L123"><a class="ox-line__n" href="#L123" aria-label="Line 123">123</a><code>the old query.</code></span>
+<span class="ox-line" id="L124"><a class="ox-line__n" href="#L124" aria-label="Line 124">124</a><code>Other unsupported field types throw an error. The rule query is an observation; the business rules do not become write-time</code></span>
+<span class="ox-line" id="L125"><a class="ox-line__n" href="#L125" aria-label="Line 125">125</a><code>Datalog constraints or scheduled background jobs.</code></span>
+<span class="ox-line" id="L126"><a class="ox-line__n" href="#L126" aria-label="Line 126">126</a><code> </code></span>
+<span class="ox-line" id="L127"><a class="ox-line__n" href="#L127" aria-label="Line 127">127</a><code>## Diagnostics</code></span>
+<span class="ox-line" id="L128"><a class="ox-line__n" href="#L128" aria-label="Line 128">128</a><code> </code></span>
+<span class="ox-line" id="L129"><a class="ox-line__n" href="#L129" aria-label="Line 129">129</a><code>The test creates each broken variant with a string replacement and asserts the</code></span>
+<span class="ox-line" id="L130"><a class="ox-line__n" href="#L130" aria-label="Line 130">130</a><code>code, severity and message. Expression inference follows linked record views,</code></span>
+<span class="ox-line" id="L131"><a class="ox-line__n" href="#L131" aria-label="Line 131">131</a><code>including `invoice.reservation.room-class.rate`.</code></span>
+<span class="ox-line" id="L132"><a class="ox-line__n" href="#L132" aria-label="Line 132">132</a><code> </code></span>
+<span class="ox-line" id="L133"><a class="ox-line__n" href="#L133" aria-label="Line 133">133</a><code>| Broken variant in `hotel.forma` | Diagnostic |</code></span>
+<span class="ox-line" id="L134"><a class="ox-line__n" href="#L134" aria-label="Line 134">134</a><code>| --- | --- |</code></span>
+<span class="ox-line" id="L135"><a class="ox-line__n" href="#L135" aria-label="Line 135">135</a><code>| `reservation.check-in` → `reservation.checkin` in a rule | `elaborate/hole-type`: missing record field |</code></span>
+<span class="ox-line" id="L136"><a class="ox-line__n" href="#L136" aria-label="Line 136">136</a><code>| `invoice.reservation.room-class.rate` → `.name` | `elaborate/hole-type`: type mismatch |</code></span>
+<span class="ox-line" id="L137"><a class="ox-line__n" href="#L137" aria-label="Line 137">137</a><code>| `:sets {:status :checked-in}` → `:checked_in` | `onto/unknown-state` |</code></span>
+<span class="ox-line" id="L138"><a class="ox-line__n" href="#L138" aria-label="Line 138">138</a><code>| `(is? reservation.status :confirmed)` → `:confirmd` | `onto/unknown-state`, lists valid states |</code></span>
+<span class="ox-line" id="L139"><a class="ox-line__n" href="#L139" aria-label="Line 139">139</a><code>| Remove `:new true` from Guest submits Reservation | Warning `onto/unguarded-transition` |</code></span>
+<span class="ox-line" id="L140"><a class="ox-line__n" href="#L140" aria-label="Line 140">140</a><code>| `:room (One Room)` → `(One Suite)` | `onto/unknown-link` and `elaborate/hole-type`: unknown type Suite |</code></span>
+<span class="ox-line" id="L141"><a class="ox-line__n" href="#L141" aria-label="Line 141">141</a><code>| `(formula Invoice total Int` → `String` | `elaborate/hole-type`: expected String, found Int |</code></span>
+<span class="ox-line" id="L142"><a class="ox-line__n" href="#L142" aria-label="Line 142">142</a><code>| `(step Concierge fulfils Service` → `Booking` | `elaborate/hole-type`: unknown reference Booking |</code></span>
+<span class="ox-line" id="L143"><a class="ox-line__n" href="#L143" aria-label="Line 143">143</a><code>| Seed `:rate 200` → `:price 200` | `onto/unknown-field` |</code></span>
+<span class="ox-line" id="L144"><a class="ox-line__n" href="#L144" aria-label="Line 144">144</a><code> </code></span>
+<span class="ox-line" id="L145"><a class="ox-line__n" href="#L145" aria-label="Line 145">145</a><code>Removing `:new true` exposes a real ambiguity: a submission sentence with no</code></span>
+<span class="ox-line" id="L146"><a class="ox-line__n" href="#L146" aria-label="Line 146">146</a><code>current-state guard could otherwise revive a declined reservation.</code></span>
+<span class="ox-line" id="L147"><a class="ox-line__n" href="#L147" aria-label="Line 147">147</a><code> </code></span>
+<span class="ox-line" id="L148"><a class="ox-line__n" href="#L148" aria-label="Line 148">148</a><code>The supplied monomorphic `is?` workaround stays in the prelude. Forma's</code></span>
+<span class="ox-line" id="L149"><a class="ox-line__n" href="#L149" aria-label="Line 149">149</a><code>keyword inference and missing-hole destructuring issues were addressed upstream</code></span>
+<span class="ox-line" id="L150"><a class="ox-line__n" href="#L150" aria-label="Line 150">150</a><code>in [Forma PR 110](https://github.com/bjacobso/forma/pull/110); this example does</code></span>
+<span class="ox-line" id="L151"><a class="ox-line__n" href="#L151" aria-label="Line 151">151</a><code>not implement either compiler fix.</code></span>
+<span class="ox-line" id="L152"><a class="ox-line__n" href="#L152" aria-label="Line 152">152</a><code> </code></span>
+<span class="ox-line" id="L153"><a class="ox-line__n" href="#L153" aria-label="Line 153">153</a><code>## Forma package provenance</code></span>
+<span class="ox-line" id="L154"><a class="ox-line__n" href="#L154" aria-label="Line 154">154</a><code> </code></span>
+<span class="ox-line" id="L155"><a class="ox-line__n" href="#L155" aria-label="Line 155">155</a><code>The npm 0.3.0 tarball predates the descriptor API used here. This example uses</code></span>
+<span class="ox-line" id="L156"><a class="ox-line__n" href="#L156" aria-label="Line 156">156</a><code>an isolated, MIT-licensed snapshot of latest Forma `main` (resolved to commit</code></span>
+<span class="ox-line" id="L157"><a class="ox-line__n" href="#L157" aria-label="Line 157">157</a><code>`535cd41ec7f81f3229b810df6f374ebfa04c16c7`) as the development package</code></span>
+<span class="ox-line" id="L158"><a class="ox-line__n" href="#L158" aria-label="Line 158">158</a><code>`@open-ontology/onto-forma`; the package's existing `@formalang/ts` dependency</code></span>
+<span class="ox-line" id="L159"><a class="ox-line__n" href="#L159" aria-label="Line 159">159</a><code>stays unchanged. See [the provenance and rebuild instructions](../../vendor/README.md).</code></span>
+<span class="ox-line" id="L160"><a class="ox-line__n" href="#L160" aria-label="Line 160">160</a><code>Both APIs are consumed through package exports; no sibling project source is imported.</code></span></pre></div></main>
+<footer class="oo-footer"><span class="oo-footer__brand"><b>Open Ontology</b> Experimental v0.1 · Local in-memory runtime.</span><nav aria-label="Footer navigation"><a href="/explorations/">All explorations</a><a href="/explorations/catalog.json">catalog.json</a><a href="/llms.txt">llms.txt</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">Source ↗</a></nav></footer>
+</div></body></html>
