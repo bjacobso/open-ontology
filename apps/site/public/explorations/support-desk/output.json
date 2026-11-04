@@ -1,0 +1,35 @@
+{
+  "open-work": [
+    {
+      "?title": "VPN drops hourly",
+      "?customer": "Acme",
+      "?priority": 2
+    },
+    {
+      "?title": "Invoice PDF blank",
+      "?customer": "Acme",
+      "?priority": 1
+    }
+  ],
+  "escalations": [
+    {
+      "?title": "VPN drops hourly",
+      "?engineer": "Lin",
+      "?reason": "Needs network access"
+    }
+  ],
+  "tickets-by-status": [
+    {
+      "?status": "escalated",
+      "?count": 1
+    },
+    {
+      "?status": "open",
+      "?count": 1
+    },
+    {
+      "?status": "closed",
+      "?count": 1
+    }
+  ]
+}

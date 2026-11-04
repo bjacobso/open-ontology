@@ -1,0 +1,110 @@
+; hotel.forma: the OntoLang hotel example, as Forma.
+
+(project hotel "A small hotel: bookings, rooms, stays and the services guests ask for.")
+
+; ── Actors ──
+
+(actor Guest :person
+  "A traveler who books a room and stays at the hotel; the paying customer of the booking."
+  :joins :sign-up
+  {:name String
+   :reservations (Many Reservation)})
+
+(actor Receptionist :person
+  "Front-desk staff who check guests in and out."
+  {:name String})
+
+(actor Concierge :person
+  "Arranges and fulfils the services guests request during a stay."
+  {:name String})
+
+(actor System :system
+  "The hotel booking software that confirms reservations and automates back-office steps."
+  {})
+
+; ── Objects ──
+
+(object RoomClass "A type of room, with its nightly rate."
+  {:name String
+   :rate Int})
+
+(object Room "A physical room of some room class."
+  {:number String
+   :room-class (One RoomClass)})
+
+(object Reservation "A guest's booking of a room class for a stay."
+  :final {:status [:declined :checked-out]}
+  {:guest (One Guest)
+   :name String
+   :room-class (One RoomClass)
+   :room (One Room)
+   :check-in Instant
+   :check-out Instant
+   :services (Many Service)
+   :invoice (One Invoice)
+   :status (Union :requested :confirmed :declined :checked-in :checked-out)})
+
+(object Service
+  "A guest-requested amenity with a charge, fulfilled by the concierge; fulfilled charges roll up onto the stay."
+  :final {:status [:fulfilled]}
+  {:kind (Union :room-service :spa :laundry :taxi)
+   :charge Int
+   :notes String
+   :reservation (One Reservation)
+   :status (Union :requested :fulfilled)})
+
+(object Invoice "What the guest owes for a stay."
+  {:reservation (One Reservation)})
+
+; ── Rules: true whichever story runs ──
+
+(rule check-out-after-check-in Reservation
+  "A stay ends after it starts."
+  (after? reservation.check-out reservation.check-in))
+
+(rule past-bookings-are-settled Reservation
+  "Once the check-in date has passed, a booking is checked in, checked out or declined."
+  (or (in? reservation.status [:checked-in :checked-out :declined])
+      (not (after? now reservation.check-in))))
+
+; ── Formulas: worked out, not typed in ──
+
+(formula Reservation service-charges Int
+  "Charges for the services fulfilled during this stay."
+  (sum (map (fn [s] s.charge)
+            (filter (fn [s] (is? s.status :fulfilled)) reservation.services))))
+
+(formula Invoice total Int
+  "Nights at the room-class rate, plus fulfilled services."
+  (+ (* (days-between invoice.reservation.check-in invoice.reservation.check-out)
+        invoice.reservation.room-class.rate)
+     invoice.reservation.service-charges))
+
+; ── Stories ──
+
+(story HotelBooking "From a guest's request to their arrival."
+  (step Guest submits Reservation :to System :new true
+    :requires [(known? reservation.room-class)]
+    :sets {:status :requested})
+  (step System confirms Reservation :to Guest
+    :requires [(is? reservation.status :requested)]
+    :sets {:status :confirmed})
+  (step Receptionist checks-in Reservation :for Guest
+    :requires [(is? reservation.status :confirmed)
+               (not (before? now reservation.check-in))]
+    :sets {:status :checked-in}))
+
+(story GuestServices "A guest asks for something during their stay."
+  (step Guest requests Service :to Concierge :new true
+    :requires [(is? service.reservation.status :checked-in)]
+    :sets {:status :requested})
+  (step Concierge fulfils Service :for Guest
+    :requires [(is? service.status :requested)]
+    :sets {:status :fulfilled}))
+
+; ── Seed data ──
+
+(seed RoomClass
+  [{:name "Standard" :rate 120}
+   {:name "Deluxe" :rate 200}
+   {:name "Suite" :rate 450}])

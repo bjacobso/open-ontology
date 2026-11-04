@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f6f5ef">
+<title>preludes/compiler.lisp · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Instrument+Serif:ital@0;1&amp;family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css"><script defer src="/site.js"></script></head>
+<body><div class="oo ox"><a class="oo-skip" href="#main">Skip to content</a>
+<header class="oo-nav"><a class="oo-brand" href="/" aria-label="Open Ontology home"><img src="/favicon.svg" width="24" height="24" alt=""><span>Open Ontology</span></a><nav aria-label="Main navigation"><a class="oo-nav__section" href="/#std">Standard library</a><a class="oo-nav__section" href="/#preludes">Preludes</a><a class="oo-nav__section" href="/explorations/" aria-current="page">Explorations</a><a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main" class="oo-main"><section class="ox-hero ox-hero--source"><nav class="ox-crumbs" aria-label="Breadcrumb"><a href="/">Open Ontology</a><span aria-hidden="true">/</span><a href="/explorations/">Explorations</a><span aria-hidden="true">/</span>Source</nav>
+<p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Full source · lisp · 410 lines</p>
+<h1 class="oo-pkg ox-path">preludes/compiler.lisp</h1>
+<div class="oo-actions"><a class="oo-primary" href="/explorations/raw/preludes/compiler.lisp">Raw source <span aria-hidden="true">↗</span></a><a class="oo-secondary" href="https://github.com/bjacobso/open-ontology/blob/main/preludes/compiler.lisp">View on GitHub <span aria-hidden="true">↗</span></a></div>
+<p class="oo-meta"><span>Click a line number to link to that line</span></p></section>
+<div class="oo-panel ox-source"><div class="oo-panel__head"><span>preludes/compiler.lisp</span><span>lisp</span></div><pre tabindex="0"><span class="ox-line" id="L1"><a class="ox-line__n" href="#L1" aria-label="Line 1">1</a><code class="lang-lisp">; compiler.lisp</code></span>
+<span class="ox-line" id="L2"><a class="ox-line__n" href="#L2" aria-label="Line 2">2</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L3"><a class="ox-line__n" href="#L3" aria-label="Line 3">3</a><code class="lang-lisp">; Self-describing compiler prelude for the Lisp DSL.</code></span>
+<span class="ox-line" id="L4"><a class="ox-line__n" href="#L4" aria-label="Line 4">4</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L5"><a class="ox-line__n" href="#L5" aria-label="Line 5">5</a><code class="lang-lisp">; This file defines the meta-level forms that the compiler uses to understand</code></span>
+<span class="ox-line" id="L6"><a class="ox-line__n" href="#L6" aria-label="Line 6">6</a><code class="lang-lisp">; language constructs. These are compiler infrastructure, not ontology semantics.</code></span>
+<span class="ox-line" id="L7"><a class="ox-line__n" href="#L7" aria-label="Line 7">7</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L8"><a class="ox-line__n" href="#L8" aria-label="Line 8">8</a><code class="lang-lisp">; Forms defined here:</code></span>
+<span class="ox-line" id="L9"><a class="ox-line__n" href="#L9" aria-label="Line 9">9</a><code class="lang-lisp">;   define-form, meta-fn, syntax, identifier, slot, bind, validate, elaborate,</code></span>
+<span class="ox-line" id="L10"><a class="ox-line__n" href="#L10" aria-label="Line 10">10</a><code class="lang-lisp">;   construct-fn, bindings-fn, result-type-fn, validate-fn</code></span>
+<span class="ox-line" id="L11"><a class="ox-line__n" href="#L11" aria-label="Line 11">11</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L12"><a class="ox-line__n" href="#L12" aria-label="Line 12">12</a><code class="lang-lisp">; Plus: the descriptor-construct generic meta hook, worked examples of</code></span>
+<span class="ox-line" id="L13"><a class="ox-line__n" href="#L13" aria-label="Line 13">13</a><code class="lang-lisp">; meta-fn bodies, and the minimal canonical helper vocabulary spec.</code></span>
+<span class="ox-line" id="L14"><a class="ox-line__n" href="#L14" aria-label="Line 14">14</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L15"><a class="ox-line__n" href="#L15" aria-label="Line 15">15</a><code class="lang-lisp">; Any domain (ontology, hardware description, etc.) can define its own</code></span>
+<span class="ox-line" id="L16"><a class="ox-line__n" href="#L16" aria-label="Line 16">16</a><code class="lang-lisp">; forms using these meta constructs.</code></span>
+<span class="ox-line" id="L17"><a class="ox-line__n" href="#L17" aria-label="Line 17">17</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L18"><a class="ox-line__n" href="#L18" aria-label="Line 18">18</a><code class="lang-lisp">; How to read this file:</code></span>
+<span class="ox-line" id="L19"><a class="ox-line__n" href="#L19" aria-label="Line 19">19</a><code class="lang-lisp">; - A `define-form` declares one Lisp head and the shape of its arguments.</code></span>
+<span class="ox-line" id="L20"><a class="ox-line__n" href="#L20" aria-label="Line 20">20</a><code class="lang-lisp">; - `:identifiers` are positional values immediately after the head.</code></span>
+<span class="ox-line" id="L21"><a class="ox-line__n" href="#L21" aria-label="Line 21">21</a><code class="lang-lisp">; - `:slots` are keyword clauses such as `(:field ...)` or `(:returns ...)`.</code></span>
+<span class="ox-line" id="L22"><a class="ox-line__n" href="#L22" aria-label="Line 22">22</a><code class="lang-lisp">; - `:bindings-fn`, `:validate-fn`, `:construct-fn`, and `:result-type-fn`</code></span>
+<span class="ox-line" id="L23"><a class="ox-line__n" href="#L23" aria-label="Line 23">23</a><code class="lang-lisp">;   name compile-time hooks implemented in a companion compiler prelude.</code></span>
+<span class="ox-line" id="L24"><a class="ox-line__n" href="#L24" aria-label="Line 24">24</a><code class="lang-lisp">; - Most ontology authors do not write these forms directly. They explain</code></span>
+<span class="ox-line" id="L25"><a class="ox-line__n" href="#L25" aria-label="Line 25">25</a><code class="lang-lisp">;   how authoring forms like `define-entity` are recognized and lowered.</code></span>
+<span class="ox-line" id="L26"><a class="ox-line__n" href="#L26" aria-label="Line 26">26</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L27"><a class="ox-line__n" href="#L27" aria-label="Line 27">27</a><code class="lang-lisp">; Status: executable (parsed by lisp-v2, meta-fn bodies run at compile time)</code></span>
+<span class="ox-line" id="L28"><a class="ox-line__n" href="#L28" aria-label="Line 28">28</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L29"><a class="ox-line__n" href="#L29" aria-label="Line 29">29</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L30"><a class="ox-line__n" href="#L30" aria-label="Line 30">30</a><code class="lang-lisp">; =============================================================================</code></span>
+<span class="ox-line" id="L31"><a class="ox-line__n" href="#L31" aria-label="Line 31">31</a><code class="lang-lisp">; SECTION 1 — SELF-DESCRIBING META LAYER</code></span>
+<span class="ox-line" id="L32"><a class="ox-line__n" href="#L32" aria-label="Line 32">32</a><code class="lang-lisp">; =============================================================================</code></span>
+<span class="ox-line" id="L33"><a class="ox-line__n" href="#L33" aria-label="Line 33">33</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L34"><a class="ox-line__n" href="#L34" aria-label="Line 34">34</a><code class="lang-lisp">; These are the forms the ontology prelude would need in order to describe its</code></span>
+<span class="ox-line" id="L35"><a class="ox-line__n" href="#L35" aria-label="Line 35">35</a><code class="lang-lisp">; own forms. They are the &quot;maximally needed&quot; POC layer for self-description.</code></span>
+<span class="ox-line" id="L36"><a class="ox-line__n" href="#L36" aria-label="Line 36">36</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L37"><a class="ox-line__n" href="#L37" aria-label="Line 37">37</a><code class="lang-lisp">; Unclear point:</code></span>
+<span class="ox-line" id="L38"><a class="ox-line__n" href="#L38" aria-label="Line 38">38</a><code class="lang-lisp">; - whether these should literally be ordinary `(form ...)` declarations in the</code></span>
+<span class="ox-line" id="L39"><a class="ox-line__n" href="#L39" aria-label="Line 39">39</a><code class="lang-lisp">;   final system, or come from an even smaller kernel bootstrap seed.</code></span>
+<span class="ox-line" id="L40"><a class="ox-line__n" href="#L40" aria-label="Line 40">40</a><code class="lang-lisp">; - likely answer: tiny kernel seed bootstraps these, then these bootstrap the</code></span>
+<span class="ox-line" id="L41"><a class="ox-line__n" href="#L41" aria-label="Line 41">41</a><code class="lang-lisp">;   rest of ontology.lisp.</code></span>
+<span class="ox-line" id="L42"><a class="ox-line__n" href="#L42" aria-label="Line 42">42</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L43"><a class="ox-line__n" href="#L43" aria-label="Line 43">43</a><code class="lang-lisp">(define-form form</code></span>
+<span class="ox-line" id="L44"><a class="ox-line__n" href="#L44" aria-label="Line 44">44</a><code class="lang-lisp">  (:doc &quot;Defines a canonical DSL form descriptor.&quot;)</code></span>
+<span class="ox-line" id="L45"><a class="ox-line__n" href="#L45" aria-label="Line 45">45</a><code class="lang-lisp">  (:phase meta)</code></span>
+<span class="ox-line" id="L46"><a class="ox-line__n" href="#L46" aria-label="Line 46">46</a><code class="lang-lisp">  (:identifiers</code></span>
+<span class="ox-line" id="L47"><a class="ox-line__n" href="#L47" aria-label="Line 47">47</a><code class="lang-lisp">    [name Symbol {:declaration true}])</code></span>
+<span class="ox-line" id="L48"><a class="ox-line__n" href="#L48" aria-label="Line 48">48</a><code class="lang-lisp">  (:slots</code></span>
+<span class="ox-line" id="L49"><a class="ox-line__n" href="#L49" aria-label="Line 49">49</a><code class="lang-lisp">    [phase value]</code></span>
+<span class="ox-line" id="L50"><a class="ox-line__n" href="#L50" aria-label="Line 50">50</a><code class="lang-lisp">    [doc value]</code></span>
+<span class="ox-line" id="L51"><a class="ox-line__n" href="#L51" aria-label="Line 51">51</a><code class="lang-lisp">    [syntax form {:many true}]</code></span>
+<span class="ox-line" id="L52"><a class="ox-line__n" href="#L52" aria-label="Line 52">52</a><code class="lang-lisp">    [identifiers form {:many true}]</code></span>
+<span class="ox-line" id="L53"><a class="ox-line__n" href="#L53" aria-label="Line 53">53</a><code class="lang-lisp">    [slots form {:many true}]</code></span>
+<span class="ox-line" id="L54"><a class="ox-line__n" href="#L54" aria-label="Line 54">54</a><code class="lang-lisp">    [typed form {:many true}]</code></span>
+<span class="ox-line" id="L55"><a class="ox-line__n" href="#L55" aria-label="Line 55">55</a><code class="lang-lisp">    [bindings form {:many true}]</code></span>
+<span class="ox-line" id="L56"><a class="ox-line__n" href="#L56" aria-label="Line 56">56</a><code class="lang-lisp">    [validation form {:many true}]</code></span>
+<span class="ox-line" id="L57"><a class="ox-line__n" href="#L57" aria-label="Line 57">57</a><code class="lang-lisp">    [elaborates form {:many true}]</code></span>
+<span class="ox-line" id="L58"><a class="ox-line__n" href="#L58" aria-label="Line 58">58</a><code class="lang-lisp">    [construct value]</code></span>
+<span class="ox-line" id="L59"><a class="ox-line__n" href="#L59" aria-label="Line 59">59</a><code class="lang-lisp">    [meta value]</code></span>
+<span class="ox-line" id="L60"><a class="ox-line__n" href="#L60" aria-label="Line 60">60</a><code class="lang-lisp">    [declaration-type value]</code></span>
+<span class="ox-line" id="L61"><a class="ox-line__n" href="#L61" aria-label="Line 61">61</a><code class="lang-lisp">    [result-type value])</code></span>
+<span class="ox-line" id="L62"><a class="ox-line__n" href="#L62" aria-label="Line 62">62</a><code class="lang-lisp">  (:bindings-fn form-definition-bindings)</code></span>
+<span class="ox-line" id="L63"><a class="ox-line__n" href="#L63" aria-label="Line 63">63</a><code class="lang-lisp">  (:validate-fn form-definition-validate)</code></span>
+<span class="ox-line" id="L64"><a class="ox-line__n" href="#L64" aria-label="Line 64">64</a><code class="lang-lisp">  (:construct-fn form-definition-construct)</code></span>
+<span class="ox-line" id="L65"><a class="ox-line__n" href="#L65" aria-label="Line 65">65</a><code class="lang-lisp">  (:result-type-fn form-definition-result-type)</code></span>
+<span class="ox-line" id="L66"><a class="ox-line__n" href="#L66" aria-label="Line 66">66</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L67"><a class="ox-line__n" href="#L67" aria-label="Line 67">67</a><code class="lang-lisp">  ; Unsure:</code></span>
+<span class="ox-line" id="L68"><a class="ox-line__n" href="#L68" aria-label="Line 68">68</a><code class="lang-lisp">  ; - whether :construct here should directly emit FormDescriptor</code></span>
+<span class="ox-line" id="L69"><a class="ox-line__n" href="#L69" aria-label="Line 69">69</a><code class="lang-lisp">  ;   or a higher-level MetaFormDefinition that later lowers into descriptor.</code></span>
+<span class="ox-line" id="L70"><a class="ox-line__n" href="#L70" aria-label="Line 70">70</a><code class="lang-lisp">  ; - I suspect a two-step lowering is cleaner.</code></span>
+<span class="ox-line" id="L71"><a class="ox-line__n" href="#L71" aria-label="Line 71">71</a><code class="lang-lisp">  )</code></span>
+<span class="ox-line" id="L72"><a class="ox-line__n" href="#L72" aria-label="Line 72">72</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L73"><a class="ox-line__n" href="#L73" aria-label="Line 73">73</a><code class="lang-lisp">; `meta-fn` is the bridge from declarative syntax descriptors to executable</code></span>
+<span class="ox-line" id="L74"><a class="ox-line__n" href="#L74" aria-label="Line 74">74</a><code class="lang-lisp">; compiler behavior. Domain preludes use it to say &quot;when this form appears,</code></span>
+<span class="ox-line" id="L75"><a class="ox-line__n" href="#L75" aria-label="Line 75">75</a><code class="lang-lisp">; run this pure compile-time function to infer bindings, validate slots, choose</code></span>
+<span class="ox-line" id="L76"><a class="ox-line__n" href="#L76" aria-label="Line 76">76</a><code class="lang-lisp">; a result type, or construct IR.&quot;</code></span>
+<span class="ox-line" id="L77"><a class="ox-line__n" href="#L77" aria-label="Line 77">77</a><code class="lang-lisp">(define-form meta-fn</code></span>
+<span class="ox-line" id="L78"><a class="ox-line__n" href="#L78" aria-label="Line 78">78</a><code class="lang-lisp">  (:doc &quot;Declares a pure compile-time meta hook.&quot;)</code></span>
+<span class="ox-line" id="L79"><a class="ox-line__n" href="#L79" aria-label="Line 79">79</a><code class="lang-lisp">  (:phase meta)</code></span>
+<span class="ox-line" id="L80"><a class="ox-line__n" href="#L80" aria-label="Line 80">80</a><code class="lang-lisp">  (:identifiers</code></span>
+<span class="ox-line" id="L81"><a class="ox-line__n" href="#L81" aria-label="Line 81">81</a><code class="lang-lisp">    [name Symbol {:declaration true}])</code></span>
+<span class="ox-line" id="L82"><a class="ox-line__n" href="#L82" aria-label="Line 82">82</a><code class="lang-lisp">  (:slots</code></span>
+<span class="ox-line" id="L83"><a class="ox-line__n" href="#L83" aria-label="Line 83">83</a><code class="lang-lisp">    [kind value {:required true}]</code></span>
+<span class="ox-line" id="L84"><a class="ox-line__n" href="#L84" aria-label="Line 84">84</a><code class="lang-lisp">    [input value {:required true}]</code></span>
+<span class="ox-line" id="L85"><a class="ox-line__n" href="#L85" aria-label="Line 85">85</a><code class="lang-lisp">    [output value {:required true}]</code></span>
+<span class="ox-line" id="L86"><a class="ox-line__n" href="#L86" aria-label="Line 86">86</a><code class="lang-lisp">    [capabilities value {:many true}]</code></span>
+<span class="ox-line" id="L87"><a class="ox-line__n" href="#L87" aria-label="Line 87">87</a><code class="lang-lisp">    [doc value]</code></span>
+<span class="ox-line" id="L88"><a class="ox-line__n" href="#L88" aria-label="Line 88">88</a><code class="lang-lisp">    [body expr {:required true}])</code></span>
+<span class="ox-line" id="L89"><a class="ox-line__n" href="#L89" aria-label="Line 89">89</a><code class="lang-lisp">  (:validate-fn meta-fn-validate)</code></span>
+<span class="ox-line" id="L90"><a class="ox-line__n" href="#L90" aria-label="Line 90">90</a><code class="lang-lisp">  (:construct-fn meta-fn-construct)</code></span>
+<span class="ox-line" id="L91"><a class="ox-line__n" href="#L91" aria-label="Line 91">91</a><code class="lang-lisp">  (:result-type-fn meta-fn-result-type))</code></span>
+<span class="ox-line" id="L92"><a class="ox-line__n" href="#L92" aria-label="Line 92">92</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L93"><a class="ox-line__n" href="#L93" aria-label="Line 93">93</a><code class="lang-lisp">(define-form syntax</code></span>
+<span class="ox-line" id="L94"><a class="ox-line__n" href="#L94" aria-label="Line 94">94</a><code class="lang-lisp">  (:doc &quot;Declares surface heads and aliases for a form.&quot;)</code></span>
+<span class="ox-line" id="L95"><a class="ox-line__n" href="#L95" aria-label="Line 95">95</a><code class="lang-lisp">  (:phase meta)</code></span>
+<span class="ox-line" id="L96"><a class="ox-line__n" href="#L96" aria-label="Line 96">96</a><code class="lang-lisp">  (:slots</code></span>
+<span class="ox-line" id="L97"><a class="ox-line__n" href="#L97" aria-label="Line 97">97</a><code class="lang-lisp">    [head value {:many true}]</code></span>
+<span class="ox-line" id="L98"><a class="ox-line__n" href="#L98" aria-label="Line 98">98</a><code class="lang-lisp">    [alias value {:many true}])</code></span>
+<span class="ox-line" id="L99"><a class="ox-line__n" href="#L99" aria-label="Line 99">99</a><code class="lang-lisp">  (:construct-fn descriptor-construct)</code></span>
+<span class="ox-line" id="L100"><a class="ox-line__n" href="#L100" aria-label="Line 100">100</a><code class="lang-lisp">  (:result-type (constant SyntaxDescriptor)))</code></span>
+<span class="ox-line" id="L101"><a class="ox-line__n" href="#L101" aria-label="Line 101">101</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L102"><a class="ox-line__n" href="#L102" aria-label="Line 102">102</a><code class="lang-lisp">; Positional identifiers are the non-keyword arguments after a form head.</code></span>
+<span class="ox-line" id="L103"><a class="ox-line__n" href="#L103" aria-label="Line 103">103</a><code class="lang-lisp">; Example: in `(define-entity Employee ...)`, `Employee` is the `name`</code></span>
+<span class="ox-line" id="L104"><a class="ox-line__n" href="#L104" aria-label="Line 104">104</a><code class="lang-lisp">; identifier declared by the `define-entity` descriptor.</code></span>
+<span class="ox-line" id="L105"><a class="ox-line__n" href="#L105" aria-label="Line 105">105</a><code class="lang-lisp">(define-form identifier</code></span>
+<span class="ox-line" id="L106"><a class="ox-line__n" href="#L106" aria-label="Line 106">106</a><code class="lang-lisp">  (:doc &quot;Declares a positional identifier for a form.&quot;)</code></span>
+<span class="ox-line" id="L107"><a class="ox-line__n" href="#L107" aria-label="Line 107">107</a><code class="lang-lisp">  (:phase meta)</code></span>
+<span class="ox-line" id="L108"><a class="ox-line__n" href="#L108" aria-label="Line 108">108</a><code class="lang-lisp">  (:identifiers</code></span>
+<span class="ox-line" id="L109"><a class="ox-line__n" href="#L109" aria-label="Line 109">109</a><code class="lang-lisp">    [name Symbol]</code></span>
+<span class="ox-line" id="L110"><a class="ox-line__n" href="#L110" aria-label="Line 110">110</a><code class="lang-lisp">    [kind Symbol])</code></span>
+<span class="ox-line" id="L111"><a class="ox-line__n" href="#L111" aria-label="Line 111">111</a><code class="lang-lisp">  (:slots</code></span>
+<span class="ox-line" id="L112"><a class="ox-line__n" href="#L112" aria-label="Line 112">112</a><code class="lang-lisp">    [declaration value]</code></span>
+<span class="ox-line" id="L113"><a class="ox-line__n" href="#L113" aria-label="Line 113">113</a><code class="lang-lisp">    [doc value])</code></span>
+<span class="ox-line" id="L114"><a class="ox-line__n" href="#L114" aria-label="Line 114">114</a><code class="lang-lisp">  (:construct-fn descriptor-construct)</code></span>
+<span class="ox-line" id="L115"><a class="ox-line__n" href="#L115" aria-label="Line 115">115</a><code class="lang-lisp">  (:result-type (constant IdentifierDescriptor)))</code></span>
+<span class="ox-line" id="L116"><a class="ox-line__n" href="#L116" aria-label="Line 116">116</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L117"><a class="ox-line__n" href="#L117" aria-label="Line 117">117</a><code class="lang-lisp">; Slots are keyword clauses inside a form. A required slot must be present.</code></span>
+<span class="ox-line" id="L118"><a class="ox-line__n" href="#L118" aria-label="Line 118">118</a><code class="lang-lisp">; A many slot can appear more than once. Child-form metadata lets a repeated</code></span>
+<span class="ox-line" id="L119"><a class="ox-line__n" href="#L119" aria-label="Line 119">119</a><code class="lang-lisp">; slot parse compact nested forms such as `(:field [employee/name String])`.</code></span>
+<span class="ox-line" id="L120"><a class="ox-line__n" href="#L120" aria-label="Line 120">120</a><code class="lang-lisp">(define-form slot</code></span>
+<span class="ox-line" id="L121"><a class="ox-line__n" href="#L121" aria-label="Line 121">121</a><code class="lang-lisp">  (:doc &quot;Declares a named slot for a form.&quot;)</code></span>
+<span class="ox-line" id="L122"><a class="ox-line__n" href="#L122" aria-label="Line 122">122</a><code class="lang-lisp">  (:phase meta)</code></span>
+<span class="ox-line" id="L123"><a class="ox-line__n" href="#L123" aria-label="Line 123">123</a><code class="lang-lisp">  (:identifiers</code></span>
+<span class="ox-line" id="L124"><a class="ox-line__n" href="#L124" aria-label="Line 124">124</a><code class="lang-lisp">    [name Symbol]</code></span>
+<span class="ox-line" id="L125"><a class="ox-line__n" href="#L125" aria-label="Line 125">125</a><code class="lang-lisp">    [kind Symbol])</code></span>
+<span class="ox-line" id="L126"><a class="ox-line__n" href="#L126" aria-label="Line 126">126</a><code class="lang-lisp">  (:slots</code></span>
+<span class="ox-line" id="L127"><a class="ox-line__n" href="#L127" aria-label="Line 127">127</a><code class="lang-lisp">    [required value]</code></span>
+<span class="ox-line" id="L128"><a class="ox-line__n" href="#L128" aria-label="Line 128">128</a><code class="lang-lisp">    [many value]</code></span>
+<span class="ox-line" id="L129"><a class="ox-line__n" href="#L129" aria-label="Line 129">129</a><code class="lang-lisp">    [alias value {:many true}]</code></span>
+<span class="ox-line" id="L130"><a class="ox-line__n" href="#L130" aria-label="Line 130">130</a><code class="lang-lisp">    [doc value]</code></span>
+<span class="ox-line" id="L131"><a class="ox-line__n" href="#L131" aria-label="Line 131">131</a><code class="lang-lisp">    [type value]</code></span>
+<span class="ox-line" id="L132"><a class="ox-line__n" href="#L132" aria-label="Line 132">132</a><code class="lang-lisp">    [type-from value])</code></span>
+<span class="ox-line" id="L133"><a class="ox-line__n" href="#L133" aria-label="Line 133">133</a><code class="lang-lisp">  (:construct-fn descriptor-construct)</code></span>
+<span class="ox-line" id="L134"><a class="ox-line__n" href="#L134" aria-label="Line 134">134</a><code class="lang-lisp">  (:result-type (constant SlotDescriptor)))</code></span>
+<span class="ox-line" id="L135"><a class="ox-line__n" href="#L135" aria-label="Line 135">135</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L136"><a class="ox-line__n" href="#L136" aria-label="Line 136">136</a><code class="lang-lisp">(define-form bind</code></span>
+<span class="ox-line" id="L137"><a class="ox-line__n" href="#L137" aria-label="Line 137">137</a><code class="lang-lisp">  (:doc &quot;Static binding opcode inside a form descriptor.&quot;)</code></span>
+<span class="ox-line" id="L138"><a class="ox-line__n" href="#L138" aria-label="Line 138">138</a><code class="lang-lisp">  (:phase meta)</code></span>
+<span class="ox-line" id="L139"><a class="ox-line__n" href="#L139" aria-label="Line 139">139</a><code class="lang-lisp">  (:identifiers</code></span>
+<span class="ox-line" id="L140"><a class="ox-line__n" href="#L140" aria-label="Line 140">140</a><code class="lang-lisp">    [kind Symbol])</code></span>
+<span class="ox-line" id="L141"><a class="ox-line__n" href="#L141" aria-label="Line 141">141</a><code class="lang-lisp">  (:slots</code></span>
+<span class="ox-line" id="L142"><a class="ox-line__n" href="#L142" aria-label="Line 142">142</a><code class="lang-lisp">    [name value]</code></span>
+<span class="ox-line" id="L143"><a class="ox-line__n" href="#L143" aria-label="Line 143">143</a><code class="lang-lisp">    [slot value]</code></span>
+<span class="ox-line" id="L144"><a class="ox-line__n" href="#L144" aria-label="Line 144">144</a><code class="lang-lisp">    [as value]</code></span>
+<span class="ox-line" id="L145"><a class="ox-line__n" href="#L145" aria-label="Line 145">145</a><code class="lang-lisp">    [type value]</code></span>
+<span class="ox-line" id="L146"><a class="ox-line__n" href="#L146" aria-label="Line 146">146</a><code class="lang-lisp">    [identifier value])</code></span>
+<span class="ox-line" id="L147"><a class="ox-line__n" href="#L147" aria-label="Line 147">147</a><code class="lang-lisp">  (:construct-fn descriptor-construct)</code></span>
+<span class="ox-line" id="L148"><a class="ox-line__n" href="#L148" aria-label="Line 148">148</a><code class="lang-lisp">  (:result-type (constant BindingOpcode)))</code></span>
+<span class="ox-line" id="L149"><a class="ox-line__n" href="#L149" aria-label="Line 149">149</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L150"><a class="ox-line__n" href="#L150" aria-label="Line 150">150</a><code class="lang-lisp">(define-form validate</code></span>
+<span class="ox-line" id="L151"><a class="ox-line__n" href="#L151" aria-label="Line 151">151</a><code class="lang-lisp">  (:doc &quot;Static validation opcode inside a form descriptor.&quot;)</code></span>
+<span class="ox-line" id="L152"><a class="ox-line__n" href="#L152" aria-label="Line 152">152</a><code class="lang-lisp">  (:phase meta)</code></span>
+<span class="ox-line" id="L153"><a class="ox-line__n" href="#L153" aria-label="Line 153">153</a><code class="lang-lisp">  (:identifiers</code></span>
+<span class="ox-line" id="L154"><a class="ox-line__n" href="#L154" aria-label="Line 154">154</a><code class="lang-lisp">    [kind Symbol])</code></span>
+<span class="ox-line" id="L155"><a class="ox-line__n" href="#L155" aria-label="Line 155">155</a><code class="lang-lisp">  (:slots</code></span>
+<span class="ox-line" id="L156"><a class="ox-line__n" href="#L156" aria-label="Line 156">156</a><code class="lang-lisp">    [slot value]</code></span>
+<span class="ox-line" id="L157"><a class="ox-line__n" href="#L157" aria-label="Line 157">157</a><code class="lang-lisp">    [values value {:many true}]</code></span>
+<span class="ox-line" id="L158"><a class="ox-line__n" href="#L158" aria-label="Line 158">158</a><code class="lang-lisp">    [collection value]</code></span>
+<span class="ox-line" id="L159"><a class="ox-line__n" href="#L159" aria-label="Line 159">159</a><code class="lang-lisp">    [default-slot value]</code></span>
+<span class="ox-line" id="L160"><a class="ox-line__n" href="#L160" aria-label="Line 160">160</a><code class="lang-lisp">    [list-slot value])</code></span>
+<span class="ox-line" id="L161"><a class="ox-line__n" href="#L161" aria-label="Line 161">161</a><code class="lang-lisp">  (:construct-fn descriptor-construct)</code></span>
+<span class="ox-line" id="L162"><a class="ox-line__n" href="#L162" aria-label="Line 162">162</a><code class="lang-lisp">  (:result-type (constant ValidationOpcode)))</code></span>
+<span class="ox-line" id="L163"><a class="ox-line__n" href="#L163" aria-label="Line 163">163</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L164"><a class="ox-line__n" href="#L164" aria-label="Line 164">164</a><code class="lang-lisp">(define-form elaborate</code></span>
+<span class="ox-line" id="L165"><a class="ox-line__n" href="#L165" aria-label="Line 165">165</a><code class="lang-lisp">  (:doc &quot;Static elaboration/lowering opcode inside a form descriptor.&quot;)</code></span>
+<span class="ox-line" id="L166"><a class="ox-line__n" href="#L166" aria-label="Line 166">166</a><code class="lang-lisp">  (:phase meta)</code></span>
+<span class="ox-line" id="L167"><a class="ox-line__n" href="#L167" aria-label="Line 167">167</a><code class="lang-lisp">  (:identifiers</code></span>
+<span class="ox-line" id="L168"><a class="ox-line__n" href="#L168" aria-label="Line 168">168</a><code class="lang-lisp">    [kind Symbol])</code></span>
+<span class="ox-line" id="L169"><a class="ox-line__n" href="#L169" aria-label="Line 169">169</a><code class="lang-lisp">  (:slots</code></span>
+<span class="ox-line" id="L170"><a class="ox-line__n" href="#L170" aria-label="Line 170">170</a><code class="lang-lisp">    [slot value]</code></span>
+<span class="ox-line" id="L171"><a class="ox-line__n" href="#L171" aria-label="Line 171">171</a><code class="lang-lisp">    [form value]</code></span>
+<span class="ox-line" id="L172"><a class="ox-line__n" href="#L172" aria-label="Line 172">172</a><code class="lang-lisp">    [target value]</code></span>
+<span class="ox-line" id="L173"><a class="ox-line__n" href="#L173" aria-label="Line 173">173</a><code class="lang-lisp">    [declaration-kind value]</code></span>
+<span class="ox-line" id="L174"><a class="ox-line__n" href="#L174" aria-label="Line 174">174</a><code class="lang-lisp">    [binding-name value]</code></span>
+<span class="ox-line" id="L175"><a class="ox-line__n" href="#L175" aria-label="Line 175">175</a><code class="lang-lisp">    [collection value]</code></span>
+<span class="ox-line" id="L176"><a class="ox-line__n" href="#L176" aria-label="Line 176">176</a><code class="lang-lisp">    [default-slot value]</code></span>
+<span class="ox-line" id="L177"><a class="ox-line__n" href="#L177" aria-label="Line 177">177</a><code class="lang-lisp">    [list-slot value]</code></span>
+<span class="ox-line" id="L178"><a class="ox-line__n" href="#L178" aria-label="Line 178">178</a><code class="lang-lisp">    [values value {:many true}])</code></span>
+<span class="ox-line" id="L179"><a class="ox-line__n" href="#L179" aria-label="Line 179">179</a><code class="lang-lisp">  (:construct-fn descriptor-construct)</code></span>
+<span class="ox-line" id="L180"><a class="ox-line__n" href="#L180" aria-label="Line 180">180</a><code class="lang-lisp">  (:result-type (constant LoweringOpcode)))</code></span>
+<span class="ox-line" id="L181"><a class="ox-line__n" href="#L181" aria-label="Line 181">181</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L182"><a class="ox-line__n" href="#L182" aria-label="Line 182">182</a><code class="lang-lisp">(define-form construct-fn</code></span>
+<span class="ox-line" id="L183"><a class="ox-line__n" href="#L183" aria-label="Line 183">183</a><code class="lang-lisp">  (:doc &quot;References a named construct meta function.&quot;)</code></span>
+<span class="ox-line" id="L184"><a class="ox-line__n" href="#L184" aria-label="Line 184">184</a><code class="lang-lisp">  (:phase meta)</code></span>
+<span class="ox-line" id="L185"><a class="ox-line__n" href="#L185" aria-label="Line 185">185</a><code class="lang-lisp">  (:identifiers</code></span>
+<span class="ox-line" id="L186"><a class="ox-line__n" href="#L186" aria-label="Line 186">186</a><code class="lang-lisp">    [name Symbol])</code></span>
+<span class="ox-line" id="L187"><a class="ox-line__n" href="#L187" aria-label="Line 187">187</a><code class="lang-lisp">  (:construct-fn descriptor-construct)</code></span>
+<span class="ox-line" id="L188"><a class="ox-line__n" href="#L188" aria-label="Line 188">188</a><code class="lang-lisp">  (:result-type (constant MetaHookReference)))</code></span>
+<span class="ox-line" id="L189"><a class="ox-line__n" href="#L189" aria-label="Line 189">189</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L190"><a class="ox-line__n" href="#L190" aria-label="Line 190">190</a><code class="lang-lisp">(define-form bindings-fn</code></span>
+<span class="ox-line" id="L191"><a class="ox-line__n" href="#L191" aria-label="Line 191">191</a><code class="lang-lisp">  (:doc &quot;References a named bindings meta function.&quot;)</code></span>
+<span class="ox-line" id="L192"><a class="ox-line__n" href="#L192" aria-label="Line 192">192</a><code class="lang-lisp">  (:phase meta)</code></span>
+<span class="ox-line" id="L193"><a class="ox-line__n" href="#L193" aria-label="Line 193">193</a><code class="lang-lisp">  (:identifiers</code></span>
+<span class="ox-line" id="L194"><a class="ox-line__n" href="#L194" aria-label="Line 194">194</a><code class="lang-lisp">    [name Symbol])</code></span>
+<span class="ox-line" id="L195"><a class="ox-line__n" href="#L195" aria-label="Line 195">195</a><code class="lang-lisp">  (:construct-fn descriptor-construct)</code></span>
+<span class="ox-line" id="L196"><a class="ox-line__n" href="#L196" aria-label="Line 196">196</a><code class="lang-lisp">  (:result-type (constant MetaHookReference)))</code></span>
+<span class="ox-line" id="L197"><a class="ox-line__n" href="#L197" aria-label="Line 197">197</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L198"><a class="ox-line__n" href="#L198" aria-label="Line 198">198</a><code class="lang-lisp">(define-form result-type-fn</code></span>
+<span class="ox-line" id="L199"><a class="ox-line__n" href="#L199" aria-label="Line 199">199</a><code class="lang-lisp">  (:doc &quot;References a named result-type meta function.&quot;)</code></span>
+<span class="ox-line" id="L200"><a class="ox-line__n" href="#L200" aria-label="Line 200">200</a><code class="lang-lisp">  (:phase meta)</code></span>
+<span class="ox-line" id="L201"><a class="ox-line__n" href="#L201" aria-label="Line 201">201</a><code class="lang-lisp">  (:identifiers</code></span>
+<span class="ox-line" id="L202"><a class="ox-line__n" href="#L202" aria-label="Line 202">202</a><code class="lang-lisp">    [name Symbol])</code></span>
+<span class="ox-line" id="L203"><a class="ox-line__n" href="#L203" aria-label="Line 203">203</a><code class="lang-lisp">  (:construct-fn descriptor-construct)</code></span>
+<span class="ox-line" id="L204"><a class="ox-line__n" href="#L204" aria-label="Line 204">204</a><code class="lang-lisp">  (:result-type (constant MetaHookReference)))</code></span>
+<span class="ox-line" id="L205"><a class="ox-line__n" href="#L205" aria-label="Line 205">205</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L206"><a class="ox-line__n" href="#L206" aria-label="Line 206">206</a><code class="lang-lisp">(define-form validate-fn</code></span>
+<span class="ox-line" id="L207"><a class="ox-line__n" href="#L207" aria-label="Line 207">207</a><code class="lang-lisp">  (:doc &quot;References a named validate meta function.&quot;)</code></span>
+<span class="ox-line" id="L208"><a class="ox-line__n" href="#L208" aria-label="Line 208">208</a><code class="lang-lisp">  (:phase meta)</code></span>
+<span class="ox-line" id="L209"><a class="ox-line__n" href="#L209" aria-label="Line 209">209</a><code class="lang-lisp">  (:identifiers</code></span>
+<span class="ox-line" id="L210"><a class="ox-line__n" href="#L210" aria-label="Line 210">210</a><code class="lang-lisp">    [name Symbol])</code></span>
+<span class="ox-line" id="L211"><a class="ox-line__n" href="#L211" aria-label="Line 211">211</a><code class="lang-lisp">  (:construct-fn descriptor-construct)</code></span>
+<span class="ox-line" id="L212"><a class="ox-line__n" href="#L212" aria-label="Line 212">212</a><code class="lang-lisp">  (:result-type (constant MetaHookReference)))</code></span>
+<span class="ox-line" id="L213"><a class="ox-line__n" href="#L213" aria-label="Line 213">213</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L214"><a class="ox-line__n" href="#L214" aria-label="Line 214">214</a><code class="lang-lisp">; ----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L215"><a class="ox-line__n" href="#L215" aria-label="Line 215">215</a><code class="lang-lisp">; Generic meta hooks the ontology prelude would want available.</code></span>
+<span class="ox-line" id="L216"><a class="ox-line__n" href="#L216" aria-label="Line 216">216</a><code class="lang-lisp">; ----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L217"><a class="ox-line__n" href="#L217" aria-label="Line 217">217</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L218"><a class="ox-line__n" href="#L218" aria-label="Line 218">218</a><code class="lang-lisp">(meta-fn descriptor-construct</code></span>
+<span class="ox-line" id="L219"><a class="ox-line__n" href="#L219" aria-label="Line 219">219</a><code class="lang-lisp">  (:kind construct)</code></span>
+<span class="ox-line" id="L220"><a class="ox-line__n" href="#L220" aria-label="Line 220">220</a><code class="lang-lisp">  (:input FormConstructInput)</code></span>
+<span class="ox-line" id="L221"><a class="ox-line__n" href="#L221" aria-label="Line 221">221</a><code class="lang-lisp">  (:output ConstructObject)</code></span>
+<span class="ox-line" id="L222"><a class="ox-line__n" href="#L222" aria-label="Line 222">222</a><code class="lang-lisp">  (:doc &quot;Generic constructor that interprets static descriptor :construct fields.&quot;)</code></span>
+<span class="ox-line" id="L223"><a class="ox-line__n" href="#L223" aria-label="Line 223">223</a><code class="lang-lisp">  (:body</code></span>
+<span class="ox-line" id="L224"><a class="ox-line__n" href="#L224" aria-label="Line 224">224</a><code class="lang-lisp">    ; See Section 4 for the real implementation</code></span>
+<span class="ox-line" id="L225"><a class="ox-line__n" href="#L225" aria-label="Line 225">225</a><code class="lang-lisp">    nil))</code></span>
+<span class="ox-line" id="L226"><a class="ox-line__n" href="#L226" aria-label="Line 226">226</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L227"><a class="ox-line__n" href="#L227" aria-label="Line 227">227</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L228"><a class="ox-line__n" href="#L228" aria-label="Line 228">228</a><code class="lang-lisp">; Worked example: generic descriptor-backed construct hook</code></span>
+<span class="ox-line" id="L229"><a class="ox-line__n" href="#L229" aria-label="Line 229">229</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L230"><a class="ox-line__n" href="#L230" aria-label="Line 230">230</a><code class="lang-lisp">(meta-fn descriptor-construct</code></span>
+<span class="ox-line" id="L231"><a class="ox-line__n" href="#L231" aria-label="Line 231">231</a><code class="lang-lisp">  (:kind construct)</code></span>
+<span class="ox-line" id="L232"><a class="ox-line__n" href="#L232" aria-label="Line 232">232</a><code class="lang-lisp">  (:input FormConstructInput)</code></span>
+<span class="ox-line" id="L233"><a class="ox-line__n" href="#L233" aria-label="Line 233">233</a><code class="lang-lisp">  (:output ConstructObject)</code></span>
+<span class="ox-line" id="L234"><a class="ox-line__n" href="#L234" aria-label="Line 234">234</a><code class="lang-lisp">  (:doc &quot;Interprets descriptor-authored construct fields in a restricted way.&quot;)</code></span>
+<span class="ox-line" id="L235"><a class="ox-line__n" href="#L235" aria-label="Line 235">235</a><code class="lang-lisp">  (:body</code></span>
+<span class="ox-line" id="L236"><a class="ox-line__n" href="#L236" aria-label="Line 236">236</a><code class="lang-lisp">    (construct/from-descriptor</code></span>
+<span class="ox-line" id="L237"><a class="ox-line__n" href="#L237" aria-label="Line 237">237</a><code class="lang-lisp">      :input input</code></span>
+<span class="ox-line" id="L238"><a class="ox-line__n" href="#L238" aria-label="Line 238">238</a><code class="lang-lisp">      :env (meta/semantic-env input))))</code></span>
+<span class="ox-line" id="L239"><a class="ox-line__n" href="#L239" aria-label="Line 239">239</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L240"><a class="ox-line__n" href="#L240" aria-label="Line 240">240</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L241"><a class="ox-line__n" href="#L241" aria-label="Line 241">241</a><code class="lang-lisp">; =============================================================================</code></span>
+<span class="ox-line" id="L242"><a class="ox-line__n" href="#L242" aria-label="Line 242">242</a><code class="lang-lisp">; SECTION 5 — MINIMAL CANONICAL HELPER VOCABULARY</code></span>
+<span class="ox-line" id="L243"><a class="ox-line__n" href="#L243" aria-label="Line 243">243</a><code class="lang-lisp">; =============================================================================</code></span>
+<span class="ox-line" id="L244"><a class="ox-line__n" href="#L244" aria-label="Line 244">244</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L245"><a class="ox-line__n" href="#L245" aria-label="Line 245">245</a><code class="lang-lisp">; This section lists the smallest helper surface I currently think the kernel +</code></span>
+<span class="ox-line" id="L246"><a class="ox-line__n" href="#L246" aria-label="Line 246">246</a><code class="lang-lisp">; meta substrate would need in order to support the worked examples above.</code></span>
+<span class="ox-line" id="L247"><a class="ox-line__n" href="#L247" aria-label="Line 247">247</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L248"><a class="ox-line__n" href="#L248" aria-label="Line 248">248</a><code class="lang-lisp">; Goal:</code></span>
+<span class="ox-line" id="L249"><a class="ox-line__n" href="#L249" aria-label="Line 249">249</a><code class="lang-lisp">; - enough power for full self-description and bootstrapping</code></span>
+<span class="ox-line" id="L250"><a class="ox-line__n" href="#L250" aria-label="Line 250">250</a><code class="lang-lisp">; - not enough power to become an unconstrained compiler plugin API</code></span>
+<span class="ox-line" id="L251"><a class="ox-line__n" href="#L251" aria-label="Line 251">251</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L252"><a class="ox-line__n" href="#L252" aria-label="Line 252">252</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L253"><a class="ox-line__n" href="#L253" aria-label="Line 253">253</a><code class="lang-lisp">; 5A. Input model helpers</code></span>
+<span class="ox-line" id="L254"><a class="ox-line__n" href="#L254" aria-label="Line 254">254</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L255"><a class="ox-line__n" href="#L255" aria-label="Line 255">255</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L256"><a class="ox-line__n" href="#L256" aria-label="Line 256">256</a><code class="lang-lisp">; These helpers expose structured views of the current compile-time input.</code></span>
+<span class="ox-line" id="L257"><a class="ox-line__n" href="#L257" aria-label="Line 257">257</a><code class="lang-lisp">; They should be preferred over direct access to raw normalized/compiler internals.</code></span>
+<span class="ox-line" id="L258"><a class="ox-line__n" href="#L258" aria-label="Line 258">258</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L259"><a class="ox-line__n" href="#L259" aria-label="Line 259">259</a><code class="lang-lisp">; Core meta/input helpers:</code></span>
+<span class="ox-line" id="L260"><a class="ox-line__n" href="#L260" aria-label="Line 260">260</a><code class="lang-lisp">; - (meta/descriptor input)</code></span>
+<span class="ox-line" id="L261"><a class="ox-line__n" href="#L261" aria-label="Line 261">261</a><code class="lang-lisp">; - (meta/form-name input)</code></span>
+<span class="ox-line" id="L262"><a class="ox-line__n" href="#L262" aria-label="Line 262">262</a><code class="lang-lisp">; - (meta/declaration-name input)</code></span>
+<span class="ox-line" id="L263"><a class="ox-line__n" href="#L263" aria-label="Line 263">263</a><code class="lang-lisp">; - (meta/loc input)</code></span>
+<span class="ox-line" id="L264"><a class="ox-line__n" href="#L264" aria-label="Line 264">264</a><code class="lang-lisp">; - (meta/normalized-form input)</code></span>
+<span class="ox-line" id="L265"><a class="ox-line__n" href="#L265" aria-label="Line 265">265</a><code class="lang-lisp">; - (meta/semantic-env input)</code></span>
+<span class="ox-line" id="L266"><a class="ox-line__n" href="#L266" aria-label="Line 266">266</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L267"><a class="ox-line__n" href="#L267" aria-label="Line 267">267</a><code class="lang-lisp">; Slot/identifier access:</code></span>
+<span class="ox-line" id="L268"><a class="ox-line__n" href="#L268" aria-label="Line 268">268</a><code class="lang-lisp">; - (meta/slot-value input :slot)</code></span>
+<span class="ox-line" id="L269"><a class="ox-line__n" href="#L269" aria-label="Line 269">269</a><code class="lang-lisp">; - (meta/slot-values input :slot)</code></span>
+<span class="ox-line" id="L270"><a class="ox-line__n" href="#L270" aria-label="Line 270">270</a><code class="lang-lisp">; - (meta/slot-string input :slot)</code></span>
+<span class="ox-line" id="L271"><a class="ox-line__n" href="#L271" aria-label="Line 271">271</a><code class="lang-lisp">; - (meta/slot-string-list input :slot)</code></span>
+<span class="ox-line" id="L272"><a class="ox-line__n" href="#L272" aria-label="Line 272">272</a><code class="lang-lisp">; - (meta/slot-symbol input :slot)</code></span>
+<span class="ox-line" id="L273"><a class="ox-line__n" href="#L273" aria-label="Line 273">273</a><code class="lang-lisp">; - (meta/slot-expr input :slot)</code></span>
+<span class="ox-line" id="L274"><a class="ox-line__n" href="#L274" aria-label="Line 274">274</a><code class="lang-lisp">; - (meta/slot-ref input :slot DeclarationKind)</code></span>
+<span class="ox-line" id="L275"><a class="ox-line__n" href="#L275" aria-label="Line 275">275</a><code class="lang-lisp">; - (meta/identifier input :name)</code></span>
+<span class="ox-line" id="L276"><a class="ox-line__n" href="#L276" aria-label="Line 276">276</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L277"><a class="ox-line__n" href="#L277" aria-label="Line 277">277</a><code class="lang-lisp">; Child-form traversal:</code></span>
+<span class="ox-line" id="L278"><a class="ox-line__n" href="#L278" aria-label="Line 278">278</a><code class="lang-lisp">; - (meta/child-forms input :slot)</code></span>
+<span class="ox-line" id="L279"><a class="ox-line__n" href="#L279" aria-label="Line 279">279</a><code class="lang-lisp">; - (meta/child-form input :slot)</code></span>
+<span class="ox-line" id="L280"><a class="ox-line__n" href="#L280" aria-label="Line 280">280</a><code class="lang-lisp">; - (meta/child-identifier-set input :slot :identifier)</code></span>
+<span class="ox-line" id="L281"><a class="ox-line__n" href="#L281" aria-label="Line 281">281</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L282"><a class="ox-line__n" href="#L282" aria-label="Line 282">282</a><code class="lang-lisp">; Generic declaration reflection:</code></span>
+<span class="ox-line" id="L283"><a class="ox-line__n" href="#L283" aria-label="Line 283">283</a><code class="lang-lisp">; - (meta/lookup-declaration input name)</code></span>
+<span class="ox-line" id="L284"><a class="ox-line__n" href="#L284" aria-label="Line 284">284</a><code class="lang-lisp">; - (meta/declaration-kind declaration)</code></span>
+<span class="ox-line" id="L285"><a class="ox-line__n" href="#L285" aria-label="Line 285">285</a><code class="lang-lisp">; - (meta/declaration-type declaration)</code></span>
+<span class="ox-line" id="L286"><a class="ox-line__n" href="#L286" aria-label="Line 286">286</a><code class="lang-lisp">; - (meta/declaration-field declaration field-name)</code></span>
+<span class="ox-line" id="L287"><a class="ox-line__n" href="#L287" aria-label="Line 287">287</a><code class="lang-lisp">; - (meta/project-type declaration [field ...])</code></span>
+<span class="ox-line" id="L288"><a class="ox-line__n" href="#L288" aria-label="Line 288">288</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L289"><a class="ox-line__n" href="#L289" aria-label="Line 289">289</a><code class="lang-lisp">; Unclear / maybe too low-level:</code></span>
+<span class="ox-line" id="L290"><a class="ox-line__n" href="#L290" aria-label="Line 290">290</a><code class="lang-lisp">; - exposing raw normalized maps or raw declaration indexes directly</code></span>
+<span class="ox-line" id="L291"><a class="ox-line__n" href="#L291" aria-label="Line 291">291</a><code class="lang-lisp">; - likely should stay internal to TypeScript</code></span>
+<span class="ox-line" id="L292"><a class="ox-line__n" href="#L292" aria-label="Line 292">292</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L293"><a class="ox-line__n" href="#L293" aria-label="Line 293">293</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L294"><a class="ox-line__n" href="#L294" aria-label="Line 294">294</a><code class="lang-lisp">; 5B. Type helpers</code></span>
+<span class="ox-line" id="L295"><a class="ox-line__n" href="#L295" aria-label="Line 295">295</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L296"><a class="ox-line__n" href="#L296" aria-label="Line 296">296</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L297"><a class="ox-line__n" href="#L297" aria-label="Line 297">297</a><code class="lang-lisp">; These helpers let meta functions describe HM results without constructing raw</code></span>
+<span class="ox-line" id="L298"><a class="ox-line__n" href="#L298" aria-label="Line 298">298</a><code class="lang-lisp">; TS runtime objects directly.</code></span>
+<span class="ox-line" id="L299"><a class="ox-line__n" href="#L299" aria-label="Line 299">299</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L300"><a class="ox-line__n" href="#L300" aria-label="Line 300">300</a><code class="lang-lisp">; Minimal type helpers:</code></span>
+<span class="ox-line" id="L301"><a class="ox-line__n" href="#L301" aria-label="Line 301">301</a><code class="lang-lisp">; - (type/unknown)</code></span>
+<span class="ox-line" id="L302"><a class="ox-line__n" href="#L302" aria-label="Line 302">302</a><code class="lang-lisp">; - (type/constant Name)</code></span>
+<span class="ox-line" id="L303"><a class="ox-line__n" href="#L303" aria-label="Line 303">303</a><code class="lang-lisp">; - (type/list T)</code></span>
+<span class="ox-line" id="L304"><a class="ox-line__n" href="#L304" aria-label="Line 304">304</a><code class="lang-lisp">; - (type/vector T)</code></span>
+<span class="ox-line" id="L305"><a class="ox-line__n" href="#L305" aria-label="Line 305">305</a><code class="lang-lisp">; - (type/record [field type] ...)</code></span>
+<span class="ox-line" id="L306"><a class="ox-line__n" href="#L306" aria-label="Line 306">306</a><code class="lang-lisp">; - (type/ref Name)</code></span>
+<span class="ox-line" id="L307"><a class="ox-line__n" href="#L307" aria-label="Line 307">307</a><code class="lang-lisp">; - (type/project-row row [field ...])</code></span>
+<span class="ox-line" id="L308"><a class="ox-line__n" href="#L308" aria-label="Line 308">308</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L309"><a class="ox-line__n" href="#L309" aria-label="Line 309">309</a><code class="lang-lisp">; Type-check query helpers:</code></span>
+<span class="ox-line" id="L310"><a class="ox-line__n" href="#L310" aria-label="Line 310">310</a><code class="lang-lisp">; - (meta/expr-assignable-to? input expr Type)</code></span>
+<span class="ox-line" id="L311"><a class="ox-line__n" href="#L311" aria-label="Line 311">311</a><code class="lang-lisp">; - maybe later: (meta/infer-expr-type input expr)</code></span>
+<span class="ox-line" id="L312"><a class="ox-line__n" href="#L312" aria-label="Line 312">312</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L313"><a class="ox-line__n" href="#L313" aria-label="Line 313">313</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L314"><a class="ox-line__n" href="#L314" aria-label="Line 314">314</a><code class="lang-lisp">; 5C. Binding helpers</code></span>
+<span class="ox-line" id="L315"><a class="ox-line__n" href="#L315" aria-label="Line 315">315</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L316"><a class="ox-line__n" href="#L316" aria-label="Line 316">316</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L317"><a class="ox-line__n" href="#L317" aria-label="Line 317">317</a><code class="lang-lisp">; These helpers construct validated binding payloads.</code></span>
+<span class="ox-line" id="L318"><a class="ox-line__n" href="#L318" aria-label="Line 318">318</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L319"><a class="ox-line__n" href="#L319" aria-label="Line 319">319</a><code class="lang-lisp">; Minimal binding helpers:</code></span>
+<span class="ox-line" id="L320"><a class="ox-line__n" href="#L320" aria-label="Line 320">320</a><code class="lang-lisp">; - (bindings/empty)</code></span>
+<span class="ox-line" id="L321"><a class="ox-line__n" href="#L321" aria-label="Line 321">321</a><code class="lang-lisp">; - (bindings/of [name Type] ...)</code></span>
+<span class="ox-line" id="L322"><a class="ox-line__n" href="#L322" aria-label="Line 322">322</a><code class="lang-lisp">; - (bindings/merge a b ...)</code></span>
+<span class="ox-line" id="L323"><a class="ox-line__n" href="#L323" aria-label="Line 323">323</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L324"><a class="ox-line__n" href="#L324" aria-label="Line 324">324</a><code class="lang-lisp">; Possibly useful later:</code></span>
+<span class="ox-line" id="L325"><a class="ox-line__n" href="#L325" aria-label="Line 325">325</a><code class="lang-lisp">; - (bindings/when condition payload)</code></span>
+<span class="ox-line" id="L326"><a class="ox-line__n" href="#L326" aria-label="Line 326">326</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L327"><a class="ox-line__n" href="#L327" aria-label="Line 327">327</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L328"><a class="ox-line__n" href="#L328" aria-label="Line 328">328</a><code class="lang-lisp">; 5D. Construct helpers</code></span>
+<span class="ox-line" id="L329"><a class="ox-line__n" href="#L329" aria-label="Line 329">329</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L330"><a class="ox-line__n" href="#L330" aria-label="Line 330">330</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L331"><a class="ox-line__n" href="#L331" aria-label="Line 331">331</a><code class="lang-lisp">; These helpers produce structured elaboration payloads.</code></span>
+<span class="ox-line" id="L332"><a class="ox-line__n" href="#L332" aria-label="Line 332">332</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L333"><a class="ox-line__n" href="#L333" aria-label="Line 333">333</a><code class="lang-lisp">; Minimal construct helpers:</code></span>
+<span class="ox-line" id="L334"><a class="ox-line__n" href="#L334" aria-label="Line 334">334</a><code class="lang-lisp">; - (construct/from-descriptor ...)</code></span>
+<span class="ox-line" id="L335"><a class="ox-line__n" href="#L335" aria-label="Line 335">335</a><code class="lang-lisp">; - (construct/object ...)</code></span>
+<span class="ox-line" id="L336"><a class="ox-line__n" href="#L336" aria-label="Line 336">336</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L337"><a class="ox-line__n" href="#L337" aria-label="Line 337">337</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L338"><a class="ox-line__n" href="#L338" aria-label="Line 338">338</a><code class="lang-lisp">; 5E. Diagnostic helpers</code></span>
+<span class="ox-line" id="L339"><a class="ox-line__n" href="#L339" aria-label="Line 339">339</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L340"><a class="ox-line__n" href="#L340" aria-label="Line 340">340</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L341"><a class="ox-line__n" href="#L341" aria-label="Line 341">341</a><code class="lang-lisp">; These helpers produce structured diagnostics without exposing TS internals.</code></span>
+<span class="ox-line" id="L342"><a class="ox-line__n" href="#L342" aria-label="Line 342">342</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L343"><a class="ox-line__n" href="#L343" aria-label="Line 343">343</a><code class="lang-lisp">; Minimal diagnostic helpers:</code></span>
+<span class="ox-line" id="L344"><a class="ox-line__n" href="#L344" aria-label="Line 344">344</a><code class="lang-lisp">; - (diag/error :message &quot;...&quot;)</code></span>
+<span class="ox-line" id="L345"><a class="ox-line__n" href="#L345" aria-label="Line 345">345</a><code class="lang-lisp">; - (diag/error :slot :where :message &quot;...&quot;)</code></span>
+<span class="ox-line" id="L346"><a class="ox-line__n" href="#L346" aria-label="Line 346">346</a><code class="lang-lisp">; - (diag/error :form child-form :message &quot;...&quot;)</code></span>
+<span class="ox-line" id="L347"><a class="ox-line__n" href="#L347" aria-label="Line 347">347</a><code class="lang-lisp">; - (diag/concat a b ...)</code></span>
+<span class="ox-line" id="L348"><a class="ox-line__n" href="#L348" aria-label="Line 348">348</a><code class="lang-lisp">; - (diag/validate-membership-list values allowed :slot :slot-name)</code></span>
+<span class="ox-line" id="L349"><a class="ox-line__n" href="#L349" aria-label="Line 349">349</a><code class="lang-lisp">; - (diag/validate-default-in-list default values :slot :slot-name)</code></span>
+<span class="ox-line" id="L350"><a class="ox-line__n" href="#L350" aria-label="Line 350">350</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L351"><a class="ox-line__n" href="#L351" aria-label="Line 351">351</a><code class="lang-lisp">; Likely useful:</code></span>
+<span class="ox-line" id="L352"><a class="ox-line__n" href="#L352" aria-label="Line 352">352</a><code class="lang-lisp">; - (diag/warning ...)</code></span>
+<span class="ox-line" id="L353"><a class="ox-line__n" href="#L353" aria-label="Line 353">353</a><code class="lang-lisp">; - (diag/info ...)</code></span>
+<span class="ox-line" id="L354"><a class="ox-line__n" href="#L354" aria-label="Line 354">354</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L355"><a class="ox-line__n" href="#L355" aria-label="Line 355">355</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L356"><a class="ox-line__n" href="#L356" aria-label="Line 356">356</a><code class="lang-lisp">; 5F. Small safe collection/string helpers</code></span>
+<span class="ox-line" id="L357"><a class="ox-line__n" href="#L357" aria-label="Line 357">357</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L358"><a class="ox-line__n" href="#L358" aria-label="Line 358">358</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L359"><a class="ox-line__n" href="#L359" aria-label="Line 359">359</a><code class="lang-lisp">; These are probably the maximum general-purpose helpers we should allow.</code></span>
+<span class="ox-line" id="L360"><a class="ox-line__n" href="#L360" aria-label="Line 360">360</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L361"><a class="ox-line__n" href="#L361" aria-label="Line 361">361</a><code class="lang-lisp">; Collections:</code></span>
+<span class="ox-line" id="L362"><a class="ox-line__n" href="#L362" aria-label="Line 362">362</a><code class="lang-lisp">; - (empty? xs)</code></span>
+<span class="ox-line" id="L363"><a class="ox-line__n" href="#L363" aria-label="Line 363">363</a><code class="lang-lisp">; - (list/flat-map xs fn)</code></span>
+<span class="ox-line" id="L364"><a class="ox-line__n" href="#L364" aria-label="Line 364">364</a><code class="lang-lisp">; - (list/map xs fn)</code></span>
+<span class="ox-line" id="L365"><a class="ox-line__n" href="#L365" aria-label="Line 365">365</a><code class="lang-lisp">; - (list/filter xs fn)</code></span>
+<span class="ox-line" id="L366"><a class="ox-line__n" href="#L366" aria-label="Line 366">366</a><code class="lang-lisp">; - (set/contains? set value)</code></span>
+<span class="ox-line" id="L367"><a class="ox-line__n" href="#L367" aria-label="Line 367">367</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L368"><a class="ox-line__n" href="#L368" aria-label="Line 368">368</a><code class="lang-lisp">; Strings:</code></span>
+<span class="ox-line" id="L369"><a class="ox-line__n" href="#L369" aria-label="Line 369">369</a><code class="lang-lisp">; - (str a b c ...)</code></span>
+<span class="ox-line" id="L370"><a class="ox-line__n" href="#L370" aria-label="Line 370">370</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L371"><a class="ox-line__n" href="#L371" aria-label="Line 371">371</a><code class="lang-lisp">; Control flow:</code></span>
+<span class="ox-line" id="L372"><a class="ox-line__n" href="#L372" aria-label="Line 372">372</a><code class="lang-lisp">; - let</code></span>
+<span class="ox-line" id="L373"><a class="ox-line__n" href="#L373" aria-label="Line 373">373</a><code class="lang-lisp">; - if</code></span>
+<span class="ox-line" id="L374"><a class="ox-line__n" href="#L374" aria-label="Line 374">374</a><code class="lang-lisp">; - small local fn</code></span>
+<span class="ox-line" id="L375"><a class="ox-line__n" href="#L375" aria-label="Line 375">375</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L376"><a class="ox-line__n" href="#L376" aria-label="Line 376">376</a><code class="lang-lisp">; I would avoid for now:</code></span>
+<span class="ox-line" id="L377"><a class="ox-line__n" href="#L377" aria-label="Line 377">377</a><code class="lang-lisp">; - unrestricted recursion</code></span>
+<span class="ox-line" id="L378"><a class="ox-line__n" href="#L378" aria-label="Line 378">378</a><code class="lang-lisp">; - macros in meta-fn bodies</code></span>
+<span class="ox-line" id="L379"><a class="ox-line__n" href="#L379" aria-label="Line 379">379</a><code class="lang-lisp">; - arbitrary higher-order library imports</code></span>
+<span class="ox-line" id="L380"><a class="ox-line__n" href="#L380" aria-label="Line 380">380</a><code class="lang-lisp">; - mutation</code></span>
+<span class="ox-line" id="L381"><a class="ox-line__n" href="#L381" aria-label="Line 381">381</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L382"><a class="ox-line__n" href="#L382" aria-label="Line 382">382</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L383"><a class="ox-line__n" href="#L383" aria-label="Line 383">383</a><code class="lang-lisp">; 5G. Probably kernel-owned vs ontology-owned</code></span>
+<span class="ox-line" id="L384"><a class="ox-line__n" href="#L384" aria-label="Line 384">384</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L385"><a class="ox-line__n" href="#L385" aria-label="Line 385">385</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L386"><a class="ox-line__n" href="#L386" aria-label="Line 386">386</a><code class="lang-lisp">; Kernel-owned generic helpers:</code></span>
+<span class="ox-line" id="L387"><a class="ox-line__n" href="#L387" aria-label="Line 387">387</a><code class="lang-lisp">; - meta/input access primitives</code></span>
+<span class="ox-line" id="L388"><a class="ox-line__n" href="#L388" aria-label="Line 388">388</a><code class="lang-lisp">; - binding constructors</code></span>
+<span class="ox-line" id="L389"><a class="ox-line__n" href="#L389" aria-label="Line 389">389</a><code class="lang-lisp">; - type constructors</code></span>
+<span class="ox-line" id="L390"><a class="ox-line__n" href="#L390" aria-label="Line 390">390</a><code class="lang-lisp">; - construct protocol dispatch</code></span>
+<span class="ox-line" id="L391"><a class="ox-line__n" href="#L391" aria-label="Line 391">391</a><code class="lang-lisp">; - diagnostic constructors</code></span>
+<span class="ox-line" id="L392"><a class="ox-line__n" href="#L392" aria-label="Line 392">392</a><code class="lang-lisp">; - tiny safe collection/string helpers</code></span>
+<span class="ox-line" id="L393"><a class="ox-line__n" href="#L393" aria-label="Line 393">393</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L394"><a class="ox-line__n" href="#L394" aria-label="Line 394">394</a><code class="lang-lisp">; This separation is important.</code></span>
+<span class="ox-line" id="L395"><a class="ox-line__n" href="#L395" aria-label="Line 395">395</a><code class="lang-lisp">; The kernel should host DSLs; the ontology prelude should define ontology logic.</code></span>
+<span class="ox-line" id="L396"><a class="ox-line__n" href="#L396" aria-label="Line 396">396</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L397"><a class="ox-line__n" href="#L397" aria-label="Line 397">397</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L398"><a class="ox-line__n" href="#L398" aria-label="Line 398">398</a><code class="lang-lisp">; 5H. Bootstrap minimum</code></span>
+<span class="ox-line" id="L399"><a class="ox-line__n" href="#L399" aria-label="Line 399">399</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L400"><a class="ox-line__n" href="#L400" aria-label="Line 400">400</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L401"><a class="ox-line__n" href="#L401" aria-label="Line 401">401</a><code class="lang-lisp">; If we work backwards from this file, the smallest trusted bootstrap seed likely</code></span>
+<span class="ox-line" id="L402"><a class="ox-line__n" href="#L402" aria-label="Line 402">402</a><code class="lang-lisp">; needs to support:</code></span>
+<span class="ox-line" id="L403"><a class="ox-line__n" href="#L403" aria-label="Line 403">403</a><code class="lang-lisp">; - parsing S-expressions</code></span>
+<span class="ox-line" id="L404"><a class="ox-line__n" href="#L404" aria-label="Line 404">404</a><code class="lang-lisp">; - reading a tiny seed descriptor for `form`</code></span>
+<span class="ox-line" id="L405"><a class="ox-line__n" href="#L405" aria-label="Line 405">405</a><code class="lang-lisp">; - reading a tiny seed descriptor for `meta-fn`</code></span>
+<span class="ox-line" id="L406"><a class="ox-line__n" href="#L406" aria-label="Line 406">406</a><code class="lang-lisp">; - validating structured helper calls in meta-fn bodies</code></span>
+<span class="ox-line" id="L407"><a class="ox-line__n" href="#L407" aria-label="Line 407">407</a><code class="lang-lisp">; - executing constrained meta hooks</code></span>
+<span class="ox-line" id="L408"><a class="ox-line__n" href="#L408" aria-label="Line 408">408</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L409"><a class="ox-line__n" href="#L409" aria-label="Line 409">409</a><code class="lang-lisp">; After that, ontology.lisp can define the rest of its own surface.</code></span>
+<span class="ox-line" id="L410"><a class="ox-line__n" href="#L410" aria-label="Line 410">410</a><code class="lang-lisp">;</code></span></pre></div></main>
+<footer class="oo-footer"><span class="oo-footer__brand"><b>Open Ontology</b> Experimental v0.1 · Local in-memory runtime.</span><nav aria-label="Footer navigation"><a href="/explorations/">All explorations</a><a href="/explorations/catalog.json">catalog.json</a><a href="/llms.txt">llms.txt</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">Source ↗</a></nav></footer>
+</div></body></html>

@@ -43,9 +43,11 @@
     "site:export-onboarded": "tsx scripts/export-onboarded.ts",
     "model:check": "tsx scripts/check-model.ts",
     "account:check": "tsx scripts/check-account.ts",
-    "site:check": "node apps/site/check.mjs",
+    "site:check": "tsx scripts/export-explorations.ts --check && node apps/site/check.mjs",
     "site:dev": "wrangler dev --config apps/site/wrangler.jsonc",
-    "site:deploy": "alchemy deploy --stage prod --yes"
+    "site:deploy": "alchemy deploy --stage prod --yes",
+    "example:onto": "tsx examples/onto/run.ts",
+    "site:export-explorations": "tsx scripts/export-explorations.ts"
   },
   "dependencies": {
     "@formalang/ts": "0.3.0",
@@ -54,9 +56,11 @@
   "devDependencies": {
     "@alchemy.run/cloudflare": "2.0.0-beta.84",
     "@effect/platform-node": "4.1.1",
+    "@open-ontology/onto-forma": "file:vendor/open-ontology-onto-forma-0.3.0-onto.535cd41e.tgz",
     "@types/node": "25.9.1",
     "alchemy": "2.0.0-beta.84",
     "effect": "4.1.1",
+    "marked": "18.1.3",
     "tsdown": "0.20.0",
     "tsx": "4.19.0",
     "typescript": "5.9.3",

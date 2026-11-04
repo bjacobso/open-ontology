@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f6f5ef">
+<title>preludes/viewspec-compiler.lisp · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Instrument+Serif:ital@0;1&amp;family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css"><script defer src="/site.js"></script></head>
+<body><div class="oo ox"><a class="oo-skip" href="#main">Skip to content</a>
+<header class="oo-nav"><a class="oo-brand" href="/" aria-label="Open Ontology home"><img src="/favicon.svg" width="24" height="24" alt=""><span>Open Ontology</span></a><nav aria-label="Main navigation"><a class="oo-nav__section" href="/#std">Standard library</a><a class="oo-nav__section" href="/#preludes">Preludes</a><a class="oo-nav__section" href="/explorations/" aria-current="page">Explorations</a><a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main" class="oo-main"><section class="ox-hero ox-hero--source"><nav class="ox-crumbs" aria-label="Breadcrumb"><a href="/">Open Ontology</a><span aria-hidden="true">/</span><a href="/explorations/">Explorations</a><span aria-hidden="true">/</span>Source</nav>
+<p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Full source · lisp · 44 lines</p>
+<h1 class="oo-pkg ox-path">preludes/viewspec-compiler.lisp</h1>
+<div class="oo-actions"><a class="oo-primary" href="/explorations/raw/preludes/viewspec-compiler.lisp">Raw source <span aria-hidden="true">↗</span></a><a class="oo-secondary" href="https://github.com/bjacobso/open-ontology/blob/main/preludes/viewspec-compiler.lisp">View on GitHub <span aria-hidden="true">↗</span></a></div>
+<p class="oo-meta"><span>Click a line number to link to that line</span></p></section>
+<div class="oo-panel ox-source"><div class="oo-panel__head"><span>preludes/viewspec-compiler.lisp</span><span>lisp</span></div><pre tabindex="0"><span class="ox-line" id="L1"><a class="ox-line__n" href="#L1" aria-label="Line 1">1</a><code class="lang-lisp">; viewspec-compiler.lisp</code></span>
+<span class="ox-line" id="L2"><a class="ox-line__n" href="#L2" aria-label="Line 2">2</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L3"><a class="ox-line__n" href="#L3" aria-label="Line 3">3</a><code class="lang-lisp">; Hosted ViewSpec compiler hooks.</code></span>
+<span class="ox-line" id="L4"><a class="ox-line__n" href="#L4" aria-label="Line 4">4</a><code class="lang-lisp">;</code></span>
+<span class="ox-line" id="L5"><a class="ox-line__n" href="#L5" aria-label="Line 5">5</a><code class="lang-lisp">; These hooks implement validation behavior for ontology forms whose semantics</code></span>
+<span class="ox-line" id="L6"><a class="ox-line__n" href="#L6" aria-label="Line 6">6</a><code class="lang-lisp">; depend on the hosted ViewSpec DSL.</code></span>
+<span class="ox-line" id="L7"><a class="ox-line__n" href="#L7" aria-label="Line 7">7</a><code class="lang-lisp">; -----------------------------------------------------------------------------</code></span>
+<span class="ox-line" id="L8"><a class="ox-line__n" href="#L8" aria-label="Line 8">8</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L9"><a class="ox-line__n" href="#L9" aria-label="Line 9">9</a><code class="lang-lisp">(meta-fn view/validate</code></span>
+<span class="ox-line" id="L10"><a class="ox-line__n" href="#L10" aria-label="Line 10">10</a><code class="lang-lisp">  (:kind validate)</code></span>
+<span class="ox-line" id="L11"><a class="ox-line__n" href="#L11" aria-label="Line 11">11</a><code class="lang-lisp">  (:input FormMetaInput)</code></span>
+<span class="ox-line" id="L12"><a class="ox-line__n" href="#L12" aria-label="Line 12">12</a><code class="lang-lisp">  (:output DiagnosticList)</code></span>
+<span class="ox-line" id="L13"><a class="ox-line__n" href="#L13" aria-label="Line 13">13</a><code class="lang-lisp">  (:doc &quot;Type-checks the view layout tree against the ViewSpec component catalog.&quot;)</code></span>
+<span class="ox-line" id="L14"><a class="ox-line__n" href="#L14" aria-label="Line 14">14</a><code class="lang-lisp">  (:body</code></span>
+<span class="ox-line" id="L15"><a class="ox-line__n" href="#L15" aria-label="Line 15">15</a><code class="lang-lisp">    (let [layout-expr (meta/slot-expr input :layout)]</code></span>
+<span class="ox-line" id="L16"><a class="ox-line__n" href="#L16" aria-label="Line 16">16</a><code class="lang-lisp">      (let [state-forms (meta/child-forms input :state)</code></span>
+<span class="ox-line" id="L17"><a class="ox-line__n" href="#L17" aria-label="Line 17">17</a><code class="lang-lisp">            state-info (into (list/map state-forms</code></span>
+<span class="ox-line" id="L18"><a class="ox-line__n" href="#L18" aria-label="Line 18">18</a><code class="lang-lisp">              (fn [sf]</code></span>
+<span class="ox-line" id="L19"><a class="ox-line__n" href="#L19" aria-label="Line 19">19</a><code class="lang-lisp">                [(meta/identifier sf :name)</code></span>
+<span class="ox-line" id="L20"><a class="ox-line__n" href="#L20" aria-label="Line 20">20</a><code class="lang-lisp">                 (if (meta/slot-string sf :type)</code></span>
+<span class="ox-line" id="L21"><a class="ox-line__n" href="#L21" aria-label="Line 21">21</a><code class="lang-lisp">                   (meta/slot-string sf :type)</code></span>
+<span class="ox-line" id="L22"><a class="ox-line__n" href="#L22" aria-label="Line 22">22</a><code class="lang-lisp">                   &quot;any&quot;)])))</code></span>
+<span class="ox-line" id="L23"><a class="ox-line__n" href="#L23" aria-label="Line 23">23</a><code class="lang-lisp">            main-query (meta/slot-string input :query)</code></span>
+<span class="ox-line" id="L24"><a class="ox-line__n" href="#L24" aria-label="Line 24">24</a><code class="lang-lisp">            nq-forms (meta/child-forms input :named-query)</code></span>
+<span class="ox-line" id="L25"><a class="ox-line__n" href="#L25" aria-label="Line 25">25</a><code class="lang-lisp">            nq-names (list/map nq-forms</code></span>
+<span class="ox-line" id="L26"><a class="ox-line__n" href="#L26" aria-label="Line 26">26</a><code class="lang-lisp">              (fn [nq] (meta/identifier nq :name)))</code></span>
+<span class="ox-line" id="L27"><a class="ox-line__n" href="#L27" aria-label="Line 27">27</a><code class="lang-lisp">            all-query-names (if (nil? main-query)</code></span>
+<span class="ox-line" id="L28"><a class="ox-line__n" href="#L28" aria-label="Line 28">28</a><code class="lang-lisp">              nq-names</code></span>
+<span class="ox-line" id="L29"><a class="ox-line__n" href="#L29" aria-label="Line 29">29</a><code class="lang-lisp">              (conj nq-names main-query))</code></span>
+<span class="ox-line" id="L30"><a class="ox-line__n" href="#L30" aria-label="Line 30">30</a><code class="lang-lisp">            input-forms (meta/child-forms input :input-param)</code></span>
+<span class="ox-line" id="L31"><a class="ox-line__n" href="#L31" aria-label="Line 31">31</a><code class="lang-lisp">            input-names (list/map input-forms</code></span>
+<span class="ox-line" id="L32"><a class="ox-line__n" href="#L32" aria-label="Line 32">32</a><code class="lang-lisp">              (fn [inf] (meta/identifier inf :name)))</code></span>
+<span class="ox-line" id="L33"><a class="ox-line__n" href="#L33" aria-label="Line 33">33</a><code class="lang-lisp">            def-forms (meta/child-forms input :def)</code></span>
+<span class="ox-line" id="L34"><a class="ox-line__n" href="#L34" aria-label="Line 34">34</a><code class="lang-lisp">            def-names (list/map def-forms</code></span>
+<span class="ox-line" id="L35"><a class="ox-line__n" href="#L35" aria-label="Line 35">35</a><code class="lang-lisp">              (fn [df] (meta/identifier df :name)))]</code></span>
+<span class="ox-line" id="L36"><a class="ox-line__n" href="#L36" aria-label="Line 36">36</a><code class="lang-lisp">        (if (nil? layout-expr)</code></span>
+<span class="ox-line" id="L37"><a class="ox-line__n" href="#L37" aria-label="Line 37">37</a><code class="lang-lisp">          []</code></span>
+<span class="ox-line" id="L38"><a class="ox-line__n" href="#L38" aria-label="Line 38">38</a><code class="lang-lisp">          (meta/validate-descriptor-tree</code></span>
+<span class="ox-line" id="L39"><a class="ox-line__n" href="#L39" aria-label="Line 39">39</a><code class="lang-lisp">            &quot;viewspec&quot;</code></span>
+<span class="ox-line" id="L40"><a class="ox-line__n" href="#L40" aria-label="Line 40">40</a><code class="lang-lisp">            layout-expr</code></span>
+<span class="ox-line" id="L41"><a class="ox-line__n" href="#L41" aria-label="Line 41">41</a><code class="lang-lisp">            state-info</code></span>
+<span class="ox-line" id="L42"><a class="ox-line__n" href="#L42" aria-label="Line 42">42</a><code class="lang-lisp">            all-query-names</code></span>
+<span class="ox-line" id="L43"><a class="ox-line__n" href="#L43" aria-label="Line 43">43</a><code class="lang-lisp">            input-names</code></span>
+<span class="ox-line" id="L44"><a class="ox-line__n" href="#L44" aria-label="Line 44">44</a><code class="lang-lisp">            def-names))))))</code></span></pre></div></main>
+<footer class="oo-footer"><span class="oo-footer__brand"><b>Open Ontology</b> Experimental v0.1 · Local in-memory runtime.</span><nav aria-label="Footer navigation"><a href="/explorations/">All explorations</a><a href="/explorations/catalog.json">catalog.json</a><a href="/llms.txt">llms.txt</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">Source ↗</a></nav></footer>
+</div></body></html>

@@ -47,6 +47,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
         if: steps.credentials.outputs.available == 'true'
+      - name: Verify Cloudflare API access
+        if: steps.credentials.outputs.available == 'true'
+        run: pnpm exec tsx scripts/check-cloudflare-auth.ts
       - name: Deploy production
         if: steps.credentials.outputs.available == 'true'
         run: pnpm exec alchemy deploy --stage prod --yes

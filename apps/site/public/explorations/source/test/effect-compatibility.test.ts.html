@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f6f5ef">
+<title>test/effect-compatibility.test.ts · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Instrument+Serif:ital@0;1&amp;family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css"><script defer src="/site.js"></script></head>
+<body><div class="oo ox"><a class="oo-skip" href="#main">Skip to content</a>
+<header class="oo-nav"><a class="oo-brand" href="/" aria-label="Open Ontology home"><img src="/favicon.svg" width="24" height="24" alt=""><span>Open Ontology</span></a><nav aria-label="Main navigation"><a class="oo-nav__section" href="/#std">Standard library</a><a class="oo-nav__section" href="/#preludes">Preludes</a><a class="oo-nav__section" href="/explorations/" aria-current="page">Explorations</a><a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main" class="oo-main"><section class="ox-hero ox-hero--source"><nav class="ox-crumbs" aria-label="Breadcrumb"><a href="/">Open Ontology</a><span aria-hidden="true">/</span><a href="/explorations/">Explorations</a><span aria-hidden="true">/</span>Source</nav>
+<p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Full source · ts · 128 lines</p>
+<h1 class="oo-pkg ox-path">test/effect-compatibility.test.ts</h1>
+<div class="oo-actions"><a class="oo-primary" href="/explorations/raw/test/effect-compatibility.test.ts">Raw source <span aria-hidden="true">↗</span></a><a class="oo-secondary" href="https://github.com/bjacobso/open-ontology/blob/main/test/effect-compatibility.test.ts">View on GitHub <span aria-hidden="true">↗</span></a></div>
+<p class="oo-meta"><span>Click a line number to link to that line</span></p></section>
+<div class="oo-panel ox-source"><div class="oo-panel__head"><span>test/effect-compatibility.test.ts</span><span>ts</span></div><pre tabindex="0"><span class="ox-line" id="L1"><a class="ox-line__n" href="#L1" aria-label="Line 1">1</a><code>import { Effect, Result, Schema } from &quot;effect&quot;;</code></span>
+<span class="ox-line" id="L2"><a class="ox-line__n" href="#L2" aria-label="Line 2">2</a><code>import { DatabaseId, EntityId, KvTriples, TransactionId, TripleId, Triples, string, type DatalogQuery } from &quot;@triplex-build/triplex&quot;;</code></span>
+<span class="ox-line" id="L3"><a class="ox-line__n" href="#L3" aria-label="Line 3">3</a><code>import { describe, expect, it } from &quot;vitest&quot;;</code></span>
+<span class="ox-line" id="L4"><a class="ox-line__n" href="#L4" aria-label="Line 4">4</a><code>import { Change, Input, Ontology, Property, defineOntology, makeOntologyRuntime, materializeOntology, ontologyToIR, toTriplexConfig } from &quot;../src/index.js&quot;;</code></span>
+<span class="ox-line" id="L5"><a class="ox-line__n" href="#L5" aria-label="Line 5">5</a><code> </code></span>
+<span class="ox-line" id="L6"><a class="ox-line__n" href="#L6" aria-label="Line 6">6</a><code>describe(&quot;Effect 4 compatibility&quot;, () =&gt; {</code></span>
+<span class="ox-line" id="L7"><a class="ox-line__n" href="#L7" aria-label="Line 7">7</a><code>  it.each([Schema.Date, Schema.NumberFromString])(&quot;rejects nonportable action inputs: %s&quot;, (schema) =&gt; {</code></span>
+<span class="ox-line" id="L8"><a class="ox-line__n" href="#L8" aria-label="Line 8">8</a><code>    const action = Ontology.ActionType(&quot;nonportable&quot;, {</code></span>
+<span class="ox-line" id="L9"><a class="ox-line__n" href="#L9" aria-label="Line 9">9</a><code>      input: Schema.Struct({ value: schema }),</code></span>
+<span class="ox-line" id="L10"><a class="ox-line__n" href="#L10" aria-label="Line 10">10</a><code>      changes: [],</code></span>
+<span class="ox-line" id="L11"><a class="ox-line__n" href="#L11" aria-label="Line 11">11</a><code>    });</code></span>
+<span class="ox-line" id="L12"><a class="ox-line__n" href="#L12" aria-label="Line 12">12</a><code>    expect(() =&gt; ontologyToIR(defineOntology({ name: &quot;invalid&quot; }, [action])))</code></span>
+<span class="ox-line" id="L13"><a class="ox-line__n" href="#L13" aria-label="Line 13">13</a><code>      .toThrow(&quot;cannot be restored from portable JSON Schema&quot;);</code></span>
+<span class="ox-line" id="L14"><a class="ox-line__n" href="#L14" aria-label="Line 14">14</a><code>  });</code></span>
+<span class="ox-line" id="L15"><a class="ox-line__n" href="#L15" aria-label="Line 15">15</a><code> </code></span>
+<span class="ox-line" id="L16"><a class="ox-line__n" href="#L16" aria-label="Line 16">16</a><code>  it.each([</code></span>
+<span class="ox-line" id="L17"><a class="ox-line__n" href="#L17" aria-label="Line 17">17</a><code>    [&quot;non-Unicode patterns&quot;, Schema.String.check(Schema.isPattern(/^\S/))],</code></span>
+<span class="ox-line" id="L18"><a class="ox-line__n" href="#L18" aria-label="Line 18">18</a><code>    [&quot;UTF-16 length approximations&quot;, Schema.String.check(Schema.isMinLength(2))],</code></span>
+<span class="ox-line" id="L19"><a class="ox-line__n" href="#L19" aria-label="Line 19">19</a><code>  ] as const)(&quot;rejects approximate JSON Schema checks: %s&quot;, (_name, schema) =&gt; {</code></span>
+<span class="ox-line" id="L20"><a class="ox-line__n" href="#L20" aria-label="Line 20">20</a><code>    const action = Ontology.ActionType(&quot;approximate&quot;, {</code></span>
+<span class="ox-line" id="L21"><a class="ox-line__n" href="#L21" aria-label="Line 21">21</a><code>      input: Schema.Struct({ value: schema }),</code></span>
+<span class="ox-line" id="L22"><a class="ox-line__n" href="#L22" aria-label="Line 22">22</a><code>      changes: [],</code></span>
+<span class="ox-line" id="L23"><a class="ox-line__n" href="#L23" aria-label="Line 23">23</a><code>    });</code></span>
+<span class="ox-line" id="L24"><a class="ox-line__n" href="#L24" aria-label="Line 24">24</a><code>    expect(() =&gt; ontologyToIR(defineOntology({ name: &quot;invalid&quot; }, [action])))</code></span>
+<span class="ox-line" id="L25"><a class="ox-line__n" href="#L25" aria-label="Line 25">25</a><code>      .toThrow(&quot;cannot be reflected to JSON Schema&quot;);</code></span>
+<span class="ox-line" id="L26"><a class="ox-line__n" href="#L26" aria-label="Line 26">26</a><code>  });</code></span>
+<span class="ox-line" id="L27"><a class="ox-line__n" href="#L27" aria-label="Line 27">27</a><code> </code></span>
+<span class="ox-line" id="L28"><a class="ox-line__n" href="#L28" aria-label="Line 28">28</a><code>  it(&quot;preserves Triplex branded-id constructors and schema validation&quot;, () =&gt; {</code></span>
+<span class="ox-line" id="L29"><a class="ox-line__n" href="#L29" aria-label="Line 29">29</a><code>    const cases: readonly (readonly [</code></span>
+<span class="ox-line" id="L30"><a class="ox-line__n" href="#L30" aria-label="Line 30">30</a><code>      Schema.Schema&lt;string&gt; &amp; { readonly DecodingServices: never; readonly make: (value: string) =&gt; string; readonly decode: (value: string) =&gt; Effect.Effect&lt;string, Schema.SchemaError&gt; },</code></span>
+<span class="ox-line" id="L31"><a class="ox-line__n" href="#L31" aria-label="Line 31">31</a><code>      string,</code></span>
+<span class="ox-line" id="L32"><a class="ox-line__n" href="#L32" aria-label="Line 32">32</a><code>      string,</code></span>
+<span class="ox-line" id="L33"><a class="ox-line__n" href="#L33" aria-label="Line 33">33</a><code>    ])[] = [</code></span>
+<span class="ox-line" id="L34"><a class="ox-line__n" href="#L34" aria-label="Line 34">34</a><code>      [EntityId, &quot;item:é&quot;, &quot;&quot;],</code></span>
+<span class="ox-line" id="L35"><a class="ox-line__n" href="#L35" aria-label="Line 35">35</a><code>      [DatabaseId, &quot;local-db&quot;, &quot;INVALID&quot;],</code></span>
+<span class="ox-line" id="L36"><a class="ox-line__n" href="#L36" aria-label="Line 36">36</a><code>      [TripleId, &quot;01ARZ3NDEKTSV4RRFFQ69G5FAV&quot;, &quot;short&quot;],</code></span>
+<span class="ox-line" id="L37"><a class="ox-line__n" href="#L37" aria-label="Line 37">37</a><code>      [TransactionId, &quot;_tx/01ARZ3NDEKTSV4RRFFQ69G5FAV&quot;, &quot;invalid&quot;],</code></span>
+<span class="ox-line" id="L38"><a class="ox-line__n" href="#L38" aria-label="Line 38">38</a><code>    ];</code></span>
+<span class="ox-line" id="L39"><a class="ox-line__n" href="#L39" aria-label="Line 39">39</a><code>    for (const [schema, valid, invalid] of cases) {</code></span>
+<span class="ox-line" id="L40"><a class="ox-line__n" href="#L40" aria-label="Line 40">40</a><code>      expect(schema.make(valid)).toBe(valid);</code></span>
+<span class="ox-line" id="L41"><a class="ox-line__n" href="#L41" aria-label="Line 41">41</a><code>      expect(Effect.runSync(schema.decode(valid))).toBe(valid);</code></span>
+<span class="ox-line" id="L42"><a class="ox-line__n" href="#L42" aria-label="Line 42">42</a><code>      expect(Schema.decodeUnknownSync(schema)(valid)).toBe(valid);</code></span>
+<span class="ox-line" id="L43"><a class="ox-line__n" href="#L43" aria-label="Line 43">43</a><code>      expect(() =&gt; schema.make(invalid)).toThrow();</code></span>
+<span class="ox-line" id="L44"><a class="ox-line__n" href="#L44" aria-label="Line 44">44</a><code>      expect(Result.isFailure(Effect.runSync(Effect.result(schema.decode(invalid))))).toBe(true);</code></span>
+<span class="ox-line" id="L45"><a class="ox-line__n" href="#L45" aria-label="Line 45">45</a><code>    }</code></span>
+<span class="ox-line" id="L46"><a class="ox-line__n" href="#L46" aria-label="Line 46">46</a><code>  });</code></span>
+<span class="ox-line" id="L47"><a class="ox-line__n" href="#L47" aria-label="Line 47">47</a><code> </code></span>
+<span class="ox-line" id="L48"><a class="ox-line__n" href="#L48" aria-label="Line 48">48</a><code>  it(&quot;restores portable action checks and executes Triplex configuration and actions&quot;, async () =&gt; {</code></span>
+<span class="ox-line" id="L49"><a class="ox-line__n" href="#L49" aria-label="Line 49">49</a><code>    const item = Ontology.ObjectType(&quot;Item&quot;, {</code></span>
+<span class="ox-line" id="L50"><a class="ox-line__n" href="#L50" aria-label="Line 50">50</a><code>      properties: { title: Property.make(&quot;:item/title&quot;, Schema.String).required() },</code></span>
+<span class="ox-line" id="L51"><a class="ox-line__n" href="#L51" aria-label="Line 51">51</a><code>    });</code></span>
+<span class="ox-line" id="L52"><a class="ox-line__n" href="#L52" aria-label="Line 52">52</a><code>    const action = Ontology.ActionType(&quot;create-item&quot;, {</code></span>
+<span class="ox-line" id="L53"><a class="ox-line__n" href="#L53" aria-label="Line 53">53</a><code>      input: Schema.Struct({</code></span>
+<span class="ox-line" id="L54"><a class="ox-line__n" href="#L54" aria-label="Line 54">54</a><code>        id: Schema.String,</code></span>
+<span class="ox-line" id="L55"><a class="ox-line__n" href="#L55" aria-label="Line 55">55</a><code>        title: Schema.String.check(Schema.isMinCodePoints(2), Schema.isPattern(/^\S/u)),</code></span>
+<span class="ox-line" id="L56"><a class="ox-line__n" href="#L56" aria-label="Line 56">56</a><code>        priority: Schema.Number.check(Schema.isInt(), Schema.isGreaterThan(0)),</code></span>
+<span class="ox-line" id="L57"><a class="ox-line__n" href="#L57" aria-label="Line 57">57</a><code>        note: Schema.optional(Schema.String),</code></span>
+<span class="ox-line" id="L58"><a class="ox-line__n" href="#L58" aria-label="Line 58">58</a><code>      }),</code></span>
+<span class="ox-line" id="L59"><a class="ox-line__n" href="#L59" aria-label="Line 59">59</a><code>      changes: [Change.create(item, Input.value(&quot;id&quot;), { &quot;:item/title&quot;: Input.value(&quot;title&quot;) })],</code></span>
+<span class="ox-line" id="L60"><a class="ox-line__n" href="#L60" aria-label="Line 60">60</a><code>    });</code></span>
+<span class="ox-line" id="L61"><a class="ox-line__n" href="#L61" aria-label="Line 61">61</a><code>    const ir = ontologyToIR(defineOntology({ name: &quot;compatibility&quot; }, [item, action]));</code></span>
+<span class="ox-line" id="L62"><a class="ox-line__n" href="#L62" aria-label="Line 62">62</a><code>    const restored = materializeOntology(JSON.parse(JSON.stringify(ir)));</code></span>
+<span class="ox-line" id="L63"><a class="ox-line__n" href="#L63" aria-label="Line 63">63</a><code>    expect(ontologyToIR(restored)).toEqual(ir);</code></span>
+<span class="ox-line" id="L64"><a class="ox-line__n" href="#L64" aria-label="Line 64">64</a><code>    const runtime = makeOntologyRuntime(restored);</code></span>
+<span class="ox-line" id="L65"><a class="ox-line__n" href="#L65" aria-label="Line 65">65</a><code>    const result = await Effect.runPromise(Effect.gen(function* () {</code></span>
+<span class="ox-line" id="L66"><a class="ox-line__n" href="#L66" aria-label="Line 66">66</a><code>      const nodes = yield* toTriplexConfig(ir).nodes;</code></span>
+<span class="ox-line" id="L67"><a class="ox-line__n" href="#L67" aria-label="Line 67">67</a><code>      const valid = { id: &quot;item:é&quot;, title: &quot;Café&quot;, priority: 1 };</code></span>
+<span class="ox-line" id="L68"><a class="ox-line__n" href="#L68" aria-label="Line 68">68</a><code>      for (const input of [</code></span>
+<span class="ox-line" id="L69"><a class="ox-line__n" href="#L69" aria-label="Line 69">69</a><code>        { ...valid, title: &quot;x&quot; },</code></span>
+<span class="ox-line" id="L70"><a class="ox-line__n" href="#L70" aria-label="Line 70">70</a><code>        { ...valid, title: &quot; space&quot; },</code></span>
+<span class="ox-line" id="L71"><a class="ox-line__n" href="#L71" aria-label="Line 71">71</a><code>        { ...valid, priority: 0 },</code></span>
+<span class="ox-line" id="L72"><a class="ox-line__n" href="#L72" aria-label="Line 72">72</a><code>        { ...valid, priority: 1.5 },</code></span>
+<span class="ox-line" id="L73"><a class="ox-line__n" href="#L73" aria-label="Line 73">73</a><code>        { ...valid, note: 42 },</code></span>
+<span class="ox-line" id="L74"><a class="ox-line__n" href="#L74" aria-label="Line 74">74</a><code>      ]) {</code></span>
+<span class="ox-line" id="L75"><a class="ox-line__n" href="#L75" aria-label="Line 75">75</a><code>        expect(Result.isFailure(yield* Effect.result(runtime.invoke(&quot;create-item&quot;, input)))).toBe(true);</code></span>
+<span class="ox-line" id="L76"><a class="ox-line__n" href="#L76" aria-label="Line 76">76</a><code>      }</code></span>
+<span class="ox-line" id="L77"><a class="ox-line__n" href="#L77" aria-label="Line 77">77</a><code>      yield* runtime.invoke(&quot;create-item&quot;, valid);</code></span>
+<span class="ox-line" id="L78"><a class="ox-line__n" href="#L78" aria-label="Line 78">78</a><code>      const triples = yield* Triples;</code></span>
+<span class="ox-line" id="L79"><a class="ox-line__n" href="#L79" aria-label="Line 79">79</a><code>      return { nodes, facts: yield* triples.entity(EntityId.make(valid.id)) };</code></span>
+<span class="ox-line" id="L80"><a class="ox-line__n" href="#L80" aria-label="Line 80">80</a><code>    }).pipe(Effect.provide(KvTriples.layer)));</code></span>
+<span class="ox-line" id="L81"><a class="ox-line__n" href="#L81" aria-label="Line 81">81</a><code>    expect(result.nodes.length).toBeGreaterThan(1);</code></span>
+<span class="ox-line" id="L82"><a class="ox-line__n" href="#L82" aria-label="Line 82">82</a><code>    expect(result.facts).toHaveLength(1);</code></span>
+<span class="ox-line" id="L83"><a class="ox-line__n" href="#L83" aria-label="Line 83">83</a><code>    expect(result.facts[0]?.value).toEqual(string(&quot;Café&quot;));</code></span>
+<span class="ox-line" id="L84"><a class="ox-line__n" href="#L84" aria-label="Line 84">84</a><code>  });</code></span>
+<span class="ox-line" id="L85"><a class="ox-line__n" href="#L85" aria-label="Line 85">85</a><code> </code></span>
+<span class="ox-line" id="L86"><a class="ox-line__n" href="#L86" aria-label="Line 86">86</a><code>  it(&quot;continues query and entity cursors at their original snapshot and rejects invalid cursors&quot;, async () =&gt; {</code></span>
+<span class="ox-line" id="L87"><a class="ox-line__n" href="#L87" aria-label="Line 87">87</a><code>    await Effect.runPromise(Effect.gen(function* () {</code></span>
+<span class="ox-line" id="L88"><a class="ox-line__n" href="#L88" aria-label="Line 88">88</a><code>      const triples = yield* Triples;</code></span>
+<span class="ox-line" id="L89"><a class="ox-line__n" href="#L89" aria-label="Line 89">89</a><code>      yield* triples.transact([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;].map((id) =&gt; ({</code></span>
+<span class="ox-line" id="L90"><a class="ox-line__n" href="#L90" aria-label="Line 90">90</a><code>        op: &quot;assert&quot; as const,</code></span>
+<span class="ox-line" id="L91"><a class="ox-line__n" href="#L91" aria-label="Line 91">91</a><code>        entityId: EntityId.make(`item:${id}`),</code></span>
+<span class="ox-line" id="L92"><a class="ox-line__n" href="#L92" aria-label="Line 92">92</a><code>        entityType: &quot;Item&quot;,</code></span>
+<span class="ox-line" id="L93"><a class="ox-line__n" href="#L93" aria-label="Line 93">93</a><code>        attribute: &quot;:item/title&quot;,</code></span>
+<span class="ox-line" id="L94"><a class="ox-line__n" href="#L94" aria-label="Line 94">94</a><code>        value: string(`Café ${id}`),</code></span>
+<span class="ox-line" id="L95"><a class="ox-line__n" href="#L95" aria-label="Line 95">95</a><code>      })));</code></span>
+<span class="ox-line" id="L96"><a class="ox-line__n" href="#L96" aria-label="Line 96">96</a><code>      const query: DatalogQuery = { find: [&quot;?title&quot;], where: [[&quot;?item&quot;, &quot;:item/title&quot;, &quot;?title&quot;]] };</code></span>
+<span class="ox-line" id="L97"><a class="ox-line__n" href="#L97" aria-label="Line 97">97</a><code>      const firstQuery = yield* triples.query(query, { pageSize: 1 });</code></span>
+<span class="ox-line" id="L98"><a class="ox-line__n" href="#L98" aria-label="Line 98">98</a><code>      const firstEntities = yield* triples.entityPage({ entityType: &quot;Item&quot;, limit: 1 });</code></span>
+<span class="ox-line" id="L99"><a class="ox-line__n" href="#L99" aria-label="Line 99">99</a><code>      expect(firstQuery.nextCursor).toEqual(expect.any(String));</code></span>
+<span class="ox-line" id="L100"><a class="ox-line__n" href="#L100" aria-label="Line 100">100</a><code>      expect(firstEntities.nextCursor).toEqual(expect.any(String));</code></span>
+<span class="ox-line" id="L101"><a class="ox-line__n" href="#L101" aria-label="Line 101">101</a><code>      // A later commit must not enter either continuation's captured snapshot.</code></span>
+<span class="ox-line" id="L102"><a class="ox-line__n" href="#L102" aria-label="Line 102">102</a><code>      yield* triples.transact([{</code></span>
+<span class="ox-line" id="L103"><a class="ox-line__n" href="#L103" aria-label="Line 103">103</a><code>        op: &quot;assert&quot;, entityId: EntityId.make(&quot;item:bb&quot;), entityType: &quot;Item&quot;,</code></span>
+<span class="ox-line" id="L104"><a class="ox-line__n" href="#L104" aria-label="Line 104">104</a><code>        attribute: &quot;:item/title&quot;, value: string(&quot;Café bb&quot;),</code></span>
+<span class="ox-line" id="L105"><a class="ox-line__n" href="#L105" aria-label="Line 105">105</a><code>      }]);</code></span>
+<span class="ox-line" id="L106"><a class="ox-line__n" href="#L106" aria-label="Line 106">106</a><code>      const secondQuery = yield* triples.query(query, { pageSize: 1, cursor: firstQuery.nextCursor! });</code></span>
+<span class="ox-line" id="L107"><a class="ox-line__n" href="#L107" aria-label="Line 107">107</a><code>      const thirdQuery = yield* triples.query(query, { pageSize: 1, cursor: secondQuery.nextCursor! });</code></span>
+<span class="ox-line" id="L108"><a class="ox-line__n" href="#L108" aria-label="Line 108">108</a><code>      expect([firstQuery, secondQuery, thirdQuery].flatMap((page) =&gt; page.results)).toEqual([</code></span>
+<span class="ox-line" id="L109"><a class="ox-line__n" href="#L109" aria-label="Line 109">109</a><code>        { &quot;?title&quot;: &quot;Café a&quot; }, { &quot;?title&quot;: &quot;Café b&quot; }, { &quot;?title&quot;: &quot;Café c&quot; },</code></span>
+<span class="ox-line" id="L110"><a class="ox-line__n" href="#L110" aria-label="Line 110">110</a><code>      ]);</code></span>
+<span class="ox-line" id="L111"><a class="ox-line__n" href="#L111" aria-label="Line 111">111</a><code>      expect(thirdQuery.nextCursor).toBeUndefined();</code></span>
+<span class="ox-line" id="L112"><a class="ox-line__n" href="#L112" aria-label="Line 112">112</a><code>      const remainingEntities = yield* triples.entityPage({ entityType: &quot;Item&quot;, limit: 2, cursor: firstEntities.nextCursor! });</code></span>
+<span class="ox-line" id="L113"><a class="ox-line__n" href="#L113" aria-label="Line 113">113</a><code>      expect(remainingEntities.entities.map((facts) =&gt; facts[0]?.entityId)).toEqual([&quot;item:b&quot;, &quot;item:c&quot;]);</code></span>
+<span class="ox-line" id="L114"><a class="ox-line__n" href="#L114" aria-label="Line 114">114</a><code>      expect(remainingEntities.snapshot).toEqual(firstEntities.snapshot);</code></span>
+<span class="ox-line" id="L115"><a class="ox-line__n" href="#L115" aria-label="Line 115">115</a><code>      expect(remainingEntities.nextCursor).toBeUndefined();</code></span>
+<span class="ox-line" id="L116"><a class="ox-line__n" href="#L116" aria-label="Line 116">116</a><code>      const malformedQuery = yield* Effect.result(triples.query(query, { cursor: &quot;%%%&quot; }));</code></span>
+<span class="ox-line" id="L117"><a class="ox-line__n" href="#L117" aria-label="Line 117">117</a><code>      const malformedEntities = yield* Effect.result(triples.entityPage({ entityType: &quot;Item&quot;, cursor: &quot;%%%&quot; }));</code></span>
+<span class="ox-line" id="L118"><a class="ox-line__n" href="#L118" aria-label="Line 118">118</a><code>      const wrongEntityType = yield* Effect.result(triples.entityPage({ entityType: &quot;Other&quot;, cursor: firstEntities.nextCursor! }));</code></span>
+<span class="ox-line" id="L119"><a class="ox-line__n" href="#L119" aria-label="Line 119">119</a><code>      const wrongQuery = yield* Effect.result(triples.query({ find: [&quot;?item&quot;], where: query.where }, { pageSize: 1, cursor: firstQuery.nextCursor! }));</code></span>
+<span class="ox-line" id="L120"><a class="ox-line__n" href="#L120" aria-label="Line 120">120</a><code>      for (const result of [malformedQuery, malformedEntities]) {</code></span>
+<span class="ox-line" id="L121"><a class="ox-line__n" href="#L121" aria-label="Line 121">121</a><code>        expect(result).toMatchObject({ _tag: &quot;Failure&quot;, failure: { _tag: &quot;PaginationCursorError&quot;, reason: &quot;malformed&quot; } });</code></span>
+<span class="ox-line" id="L122"><a class="ox-line__n" href="#L122" aria-label="Line 122">122</a><code>      }</code></span>
+<span class="ox-line" id="L123"><a class="ox-line__n" href="#L123" aria-label="Line 123">123</a><code>      for (const result of [wrongEntityType, wrongQuery]) {</code></span>
+<span class="ox-line" id="L124"><a class="ox-line__n" href="#L124" aria-label="Line 124">124</a><code>        expect(result).toMatchObject({ _tag: &quot;Failure&quot;, failure: { _tag: &quot;PaginationCursorError&quot;, reason: &quot;query_mismatch&quot; } });</code></span>
+<span class="ox-line" id="L125"><a class="ox-line__n" href="#L125" aria-label="Line 125">125</a><code>      }</code></span>
+<span class="ox-line" id="L126"><a class="ox-line__n" href="#L126" aria-label="Line 126">126</a><code>    }).pipe(Effect.provide(KvTriples.layer)));</code></span>
+<span class="ox-line" id="L127"><a class="ox-line__n" href="#L127" aria-label="Line 127">127</a><code>  });</code></span>
+<span class="ox-line" id="L128"><a class="ox-line__n" href="#L128" aria-label="Line 128">128</a><code>});</code></span></pre></div></main>
+<footer class="oo-footer"><span class="oo-footer__brand"><b>Open Ontology</b> Experimental v0.1 · Local in-memory runtime.</span><nav aria-label="Footer navigation"><a href="/explorations/">All explorations</a><a href="/explorations/catalog.json">catalog.json</a><a href="/llms.txt">llms.txt</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">Source ↗</a></nav></footer>
+</div></body></html>

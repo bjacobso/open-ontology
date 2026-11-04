@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f6f5ef">
+<title>examples/onto/scenario.ts · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Instrument+Serif:ital@0;1&amp;family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css"><script defer src="/site.js"></script></head>
+<body><div class="oo ox"><a class="oo-skip" href="#main">Skip to content</a>
+<header class="oo-nav"><a class="oo-brand" href="/" aria-label="Open Ontology home"><img src="/favicon.svg" width="24" height="24" alt=""><span>Open Ontology</span></a><nav aria-label="Main navigation"><a class="oo-nav__section" href="/#std">Standard library</a><a class="oo-nav__section" href="/#preludes">Preludes</a><a class="oo-nav__section" href="/explorations/" aria-current="page">Explorations</a><a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main" class="oo-main"><section class="ox-hero ox-hero--source"><nav class="ox-crumbs" aria-label="Breadcrumb"><a href="/">Open Ontology</a><span aria-hidden="true">/</span><a href="/explorations/">Explorations</a><span aria-hidden="true">/</span>Source</nav>
+<p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Full source · ts · 70 lines</p>
+<h1 class="oo-pkg ox-path">examples/onto/scenario.ts</h1>
+<div class="oo-actions"><a class="oo-primary" href="/explorations/raw/examples/onto/scenario.ts">Raw source <span aria-hidden="true">↗</span></a><a class="oo-secondary" href="https://github.com/bjacobso/open-ontology/blob/main/examples/onto/scenario.ts">View on GitHub <span aria-hidden="true">↗</span></a></div>
+<p class="oo-meta"><span>Click a line number to link to that line</span></p></section>
+<div class="oo-panel ox-source"><div class="oo-panel__head"><span>examples/onto/scenario.ts</span><span>ts</span></div><pre tabindex="0"><span class="ox-line" id="L1"><a class="ox-line__n" href="#L1" aria-label="Line 1">1</a><code>import { Effect } from &quot;effect&quot;;</code></span>
+<span class="ox-line" id="L2"><a class="ox-line__n" href="#L2" aria-label="Line 2">2</a><code>import { EntityId, KvTriples, Triples, ref, string, type TransactOp } from &quot;@triplex-build/triplex&quot;;</code></span>
+<span class="ox-line" id="L3"><a class="ox-line__n" href="#L3" aria-label="Line 3">3</a><code>import { toTriplexConfig } from &quot;../../src/runtime.js&quot;;</code></span>
+<span class="ox-line" id="L4"><a class="ox-line__n" href="#L4" aria-label="Line 4">4</a><code>import { elaborateHotel, lowerOnto, notLowered, seedOperations } from &quot;./lower.js&quot;;</code></span>
+<span class="ox-line" id="L5"><a class="ox-line__n" href="#L5" aria-label="Line 5">5</a><code>import { makeStoryHost, type StepResult } from &quot;./guards.js&quot;;</code></span>
+<span class="ox-line" id="L6"><a class="ox-line__n" href="#L6" aria-label="Line 6">6</a><code> </code></span>
+<span class="ox-line" id="L7"><a class="ox-line__n" href="#L7" aria-label="Line 7">7</a><code>export const arrival = Date.parse(&quot;2026-11-04T15:00:00Z&quot;);</code></span>
+<span class="ox-line" id="L8"><a class="ox-line__n" href="#L8" aria-label="Line 8">8</a><code>export const reservationInput = {</code></span>
+<span class="ox-line" id="L9"><a class="ox-line__n" href="#L9" aria-label="Line 9">9</a><code>  id: &quot;reservation:1&quot;, guest: &quot;guest:ada&quot;, name: &quot;Ada's stay&quot;, &quot;room-class&quot;: &quot;room-class:2&quot;,</code></span>
+<span class="ox-line" id="L10"><a class="ox-line__n" href="#L10" aria-label="Line 10">10</a><code>  room: &quot;room:101&quot;, &quot;check-in&quot;: arrival, &quot;check-out&quot;: arrival + 3 * 86_400_000, invoice: &quot;invoice:1&quot;,</code></span>
+<span class="ox-line" id="L11"><a class="ox-line__n" href="#L11" aria-label="Line 11">11</a><code>};</code></span>
+<span class="ox-line" id="L12"><a class="ox-line__n" href="#L12" aria-label="Line 12">12</a><code>export const serviceInput = {</code></span>
+<span class="ox-line" id="L13"><a class="ox-line__n" href="#L13" aria-label="Line 13">13</a><code>  id: &quot;service:1&quot;, kind: &quot;spa&quot;, charge: 75, notes: &quot;Evening appointment&quot;, reservation: &quot;reservation:1&quot;,</code></span>
+<span class="ox-line" id="L14"><a class="ox-line__n" href="#L14" aria-label="Line 14">14</a><code>};</code></span>
+<span class="ox-line" id="L15"><a class="ox-line__n" href="#L15" aria-label="Line 15">15</a><code>export const setupHotel = () =&gt; Effect.gen(function* () {</code></span>
+<span class="ox-line" id="L16"><a class="ox-line__n" href="#L16" aria-label="Line 16">16</a><code>  const result = elaborateHotel();</code></span>
+<span class="ox-line" id="L17"><a class="ox-line__n" href="#L17" aria-label="Line 17">17</a><code>  if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));</code></span>
+<span class="ox-line" id="L18"><a class="ox-line__n" href="#L18" aria-label="Line 18">18</a><code>  const ir = lowerOnto(result.declarations);</code></span>
+<span class="ox-line" id="L19"><a class="ox-line__n" href="#L19" aria-label="Line 19">19</a><code>  const config = toTriplexConfig(ir);</code></span>
+<span class="ox-line" id="L20"><a class="ox-line__n" href="#L20" aria-label="Line 20">20</a><code>  const nodes = yield* config.nodes;</code></span>
+<span class="ox-line" id="L21"><a class="ox-line__n" href="#L21" aria-label="Line 21">21</a><code>  const triples = yield* Triples;</code></span>
+<span class="ox-line" id="L22"><a class="ox-line__n" href="#L22" aria-label="Line 22">22</a><code>  yield* triples.transact(seedOperations(result.declarations), { actor: &quot;system:seed&quot;, commandId: &quot;seed:room-classes&quot; });</code></span>
+<span class="ox-line" id="L23"><a class="ox-line__n" href="#L23" aria-label="Line 23">23</a><code>  yield* triples.transact([</code></span>
+<span class="ox-line" id="L24"><a class="ox-line__n" href="#L24" aria-label="Line 24">24</a><code>    { op: &quot;assert&quot;, entityId: EntityId.make(&quot;guest:ada&quot;), entityType: &quot;Guest&quot;, attribute: &quot;:guest/name&quot;, value: string(&quot;Ada&quot;) },</code></span>
+<span class="ox-line" id="L25"><a class="ox-line__n" href="#L25" aria-label="Line 25">25</a><code>    { op: &quot;assert&quot;, entityId: EntityId.make(&quot;room:101&quot;), entityType: &quot;Room&quot;, attribute: &quot;:room/number&quot;, value: string(&quot;101&quot;) },</code></span>
+<span class="ox-line" id="L26"><a class="ox-line__n" href="#L26" aria-label="Line 26">26</a><code>    { op: &quot;assert&quot;, entityId: EntityId.make(&quot;room:101&quot;), entityType: &quot;Room&quot;, attribute: &quot;:room/room-class&quot;, value: ref(EntityId.make(&quot;room-class:2&quot;)) },</code></span>
+<span class="ox-line" id="L27"><a class="ox-line__n" href="#L27" aria-label="Line 27">27</a><code>    { op: &quot;assert&quot;, entityId: EntityId.make(&quot;invoice:1&quot;), entityType: &quot;Invoice&quot;, attribute: &quot;:invoice/reservation&quot;, value: ref(EntityId.make(&quot;reservation:1&quot;)) },</code></span>
+<span class="ox-line" id="L28"><a class="ox-line__n" href="#L28" aria-label="Line 28">28</a><code>  ], { actor: &quot;system:fixture&quot;, commandId: &quot;seed:hotel&quot; });</code></span>
+<span class="ox-line" id="L29"><a class="ox-line__n" href="#L29" aria-label="Line 29">29</a><code>  return { ...makeStoryHost(result.declarations, ir), ir, notLowered: notLowered(result.declarations), configNodes: nodes.length };</code></span>
+<span class="ox-line" id="L30"><a class="ox-line__n" href="#L30" aria-label="Line 30">30</a><code>});</code></span>
+<span class="ox-line" id="L31"><a class="ox-line__n" href="#L31" aria-label="Line 31">31</a><code> </code></span>
+<span class="ox-line" id="L32"><a class="ox-line__n" href="#L32" aria-label="Line 32">32</a><code>export const setStatus = (owner: &quot;Reservation&quot; | &quot;Service&quot;, id: string, value: string): readonly TransactOp[] =&gt; [</code></span>
+<span class="ox-line" id="L33"><a class="ox-line__n" href="#L33" aria-label="Line 33">33</a><code>  { op: &quot;retract-pattern&quot;, pattern: { entityId: EntityId.make(id), attribute: `:${owner.toLowerCase()}/status` } },</code></span>
+<span class="ox-line" id="L34"><a class="ox-line__n" href="#L34" aria-label="Line 34">34</a><code>  { op: &quot;assert&quot;, entityId: EntityId.make(id), entityType: owner, attribute: `:${owner.toLowerCase()}/status`, value: string(value) },</code></span>
+<span class="ox-line" id="L35"><a class="ox-line__n" href="#L35" aria-label="Line 35">35</a><code>];</code></span>
+<span class="ox-line" id="L36"><a class="ox-line__n" href="#L36" aria-label="Line 36">36</a><code> </code></span>
+<span class="ox-line" id="L37"><a class="ox-line__n" href="#L37" aria-label="Line 37">37</a><code>export const playHotel = () =&gt; Effect.gen(function* () {</code></span>
+<span class="ox-line" id="L38"><a class="ox-line__n" href="#L38" aria-label="Line 38">38</a><code>  const host = yield* setupHotel();</code></span>
+<span class="ox-line" id="L39"><a class="ox-line__n" href="#L39" aria-label="Line 39">39</a><code>  const triples = yield* Triples;</code></span>
+<span class="ox-line" id="L40"><a class="ox-line__n" href="#L40" aria-label="Line 40">40</a><code>  const outcomes: StepResult[] = [];</code></span>
+<span class="ox-line" id="L41"><a class="ox-line__n" href="#L41" aria-label="Line 41">41</a><code>  outcomes.push(yield* host.invoke(&quot;hotel-booking-submits&quot;, reservationInput,</code></span>
+<span class="ox-line" id="L42"><a class="ox-line__n" href="#L42" aria-label="Line 42">42</a><code>    { actor: &quot;guest:ada&quot;, commandId: &quot;submit:1&quot;, now: arrival - 86_400_000 }));</code></span>
+<span class="ox-line" id="L43"><a class="ox-line__n" href="#L43" aria-label="Line 43">43</a><code>  outcomes.push(yield* host.invoke(&quot;hotel-booking-confirms&quot;, { id: &quot;reservation:1&quot; },</code></span>
+<span class="ox-line" id="L44"><a class="ox-line__n" href="#L44" aria-label="Line 44">44</a><code>    { actor: &quot;system:booking&quot;, commandId: &quot;confirm:1&quot;, now: arrival - 86_400_000 }));</code></span>
+<span class="ox-line" id="L45"><a class="ox-line__n" href="#L45" aria-label="Line 45">45</a><code>  outcomes.push(yield* host.invoke(&quot;hotel-booking-checks-in&quot;, { id: &quot;reservation:1&quot; },</code></span>
+<span class="ox-line" id="L46"><a class="ox-line__n" href="#L46" aria-label="Line 46">46</a><code>    { actor: &quot;receptionist:lee&quot;, commandId: &quot;check-in:early&quot;, now: arrival - 1 }));</code></span>
+<span class="ox-line" id="L47"><a class="ox-line__n" href="#L47" aria-label="Line 47">47</a><code>  outcomes.push(yield* host.invoke(&quot;hotel-booking-checks-in&quot;, { id: &quot;reservation:1&quot; },</code></span>
+<span class="ox-line" id="L48"><a class="ox-line__n" href="#L48" aria-label="Line 48">48</a><code>    { actor: &quot;receptionist:lee&quot;, commandId: &quot;check-in:1&quot;, now: arrival }));</code></span>
+<span class="ox-line" id="L49"><a class="ox-line__n" href="#L49" aria-label="Line 49">49</a><code>  outcomes.push(yield* host.invoke(&quot;guest-services-requests&quot;, serviceInput,</code></span>
+<span class="ox-line" id="L50"><a class="ox-line__n" href="#L50" aria-label="Line 50">50</a><code>    { actor: &quot;guest:ada&quot;, commandId: &quot;request:1&quot;, now: arrival }));</code></span>
+<span class="ox-line" id="L51"><a class="ox-line__n" href="#L51" aria-label="Line 51">51</a><code>  // Onto declares two independent references; it does not specify automatic inverse maintenance.</code></span>
+<span class="ox-line" id="L52"><a class="ox-line__n" href="#L52" aria-label="Line 52">52</a><code>  yield* triples.transact([</code></span>
+<span class="ox-line" id="L53"><a class="ox-line__n" href="#L53" aria-label="Line 53">53</a><code>    { op: &quot;assert&quot;, entityId: EntityId.make(&quot;reservation:1&quot;), entityType: &quot;Reservation&quot;, attribute: &quot;:reservation/services&quot;, value: ref(EntityId.make(&quot;service:1&quot;)) },</code></span>
+<span class="ox-line" id="L54"><a class="ox-line__n" href="#L54" aria-label="Line 54">54</a><code>  ], { actor: &quot;system:fixture&quot;, commandId: &quot;link:service&quot; });</code></span>
+<span class="ox-line" id="L55"><a class="ox-line__n" href="#L55" aria-label="Line 55">55</a><code>  const beforeFulfilment = (yield* host.runtime.query(&quot;service-charges&quot;)).results;</code></span>
+<span class="ox-line" id="L56"><a class="ox-line__n" href="#L56" aria-label="Line 56">56</a><code>  outcomes.push(yield* host.invoke(&quot;guest-services-fulfils&quot;, { id: &quot;service:1&quot; },</code></span>
+<span class="ox-line" id="L57"><a class="ox-line__n" href="#L57" aria-label="Line 57">57</a><code>    { actor: &quot;concierge:sam&quot;, commandId: &quot;fulfil:1&quot;, now: arrival }));</code></span>
+<span class="ox-line" id="L58"><a class="ox-line__n" href="#L58" aria-label="Line 58">58</a><code>  // Reusing the creation sentence must never revive a fulfilled service.</code></span>
+<span class="ox-line" id="L59"><a class="ox-line__n" href="#L59" aria-label="Line 59">59</a><code>  outcomes.push(yield* host.invoke(&quot;guest-services-requests&quot;, serviceInput,</code></span>
+<span class="ox-line" id="L60"><a class="ox-line__n" href="#L60" aria-label="Line 60">60</a><code>    { actor: &quot;guest:ada&quot;, commandId: &quot;request:revive&quot;, now: arrival }));</code></span>
+<span class="ox-line" id="L61"><a class="ox-line__n" href="#L61" aria-label="Line 61">61</a><code>  const charges = (yield* host.runtime.query(&quot;service-charges&quot;)).results;</code></span>
+<span class="ox-line" id="L62"><a class="ox-line__n" href="#L62" aria-label="Line 62">62</a><code>  const dateOrder = (yield* host.runtime.query(&quot;check-out-after-check-in&quot;)).results;</code></span>
+<span class="ox-line" id="L63"><a class="ox-line__n" href="#L63" aria-label="Line 63">63</a><code>  const roomClasses = (yield* triples.queryAll({ find: [&quot;?name&quot;, &quot;?rate&quot;],</code></span>
+<span class="ox-line" id="L64"><a class="ox-line__n" href="#L64" aria-label="Line 64">64</a><code>    where: [[&quot;?room&quot;, &quot;:room-class/name&quot;, &quot;?name&quot;], [&quot;?room&quot;, &quot;:room-class/rate&quot;, &quot;?rate&quot;]],</code></span>
+<span class="ox-line" id="L65"><a class="ox-line__n" href="#L65" aria-label="Line 65">65</a><code>    orderBy: [{ variable: &quot;?rate&quot;, direction: &quot;asc&quot; }] })).results;</code></span>
+<span class="ox-line" id="L66"><a class="ox-line__n" href="#L66" aria-label="Line 66">66</a><code>  const journal = (yield* triples.transactions()).transactions.map(({ actor, commandId }) =&gt; ({ actor, commandId }));</code></span>
+<span class="ox-line" id="L67"><a class="ox-line__n" href="#L67" aria-label="Line 67">67</a><code>  return { outcomes, queries: { roomClasses, beforeFulfilment, &quot;service-charges&quot;: charges, &quot;check-out-after-check-in&quot;: dateOrder }, journal, notLowered: host.notLowered };</code></span>
+<span class="ox-line" id="L68"><a class="ox-line__n" href="#L68" aria-label="Line 68">68</a><code>});</code></span>
+<span class="ox-line" id="L69"><a class="ox-line__n" href="#L69" aria-label="Line 69">69</a><code> </code></span>
+<span class="ox-line" id="L70"><a class="ox-line__n" href="#L70" aria-label="Line 70">70</a><code>export const runHotel = () =&gt; Effect.runPromise(playHotel().pipe(Effect.provide(KvTriples.layer)));</code></span></pre></div></main>
+<footer class="oo-footer"><span class="oo-footer__brand"><b>Open Ontology</b> Experimental v0.1 · Local in-memory runtime.</span><nav aria-label="Footer navigation"><a href="/explorations/">All explorations</a><a href="/explorations/catalog.json">catalog.json</a><a href="/llms.txt">llms.txt</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">Source ↗</a></nav></footer>
+</div></body></html>

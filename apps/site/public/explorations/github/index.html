@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f6f5ef">
+<title>Git / GitHub · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Instrument+Serif:ital@0;1&amp;family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css"><script defer src="/site.js"></script></head>
+<body><div class="oo ox"><a class="oo-skip" href="#main">Skip to content</a>
+<header class="oo-nav"><a class="oo-brand" href="/" aria-label="Open Ontology home"><img src="/favicon.svg" width="24" height="24" alt=""><span>Open Ontology</span></a><nav aria-label="Main navigation"><a class="oo-nav__section" href="/#std">Standard library</a><a class="oo-nav__section" href="/#preludes">Preludes</a><a class="oo-nav__section" href="/explorations/" aria-current="page">Explorations</a><a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main" class="oo-main"><section class="oo-hero ox-hero"><div class="oo-hero__copy"><nav class="ox-crumbs" aria-label="Breadcrumb"><a href="/">Open Ontology</a><span aria-hidden="true">/</span><a href="/explorations/">Explorations</a><span aria-hidden="true">/</span><strong>Git / GitHub</strong></nav>
+<p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Domain · Runs locally</p>
+<h1>Git / GitHub</h1><p class="oo-lead">Bundled Git and GitHub vocabularies: repositories, forks, branches, PRs, issues and local graph queries.</p>
+<div class="oo-actions"><a class="oo-primary" href="#run">Run the example <span aria-hidden="true">↓</span></a><a class="oo-secondary" href="#sources">Sources <span aria-hidden="true">↓</span></a></div>
+<p class="oo-meta"><span class="oo-status oo-status--today">Runs locally</span><a href="https://github.com/bjacobso/open-ontology/blob/main/test/forma-libraries.test.ts">test/forma-libraries.test.ts ↗</a><a href="/explorations/github/output.json">output.json</a></p></div><figure class="oo-hero__side"><div class="oo-repl"><div class="oo-repl__bar" aria-hidden="true"><span></span><span></span><span></span><b>open-ontology</b><em>runs locally</em></div><pre class="ox-cmd"><code><span class="oo-prompt">$</span> pnpm install --frozen-lockfile
+<span class="oo-prompt">$</span> pnpm example:github
+<span class="oo-dim"># covered by test/forma-libraries.test.ts</span></code></pre></div><figcaption class="oo-hero__note">↑ the exact command · <a href="#run">checked output</a></figcaption></figure></section>
+<div class="ox-notebook"><aside><p class="ox-aside__label">In this exploration</p><nav aria-label="Notebook sections"><a href="#sources"><span>01</span>Language &amp; source</a><a href="#readme"><span>02</span>Documentation</a><a href="#run"><span>03</span>Model &amp; results</a><a href="/explorations/#adding"><span>+</span>Add an exploration</a></nav></aside><div class="ox-notebook__body"><section id="sources" class="oo-section ox-section"><div class="oo-head"><p class="oo-overline"><span>01</span>Language &amp; source</p><h2>Every file, line-linked.</h2><p>Each source opens with stable line anchors; raw links serve the exact bytes in this repository.</p></div>
+<ul class="ox-files"><li><span class="ox-role">prelude</span><a class="ox-file" href="/explorations/source/preludes/ontology.lisp.html#L1">preludes/ontology.lisp</a><a class="ox-raw" href="/explorations/raw/preludes/ontology.lisp">raw ↗</a></li><li><span class="ox-role">library</span><a class="ox-file" href="/explorations/source/libraries/std/git.lisp.html#L1">libraries/std/git.lisp</a><a class="ox-raw" href="/explorations/raw/libraries/std/git.lisp">raw ↗</a></li><li><span class="ox-role">library</span><a class="ox-file" href="/explorations/source/libraries/github.lisp.html#L1">libraries/github.lisp</a><a class="ox-raw" href="/explorations/raw/libraries/github.lisp">raw ↗</a></li><li><span class="ox-role">model</span><a class="ox-file" href="/explorations/source/examples/github/model.lisp.html#L1">examples/github/model.lisp</a><a class="ox-raw" href="/explorations/raw/examples/github/model.lisp">raw ↗</a></li><li><span class="ox-role">runner</span><a class="ox-file" href="/explorations/source/examples/github/run.ts.html#L1">examples/github/run.ts</a><a class="ox-raw" href="/explorations/raw/examples/github/run.ts">raw ↗</a></li></ul></section>
+<section id="readme" class="oo-section ox-section"><p class="oo-overline"><span>02</span>Documentation</p><article class="ox-prose"><h1>Git and GitHub</h1>
+<p>A reusable provider-neutral Git vocabulary and GitHub hosting vocabulary,
+loaded as bundled Forma libraries. These are declarations in the existing
+ontology language, not a new language or live provider integration.</p>
+<h2>Read and run</h2>
+<ul>
+<li>Language: <a href="/explorations/source/preludes/ontology.lisp.html">ontology.lisp</a>.</li>
+<li>Libraries: <a href="/explorations/source/libraries/std/git.lisp.html">std/git.lisp</a> and <a href="/explorations/source/libraries/github.lisp.html">github.lisp</a>.</li>
+<li>Model: <a href="/explorations/source/examples/github/model.lisp.html">model.lisp</a>.</li>
+<li>Operations: <a href="https://github.com/bjacobso/open-ontology/blob/main/examples/github/scenario.ts">scenario.ts</a> and <a href="/explorations/source/examples/github/run.ts.html">run.ts</a>.</li>
+<li>Vocabulary and extension conventions: <a href="https://github.com/bjacobso/open-ontology/blob/main/docs/git-libraries.md">Git libraries guide</a>.</li>
+<li>Run: <code>pnpm example:github</code>.</li>
+<li>Check: <code>pnpm model:check examples/github/model.lisp</code>.</li>
+<li>Coverage: <a href="https://github.com/bjacobso/open-ontology/blob/main/test/forma-libraries.test.ts">forma-libraries.test.ts</a>.</li>
+</ul>
+<p>The scenario models synthetic forks, dependencies, merge parents, a cross-fork
+pull request and issue references. It runs on local in-memory Triplex, with no
+GitHub API synchronization, configuration deployment or permission enforcement.</p>
+<p class="ox-prose__src"><a href="/explorations/source/examples/github/README.md.html#L1">examples/github/README.md</a> · <a href="/explorations/raw/examples/github/README.md">Raw Markdown ↗</a></p></article></section>
+<section id="run" class="oo-section ox-section"><div class="oo-head"><p class="oo-overline"><span>03</span>Executable notebook</p><h2>Run it, then <em>read what it did.</em></h2><p>Run in a clone with Node 24 and pnpm 10.11.0. Each run starts a fresh in-memory Triplex host. This static page does not run code in your browser; the output below is regenerated by running the example during site checks.</p></div>
+<div class="ox-run"><div class="oo-panel"><div class="oo-panel__head"><span><a href="/explorations/source/examples/github/model.lisp.html#L1">examples/github/model.lisp</a></span><span>model</span></div><pre tabindex="0"><code class="lang-lisp">(import &quot;/github&quot;)
+
+; Join the hosting layer to the shared Git graph, including cross-fork PRs.
+(define-datalog-query github-open-pull-requests
+  (:query
+    {:find [&quot;?repository&quot; &quot;?number&quot; &quot;?author&quot; &quot;?base&quot; &quot;?headRepository&quot; &quot;?head&quot;]
+     :where [[&quot;?pr&quot; &quot;:github-pull-request/state&quot; &quot;open&quot;]
+             [&quot;?pr&quot; &quot;:github-pull-request/repository&quot; &quot;?hosting&quot;]
+             [&quot;?hosting&quot; &quot;:github-repository/full-name&quot; &quot;?repository&quot;]
+             [&quot;?pr&quot; &quot;:github-pull-request/number&quot; &quot;?number&quot;]
+             [&quot;?pr&quot; &quot;:github-pull-request/author&quot; &quot;?account&quot;]
+             [&quot;?account&quot; &quot;:github-account/login&quot; &quot;?author&quot;]
+             [&quot;?pr&quot; &quot;:github-pull-request/base&quot; &quot;?baseBranch&quot;]
+             [&quot;?baseBranch&quot; &quot;:git-branch/name&quot; &quot;?base&quot;]
+             [&quot;?pr&quot; &quot;:github-pull-request/head&quot; &quot;?headBranch&quot;]
+             [&quot;?headBranch&quot; &quot;:git-branch/name&quot; &quot;?head&quot;]
+             [&quot;?headBranch&quot; &quot;:git-branch/repository&quot; &quot;?headRepo&quot;]
+             [&quot;?headHosting&quot; &quot;:github-repository/repository&quot; &quot;?headRepo&quot;]
+             [&quot;?headHosting&quot; &quot;:github-repository/full-name&quot; &quot;?headRepository&quot;]]}))
+</code></pre></div>
+<div class="oo-panel oo-panel--out"><div class="oo-panel__head"><span><a href="/explorations/github/output.json">output.json</a></span><span>pnpm example:github</span></div><pre tabindex="0"><code>{
+  &quot;github-repositories&quot;: [
+    {
+      &quot;?repository&quot;: &quot;ada/ontology&quot;,
+      &quot;?owner&quot;: &quot;ada&quot;,
+      &quot;?url&quot;: &quot;https://github.com/ada/ontology&quot;
+    },
+    {
+      &quot;?repository&quot;: &quot;example-org/ontology&quot;,
+      &quot;?owner&quot;: &quot;example-org&quot;,
+      &quot;?url&quot;: &quot;https://github.com/example-org/ontology&quot;
+    }
+  ],
+  &quot;github-forks&quot;: [
+    {
+      &quot;?fork&quot;: &quot;ada/ontology&quot;,
+      &quot;?upstream&quot;: &quot;example-org/ontology&quot;
+    }
+  ],
+  &quot;git-repository-dependencies&quot;: [
+    {
+      &quot;?repository&quot;: &quot;ontology&quot;,
+      &quot;?dependency&quot;: &quot;forma&quot;
+    }
+  ],
+  &quot;git-branch-tips&quot;: [
+    {
+      &quot;?repository&quot;: &quot;ontology-fork&quot;,
+      &quot;?branch&quot;: &quot;imports&quot;,
+      &quot;?oid&quot;: &quot;bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb&quot;
+    },
+    {
+      &quot;?repository&quot;: &quot;ontology-fork&quot;,
+      &quot;?branch&quot;: &quot;main&quot;,
+      &quot;?oid&quot;: &quot;aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&quot;
+    },
+    {
+      &quot;?repository&quot;: &quot;ontology&quot;,
+      &quot;?branch&quot;: &quot;main&quot;,
+      &quot;?oid&quot;: &quot;cccccccccccccccccccccccccccccccccccccccc&quot;
+    }
+  ],
+  &quot;github-open-pull-requests&quot;: [
+    {
+      &quot;?repository&quot;: &quot;example-org/ontology&quot;,
+      &quot;?number&quot;: 2,
+      &quot;?author&quot;: &quot;ada&quot;,
+      &quot;?base&quot;: &quot;main&quot;,
+      &quot;?headRepository&quot;: &quot;ada/ontology&quot;,
+      &quot;?head&quot;: &quot;imports&quot;
+    }
+  ],
+  &quot;github-pull-request-issues&quot;: [
+    {
+      &quot;?repository&quot;: &quot;example-org/ontology&quot;,
+      &quot;?pullRequest&quot;: 2,
+      &quot;?issueRepository&quot;: &quot;example-org/ontology&quot;,
+      &quot;?issue&quot;: 1,
+      &quot;?title&quot;: &quot;Reusable Git vocabulary&quot;
+    }
+  ],
+  &quot;merge-parents&quot;: [
+    {
+      &quot;?oid&quot;: &quot;aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&quot;,
+      &quot;?position&quot;: 0
+    },
+    {
+      &quot;?oid&quot;: &quot;bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb&quot;,
+      &quot;?position&quot;: 1
+    }
+  ],
+  &quot;collaborators&quot;: [
+    {
+      &quot;?login&quot;: &quot;ada&quot;,
+      &quot;?permission&quot;: &quot;write&quot;,
+      &quot;?role&quot;: &quot;member&quot;
+    }
+  ]
+}
+</code></pre></div></div></section></div></div></main>
+<footer class="oo-footer"><span class="oo-footer__brand"><b>Open Ontology</b> Experimental v0.1 · Local in-memory runtime.</span><nav aria-label="Footer navigation"><a href="/explorations/">All explorations</a><a href="/explorations/catalog.json">catalog.json</a><a href="/llms.txt">llms.txt</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">Source ↗</a></nav></footer>
+</div></body></html>

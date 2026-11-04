@@ -1,0 +1,105 @@
+{
+  "outcomes": [
+    {
+      "accepted": true,
+      "commandId": "submit:1"
+    },
+    {
+      "accepted": true,
+      "commandId": "confirm:1"
+    },
+    {
+      "accepted": false,
+      "reason": "requires [\"not\",[\"before?\",\"now\",\"reservation.check-in\"]]",
+      "commandId": "check-in:early"
+    },
+    {
+      "accepted": true,
+      "commandId": "check-in:1"
+    },
+    {
+      "accepted": true,
+      "commandId": "request:1"
+    },
+    {
+      "accepted": true,
+      "commandId": "fulfil:1"
+    },
+    {
+      "accepted": false,
+      "reason": "final Service.status: fulfilled",
+      "commandId": "request:revive"
+    }
+  ],
+  "queries": {
+    "roomClasses": [
+      {
+        "?name": "Standard",
+        "?rate": 120
+      },
+      {
+        "?name": "Deluxe",
+        "?rate": 200
+      },
+      {
+        "?name": "Suite",
+        "?rate": 450
+      }
+    ],
+    "beforeFulfilment": [],
+    "service-charges": [
+      {
+        "?reservation": "reservation:1",
+        "?total": 75
+      }
+    ],
+    "check-out-after-check-in": [
+      {
+        "?reservation": "reservation:1"
+      }
+    ]
+  },
+  "journal": [
+    {
+      "actor": "system:seed",
+      "commandId": "seed:room-classes"
+    },
+    {
+      "actor": "system:fixture",
+      "commandId": "seed:hotel"
+    },
+    {
+      "actor": "guest:ada",
+      "commandId": "submit:1"
+    },
+    {
+      "actor": "system:booking",
+      "commandId": "confirm:1"
+    },
+    {
+      "actor": "receptionist:lee",
+      "commandId": "check-in:1"
+    },
+    {
+      "actor": "guest:ada",
+      "commandId": "request:1"
+    },
+    {
+      "actor": "system:fixture",
+      "commandId": "link:service"
+    },
+    {
+      "actor": "concierge:sam",
+      "commandId": "fulfil:1"
+    }
+  ],
+  "notLowered": [
+    "rule check-out-after-check-in: satisfaction query only; no invariant enforcement",
+    "rule past-bookings-are-settled: checked as Bool; no faithful Datalog lowering or invariant enforcement",
+    "formula Invoice.total: no faithful Datalog lowering for this expression",
+    "requires and final states: example host guards, absent from ActionTypeIR",
+    "actor type, joins and counterpart: descriptive only; no identity or authorization enforcement",
+    "Union members: checked by the prelude; stored as strings without runtime enum constraints",
+    "Many references: schema retained; membership facts must be transacted explicitly"
+  ]
+}

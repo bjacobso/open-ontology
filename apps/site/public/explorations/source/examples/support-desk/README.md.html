@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f6f5ef">
+<title>examples/support-desk/README.md · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Instrument+Serif:ital@0;1&amp;family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css"><script defer src="/site.js"></script></head>
+<body><div class="oo ox"><a class="oo-skip" href="#main">Skip to content</a>
+<header class="oo-nav"><a class="oo-brand" href="/" aria-label="Open Ontology home"><img src="/favicon.svg" width="24" height="24" alt=""><span>Open Ontology</span></a><nav aria-label="Main navigation"><a class="oo-nav__section" href="/#std">Standard library</a><a class="oo-nav__section" href="/#preludes">Preludes</a><a class="oo-nav__section" href="/explorations/" aria-current="page">Explorations</a><a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main" class="oo-main"><section class="ox-hero ox-hero--source"><nav class="ox-crumbs" aria-label="Breadcrumb"><a href="/">Open Ontology</a><span aria-hidden="true">/</span><a href="/explorations/">Explorations</a><span aria-hidden="true">/</span>Source</nav>
+<p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Full source · md · 18 lines</p>
+<h1 class="oo-pkg ox-path">examples/support-desk/README.md</h1>
+<div class="oo-actions"><a class="oo-primary" href="/explorations/raw/examples/support-desk/README.md">Raw source <span aria-hidden="true">↗</span></a><a class="oo-secondary" href="https://github.com/bjacobso/open-ontology/blob/main/examples/support-desk/README.md">View on GitHub <span aria-hidden="true">↗</span></a></div>
+<p class="oo-meta"><span>Click a line number to link to that line</span></p></section>
+<div class="oo-panel ox-source"><div class="oo-panel__head"><span>examples/support-desk/README.md</span><span>md</span></div><pre tabindex="0"><span class="ox-line" id="L1"><a class="ox-line__n" href="#L1" aria-label="Line 1">1</a><code># Support desk</code></span>
+<span class="ox-line" id="L2"><a class="ox-line__n" href="#L2" aria-label="Line 2">2</a><code> </code></span>
+<span class="ox-line" id="L3"><a class="ox-line__n" href="#L3" aria-label="Line 3">3</a><code>A Forma-only model exercises object creation, clear-then-set updates, references,</code></span>
+<span class="ox-line" id="L4"><a class="ox-line__n" href="#L4" aria-label="Line 4">4</a><code>relations, negation, ordering and grouped aggregates. It uses the bundled</code></span>
+<span class="ox-line" id="L5"><a class="ox-line__n" href="#L5" aria-label="Line 5">5</a><code>ontology language; there is no separate support-desk prelude.</code></span>
+<span class="ox-line" id="L6"><a class="ox-line__n" href="#L6" aria-label="Line 6">6</a><code> </code></span>
+<span class="ox-line" id="L7"><a class="ox-line__n" href="#L7" aria-label="Line 7">7</a><code>## Read and run</code></span>
+<span class="ox-line" id="L8"><a class="ox-line__n" href="#L8" aria-label="Line 8">8</a><code> </code></span>
+<span class="ox-line" id="L9"><a class="ox-line__n" href="#L9" aria-label="Line 9">9</a><code>- Language: [ontology.lisp](../../preludes/ontology.lisp), with [construction hooks](../../preludes/ontology-compiler.lisp).</code></span>
+<span class="ox-line" id="L10"><a class="ox-line__n" href="#L10" aria-label="Line 10">10</a><code>- Model: [model.lisp](model.lisp).</code></span>
+<span class="ox-line" id="L11"><a class="ox-line__n" href="#L11" aria-label="Line 11">11</a><code>- Operations: [run.ts](run.ts).</code></span>
+<span class="ox-line" id="L12"><a class="ox-line__n" href="#L12" aria-label="Line 12">12</a><code>- Run: `pnpm example:support-desk`.</code></span>
+<span class="ox-line" id="L13"><a class="ox-line__n" href="#L13" aria-label="Line 13">13</a><code>- Check: `pnpm model:check examples/support-desk/model.lisp`.</code></span>
+<span class="ox-line" id="L14"><a class="ox-line__n" href="#L14" aria-label="Line 14">14</a><code>- Coverage and checked output: [agent-guide.test.ts](../../test/agent-guide.test.ts) and [agent guide](../../apps/site/public/llms-full.txt).</code></span>
+<span class="ox-line" id="L15"><a class="ox-line__n" href="#L15" aria-label="Line 15">15</a><code> </code></span>
+<span class="ox-line" id="L16"><a class="ox-line__n" href="#L16" aria-label="Line 16">16</a><code>The run opens three synthetic tickets, escalates one, closes another and prints</code></span>
+<span class="ox-line" id="L17"><a class="ox-line__n" href="#L17" aria-label="Line 17">17</a><code>three Datalog query results from local in-memory Triplex. There is no durable</code></span>
+<span class="ox-line" id="L18"><a class="ox-line__n" href="#L18" aria-label="Line 18">18</a><code>server, product authorization or external help-desk integration.</code></span></pre></div></main>
+<footer class="oo-footer"><span class="oo-footer__brand"><b>Open Ontology</b> Experimental v0.1 · Local in-memory runtime.</span><nav aria-label="Footer navigation"><a href="/explorations/">All explorations</a><a href="/explorations/catalog.json">catalog.json</a><a href="/llms.txt">llms.txt</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">Source ↗</a></nav></footer>
+</div></body></html>

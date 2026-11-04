@@ -1,0 +1,633 @@
+{
+  "kind": "ontology",
+  "name": "hotel",
+  "version": "1",
+  "objectTypes": [
+    {
+      "kind": "object-type",
+      "name": "Guest",
+      "description": "A traveler who books a room and stays at the hotel; the paying customer of the booking.",
+      "properties": [
+        {
+          "name": "name",
+          "key": ":guest/name",
+          "valueType": {
+            "kind": "string"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        },
+        {
+          "name": "reservations",
+          "key": ":guest/reservations",
+          "valueType": {
+            "kind": "ref",
+            "target": "Reservation"
+          },
+          "required": false,
+          "cardinality": "many",
+          "unique": false
+        }
+      ]
+    },
+    {
+      "kind": "object-type",
+      "name": "Receptionist",
+      "description": "Front-desk staff who check guests in and out.",
+      "properties": [
+        {
+          "name": "name",
+          "key": ":receptionist/name",
+          "valueType": {
+            "kind": "string"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        }
+      ]
+    },
+    {
+      "kind": "object-type",
+      "name": "Concierge",
+      "description": "Arranges and fulfils the services guests request during a stay.",
+      "properties": [
+        {
+          "name": "name",
+          "key": ":concierge/name",
+          "valueType": {
+            "kind": "string"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        }
+      ]
+    },
+    {
+      "kind": "object-type",
+      "name": "System",
+      "description": "The hotel booking software that confirms reservations and automates back-office steps.",
+      "properties": []
+    },
+    {
+      "kind": "object-type",
+      "name": "RoomClass",
+      "description": "A type of room, with its nightly rate.",
+      "properties": [
+        {
+          "name": "name",
+          "key": ":room-class/name",
+          "valueType": {
+            "kind": "string"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        },
+        {
+          "name": "rate",
+          "key": ":room-class/rate",
+          "valueType": {
+            "kind": "number"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        }
+      ]
+    },
+    {
+      "kind": "object-type",
+      "name": "Room",
+      "description": "A physical room of some room class.",
+      "properties": [
+        {
+          "name": "number",
+          "key": ":room/number",
+          "valueType": {
+            "kind": "string"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        },
+        {
+          "name": "room-class",
+          "key": ":room/room-class",
+          "valueType": {
+            "kind": "ref",
+            "target": "RoomClass"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        }
+      ]
+    },
+    {
+      "kind": "object-type",
+      "name": "Reservation",
+      "description": "A guest's booking of a room class for a stay.",
+      "properties": [
+        {
+          "name": "guest",
+          "key": ":reservation/guest",
+          "valueType": {
+            "kind": "ref",
+            "target": "Guest"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        },
+        {
+          "name": "name",
+          "key": ":reservation/name",
+          "valueType": {
+            "kind": "string"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        },
+        {
+          "name": "room-class",
+          "key": ":reservation/room-class",
+          "valueType": {
+            "kind": "ref",
+            "target": "RoomClass"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        },
+        {
+          "name": "room",
+          "key": ":reservation/room",
+          "valueType": {
+            "kind": "ref",
+            "target": "Room"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        },
+        {
+          "name": "check-in",
+          "key": ":reservation/check-in",
+          "valueType": {
+            "kind": "datetime"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        },
+        {
+          "name": "check-out",
+          "key": ":reservation/check-out",
+          "valueType": {
+            "kind": "datetime"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        },
+        {
+          "name": "services",
+          "key": ":reservation/services",
+          "valueType": {
+            "kind": "ref",
+            "target": "Service"
+          },
+          "required": false,
+          "cardinality": "many",
+          "unique": false
+        },
+        {
+          "name": "invoice",
+          "key": ":reservation/invoice",
+          "valueType": {
+            "kind": "ref",
+            "target": "Invoice"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        },
+        {
+          "name": "status",
+          "key": ":reservation/status",
+          "valueType": {
+            "kind": "string"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        }
+      ]
+    },
+    {
+      "kind": "object-type",
+      "name": "Service",
+      "description": "A guest-requested amenity with a charge, fulfilled by the concierge; fulfilled charges roll up onto the stay.",
+      "properties": [
+        {
+          "name": "kind",
+          "key": ":service/kind",
+          "valueType": {
+            "kind": "string"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        },
+        {
+          "name": "charge",
+          "key": ":service/charge",
+          "valueType": {
+            "kind": "number"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        },
+        {
+          "name": "notes",
+          "key": ":service/notes",
+          "valueType": {
+            "kind": "string"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        },
+        {
+          "name": "reservation",
+          "key": ":service/reservation",
+          "valueType": {
+            "kind": "ref",
+            "target": "Reservation"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        },
+        {
+          "name": "status",
+          "key": ":service/status",
+          "valueType": {
+            "kind": "string"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        }
+      ]
+    },
+    {
+      "kind": "object-type",
+      "name": "Invoice",
+      "description": "What the guest owes for a stay.",
+      "properties": [
+        {
+          "name": "reservation",
+          "key": ":invoice/reservation",
+          "valueType": {
+            "kind": "ref",
+            "target": "Reservation"
+          },
+          "required": false,
+          "cardinality": "one",
+          "unique": false
+        }
+      ]
+    }
+  ],
+  "linkTypes": [],
+  "actionTypes": [
+    {
+      "kind": "action-type",
+      "name": "hotel-booking-submits",
+      "input": [
+        {
+          "name": "id",
+          "valueType": {
+            "kind": "string"
+          }
+        },
+        {
+          "name": "guest",
+          "valueType": {
+            "kind": "ref",
+            "target": "Guest"
+          }
+        },
+        {
+          "name": "name",
+          "valueType": {
+            "kind": "string"
+          }
+        },
+        {
+          "name": "room-class",
+          "valueType": {
+            "kind": "ref",
+            "target": "RoomClass"
+          }
+        },
+        {
+          "name": "room",
+          "valueType": {
+            "kind": "ref",
+            "target": "Room"
+          }
+        },
+        {
+          "name": "check-in",
+          "valueType": {
+            "kind": "datetime"
+          }
+        },
+        {
+          "name": "check-out",
+          "valueType": {
+            "kind": "datetime"
+          }
+        },
+        {
+          "name": "invoice",
+          "valueType": {
+            "kind": "ref",
+            "target": "Invoice"
+          }
+        }
+      ],
+      "changes": [
+        {
+          "kind": "create-object",
+          "objectType": "Reservation",
+          "id": {
+            "kind": "input",
+            "name": "id"
+          },
+          "properties": {
+            ":reservation/guest": {
+              "kind": "input",
+              "name": "guest"
+            },
+            ":reservation/name": {
+              "kind": "input",
+              "name": "name"
+            },
+            ":reservation/room-class": {
+              "kind": "input",
+              "name": "room-class"
+            },
+            ":reservation/room": {
+              "kind": "input",
+              "name": "room"
+            },
+            ":reservation/check-in": {
+              "kind": "input",
+              "name": "check-in"
+            },
+            ":reservation/check-out": {
+              "kind": "input",
+              "name": "check-out"
+            },
+            ":reservation/invoice": {
+              "kind": "input",
+              "name": "invoice"
+            },
+            ":reservation/status": "requested"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "action-type",
+      "name": "hotel-booking-confirms",
+      "input": [
+        {
+          "name": "id",
+          "valueType": {
+            "kind": "string"
+          }
+        }
+      ],
+      "changes": [
+        {
+          "kind": "clear-property",
+          "object": {
+            "kind": "input",
+            "name": "id"
+          },
+          "property": ":reservation/status"
+        },
+        {
+          "kind": "set-property",
+          "object": {
+            "kind": "input",
+            "name": "id"
+          },
+          "property": ":reservation/status",
+          "value": "confirmed"
+        }
+      ]
+    },
+    {
+      "kind": "action-type",
+      "name": "hotel-booking-checks-in",
+      "input": [
+        {
+          "name": "id",
+          "valueType": {
+            "kind": "string"
+          }
+        }
+      ],
+      "changes": [
+        {
+          "kind": "clear-property",
+          "object": {
+            "kind": "input",
+            "name": "id"
+          },
+          "property": ":reservation/status"
+        },
+        {
+          "kind": "set-property",
+          "object": {
+            "kind": "input",
+            "name": "id"
+          },
+          "property": ":reservation/status",
+          "value": "checked-in"
+        }
+      ]
+    },
+    {
+      "kind": "action-type",
+      "name": "guest-services-requests",
+      "input": [
+        {
+          "name": "id",
+          "valueType": {
+            "kind": "string"
+          }
+        },
+        {
+          "name": "kind",
+          "valueType": {
+            "kind": "string"
+          }
+        },
+        {
+          "name": "charge",
+          "valueType": {
+            "kind": "number"
+          }
+        },
+        {
+          "name": "notes",
+          "valueType": {
+            "kind": "string"
+          }
+        },
+        {
+          "name": "reservation",
+          "valueType": {
+            "kind": "ref",
+            "target": "Reservation"
+          }
+        }
+      ],
+      "changes": [
+        {
+          "kind": "create-object",
+          "objectType": "Service",
+          "id": {
+            "kind": "input",
+            "name": "id"
+          },
+          "properties": {
+            ":service/kind": {
+              "kind": "input",
+              "name": "kind"
+            },
+            ":service/charge": {
+              "kind": "input",
+              "name": "charge"
+            },
+            ":service/notes": {
+              "kind": "input",
+              "name": "notes"
+            },
+            ":service/reservation": {
+              "kind": "input",
+              "name": "reservation"
+            },
+            ":service/status": "requested"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "action-type",
+      "name": "guest-services-fulfils",
+      "input": [
+        {
+          "name": "id",
+          "valueType": {
+            "kind": "string"
+          }
+        }
+      ],
+      "changes": [
+        {
+          "kind": "clear-property",
+          "object": {
+            "kind": "input",
+            "name": "id"
+          },
+          "property": ":service/status"
+        },
+        {
+          "kind": "set-property",
+          "object": {
+            "kind": "input",
+            "name": "id"
+          },
+          "property": ":service/status",
+          "value": "fulfilled"
+        }
+      ]
+    }
+  ],
+  "queryTypes": [
+    {
+      "kind": "query-type",
+      "name": "check-out-after-check-in",
+      "description": "Reservations satisfying the date-order rule; observation only, not invariant enforcement.",
+      "query": {
+        "find": [
+          "?reservation"
+        ],
+        "where": [
+          [
+            "?reservation",
+            ":reservation/check-in",
+            "?checkIn"
+          ],
+          [
+            "?reservation",
+            ":reservation/check-out",
+            "?checkOut"
+          ],
+          [
+            ">",
+            "?checkOut",
+            "?checkIn"
+          ]
+        ]
+      }
+    },
+    {
+      "kind": "query-type",
+      "name": "service-charges",
+      "description": "Sum of fulfilled service charges by reservation; absent groups mean zero.",
+      "query": {
+        "find": [
+          "?reservation",
+          "?total"
+        ],
+        "where": [
+          [
+            "?reservation",
+            ":reservation/services",
+            "?service"
+          ],
+          [
+            "?service",
+            ":service/status",
+            "fulfilled"
+          ],
+          [
+            "?service",
+            ":service/charge",
+            "?charge"
+          ]
+        ],
+        "aggregate": [
+          [
+            "sum",
+            "?charge",
+            "?total"
+          ]
+        ]
+      }
+    }
+  ]
+}

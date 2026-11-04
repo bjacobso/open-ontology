@@ -1,0 +1,366 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": "onto",
+      "title": "Onto / hotel stories",
+      "kind": "language",
+      "status": "runnable",
+      "summary": "An external OntoLang-style prelude: typed hotel records and stories lowered to portable IR and run on Triplex, with atomic observed-state guards.",
+      "readme": "examples/onto/README.md",
+      "command": "pnpm example:onto",
+      "test": "test/onto-example.test.ts",
+      "output": "examples/onto/output.json",
+      "sources": [
+        {
+          "path": "examples/onto/onto.lisp",
+          "role": "prelude"
+        },
+        {
+          "path": "examples/onto/hotel.forma",
+          "role": "model"
+        },
+        {
+          "path": "examples/onto/lower.ts",
+          "role": "lowering"
+        },
+        {
+          "path": "examples/onto/guards.ts",
+          "role": "guards"
+        },
+        {
+          "path": "examples/onto/scenario.ts",
+          "role": "operations"
+        },
+        {
+          "path": "examples/onto/run.ts",
+          "role": "runner"
+        }
+      ],
+      "links": [
+        {
+          "title": "OntoLang inspiration",
+          "url": "https://onto.space/ontolang"
+        }
+      ]
+    },
+    {
+      "id": "field-service",
+      "title": "Field service",
+      "kind": "domain",
+      "status": "runnable",
+      "summary": "Equivalent TypeScript and Forma work-order models, checked for identical IR and run locally.",
+      "readme": "examples/field-service/README.md",
+      "command": "pnpm example",
+      "test": "test/field-service.test.ts",
+      "sources": [
+        {
+          "path": "preludes/ontology.lisp",
+          "role": "prelude"
+        },
+        {
+          "path": "preludes/ontology-compiler.lisp",
+          "role": "compiler"
+        },
+        {
+          "path": "examples/field-service/model.lisp",
+          "role": "model"
+        },
+        {
+          "path": "examples/field-service/model.ts",
+          "role": "model"
+        },
+        {
+          "path": "examples/field-service/run.ts",
+          "role": "runner"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "support-desk",
+      "title": "Support desk",
+      "kind": "domain",
+      "status": "runnable",
+      "summary": "Tickets, references, escalation links, updates, negation and aggregate queries in Forma.",
+      "readme": "examples/support-desk/README.md",
+      "command": "pnpm example:support-desk",
+      "test": "test/agent-guide.test.ts",
+      "sources": [
+        {
+          "path": "preludes/ontology.lisp",
+          "role": "prelude"
+        },
+        {
+          "path": "preludes/ontology-compiler.lisp",
+          "role": "compiler"
+        },
+        {
+          "path": "examples/support-desk/model.lisp",
+          "role": "model"
+        },
+        {
+          "path": "examples/support-desk/run.ts",
+          "role": "runner"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "github",
+      "title": "Git / GitHub",
+      "kind": "domain",
+      "status": "runnable",
+      "summary": "Bundled Git and GitHub vocabularies: repositories, forks, branches, PRs, issues and local graph queries.",
+      "readme": "examples/github/README.md",
+      "command": "pnpm example:github",
+      "test": "test/forma-libraries.test.ts",
+      "sources": [
+        {
+          "path": "preludes/ontology.lisp",
+          "role": "prelude"
+        },
+        {
+          "path": "libraries/std/git.lisp",
+          "role": "library"
+        },
+        {
+          "path": "libraries/github.lisp",
+          "role": "library"
+        },
+        {
+          "path": "examples/github/model.lisp",
+          "role": "model"
+        },
+        {
+          "path": "examples/github/run.ts",
+          "role": "runner"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "onboarded",
+      "title": "Onboarded",
+      "kind": "domain",
+      "status": "runnable",
+      "summary": "Illustrative account language with checked scenarios, plus a TypeScript ontology and local Triplex transcript. The account checker is handwritten example code, not a Forma prelude.",
+      "readme": "examples/onboarded/README.md",
+      "command": "pnpm example:onboarded",
+      "test": "test/onboarded.test.ts",
+      "sources": [
+        {
+          "path": "examples/onboarded/northwind.account.lisp",
+          "role": "model"
+        },
+        {
+          "path": "examples/onboarded/account/elaborate.ts",
+          "role": "compiler"
+        },
+        {
+          "path": "examples/onboarded/model.ts",
+          "role": "model"
+        },
+        {
+          "path": "examples/onboarded/scenario.ts",
+          "role": "operations"
+        },
+        {
+          "path": "examples/onboarded/run.ts",
+          "role": "runner"
+        }
+      ],
+      "links": [
+        {
+          "title": "Account explorer",
+          "url": "https://open-ontology.com/onboarded"
+        }
+      ]
+    },
+    {
+      "id": "stripe",
+      "title": "Stripe",
+      "kind": "platform",
+      "status": "sketch",
+      "summary": "Homepage pricing and billing language sketch. No Stripe prelude, API adapter or runnable pricing example ships in this repository.",
+      "sources": [],
+      "links": [
+        {
+          "title": "Design sketch",
+          "url": "https://open-ontology.com/#stripe"
+        }
+      ]
+    },
+    {
+      "id": "salesforce",
+      "title": "Salesforce",
+      "kind": "platform",
+      "status": "sketch",
+      "summary": "Homepage metadata language sketch. No Salesforce prelude or Metadata API compiler ships here.",
+      "sources": [],
+      "links": [
+        {
+          "title": "Design sketch",
+          "url": "https://open-ontology.com/#salesforce"
+        }
+      ]
+    },
+    {
+      "id": "palantir",
+      "title": "Palantir / Foundry",
+      "kind": "platform",
+      "status": "review",
+      "summary": "The bundled ontology language runs on Triplex. A separate open PR explores compiling portable models to Foundry Ontology as Code; it is not part of this checkout.",
+      "sources": [
+        {
+          "path": "preludes/ontology.lisp",
+          "role": "prelude"
+        }
+      ],
+      "links": [
+        {
+          "title": "Foundry compiler exploration (PR 14)",
+          "url": "https://github.com/bjacobso/open-ontology/pull/14"
+        },
+        {
+          "title": "Ontology language design",
+          "url": "https://open-ontology.com/#palantir"
+        }
+      ]
+    },
+    {
+      "id": "foldkit",
+      "title": "Foldkit",
+      "kind": "framework",
+      "status": "external",
+      "summary": "Forma's Elm-style application prototype generates Foldkit and Effect TypeScript. It lives upstream in Forma; Open Ontology does not use Foldkit.",
+      "sources": [],
+      "links": [
+        {
+          "title": "Forma application prototype",
+          "url": "https://github.com/bjacobso/forma/blob/535cd41ec7f81f3229b810df6f374ebfa04c16c7/docs/elm.md"
+        },
+        {
+          "title": "Raw Elm prelude",
+          "url": "https://raw.githubusercontent.com/bjacobso/forma/535cd41ec7f81f3229b810df6f374ebfa04c16c7/preludes/elm.lisp"
+        }
+      ]
+    },
+    {
+      "id": "elm",
+      "title": "Elm architecture",
+      "kind": "language",
+      "status": "external",
+      "summary": "An upstream Forma prelude for Model / Message / update / view and checked command recovery. This is a Forma prototype targeting Foldkit, not an Elm compiler integration in this package.",
+      "sources": [],
+      "links": [
+        {
+          "title": "Prototype documentation",
+          "url": "https://github.com/bjacobso/forma/blob/535cd41ec7f81f3229b810df6f374ebfa04c16c7/docs/elm.md"
+        },
+        {
+          "title": "Raw prelude",
+          "url": "https://raw.githubusercontent.com/bjacobso/forma/535cd41ec7f81f3229b810df6f374ebfa04c16c7/preludes/elm.lisp"
+        }
+      ]
+    },
+    {
+      "id": "effect",
+      "title": "Effect",
+      "kind": "framework",
+      "status": "external",
+      "summary": "Effect 4.1.1 runs this package. Forma's separate Effect language checks services, typed failures and layers and generates TypeScript; that language is upstream, not an Open Ontology domain prelude.",
+      "sources": [
+        {
+          "path": "test/effect-compatibility.test.ts",
+          "role": "compatibility"
+        }
+      ],
+      "links": [
+        {
+          "title": "Forma for Effect",
+          "url": "https://github.com/bjacobso/forma/blob/535cd41ec7f81f3229b810df6f374ebfa04c16c7/docs/effect.md"
+        }
+      ]
+    },
+    {
+      "id": "okta",
+      "title": "Okta",
+      "kind": "platform",
+      "status": "sketch",
+      "summary": "Homepage groups, rules and app-assignment sketch. No executable prelude or provider integration ships here.",
+      "sources": [],
+      "links": [
+        {
+          "title": "Design sketch",
+          "url": "https://open-ontology.com/#more-preludes"
+        }
+      ]
+    },
+    {
+      "id": "pagerduty",
+      "title": "PagerDuty",
+      "kind": "platform",
+      "status": "sketch",
+      "summary": "Homepage on-call scheduling and escalation sketch. No executable prelude or provider integration ships here.",
+      "sources": [],
+      "links": [
+        {
+          "title": "Design sketch",
+          "url": "https://open-ontology.com/#more-preludes"
+        }
+      ]
+    },
+    {
+      "id": "zapier",
+      "title": "Zapier",
+      "kind": "platform",
+      "status": "sketch",
+      "summary": "A workflows-as-code landing-page study. The page is published static content, not an executable Zapier prelude or deployer.",
+      "sources": [],
+      "links": [
+        {
+          "title": "Workflow study",
+          "url": "https://open-ontology.com/zapier"
+        }
+      ]
+    },
+    {
+      "id": "skills",
+      "title": "Skills as a primitive",
+      "kind": "language",
+      "status": "review",
+      "summary": "An open design exploration for skills as a first-class primitive, separate from the shipped ontology language.",
+      "sources": [],
+      "links": [
+        {
+          "title": "Exploration (PR 9)",
+          "url": "https://github.com/bjacobso/open-ontology/pull/9"
+        }
+      ]
+    },
+    {
+      "id": "prelude-catalog",
+      "title": "Prelude guides",
+      "kind": "language",
+      "status": "review",
+      "summary": "A separate open PR proposes source landing pages for six bundled Lisp sources. This catalog indexes that work without treating it as merged.",
+      "sources": [
+        {
+          "path": "preludes/compiler.lisp",
+          "role": "compiler"
+        },
+        {
+          "path": "preludes/viewspec-compiler.lisp",
+          "role": "compiler"
+        }
+      ],
+      "links": [
+        {
+          "title": "Prelude pages (PR 11)",
+          "url": "https://github.com/bjacobso/open-ontology/pull/11"
+        }
+      ]
+    }
+  ]
+}

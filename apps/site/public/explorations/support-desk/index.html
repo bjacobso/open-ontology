@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f6f5ef">
+<title>Support desk · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Instrument+Serif:ital@0;1&amp;family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css"><script defer src="/site.js"></script></head>
+<body><div class="oo ox"><a class="oo-skip" href="#main">Skip to content</a>
+<header class="oo-nav"><a class="oo-brand" href="/" aria-label="Open Ontology home"><img src="/favicon.svg" width="24" height="24" alt=""><span>Open Ontology</span></a><nav aria-label="Main navigation"><a class="oo-nav__section" href="/#std">Standard library</a><a class="oo-nav__section" href="/#preludes">Preludes</a><a class="oo-nav__section" href="/explorations/" aria-current="page">Explorations</a><a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main" class="oo-main"><section class="oo-hero ox-hero"><div class="oo-hero__copy"><nav class="ox-crumbs" aria-label="Breadcrumb"><a href="/">Open Ontology</a><span aria-hidden="true">/</span><a href="/explorations/">Explorations</a><span aria-hidden="true">/</span><strong>Support desk</strong></nav>
+<p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Domain · Runs locally</p>
+<h1>Support desk</h1><p class="oo-lead">Tickets, references, escalation links, updates, negation and aggregate queries in Forma.</p>
+<div class="oo-actions"><a class="oo-primary" href="#run">Run the example <span aria-hidden="true">↓</span></a><a class="oo-secondary" href="#sources">Sources <span aria-hidden="true">↓</span></a></div>
+<p class="oo-meta"><span class="oo-status oo-status--today">Runs locally</span><a href="https://github.com/bjacobso/open-ontology/blob/main/test/agent-guide.test.ts">test/agent-guide.test.ts ↗</a><a href="/explorations/support-desk/output.json">output.json</a></p></div><figure class="oo-hero__side"><div class="oo-repl"><div class="oo-repl__bar" aria-hidden="true"><span></span><span></span><span></span><b>open-ontology</b><em>runs locally</em></div><pre class="ox-cmd"><code><span class="oo-prompt">$</span> pnpm install --frozen-lockfile
+<span class="oo-prompt">$</span> pnpm example:support-desk
+<span class="oo-dim"># covered by test/agent-guide.test.ts</span></code></pre></div><figcaption class="oo-hero__note">↑ the exact command · <a href="#run">checked output</a></figcaption></figure></section>
+<div class="ox-notebook"><aside><p class="ox-aside__label">In this exploration</p><nav aria-label="Notebook sections"><a href="#sources"><span>01</span>Language &amp; source</a><a href="#readme"><span>02</span>Documentation</a><a href="#run"><span>03</span>Model &amp; results</a><a href="/explorations/#adding"><span>+</span>Add an exploration</a></nav></aside><div class="ox-notebook__body"><section id="sources" class="oo-section ox-section"><div class="oo-head"><p class="oo-overline"><span>01</span>Language &amp; source</p><h2>Every file, line-linked.</h2><p>Each source opens with stable line anchors; raw links serve the exact bytes in this repository.</p></div>
+<ul class="ox-files"><li><span class="ox-role">prelude</span><a class="ox-file" href="/explorations/source/preludes/ontology.lisp.html#L1">preludes/ontology.lisp</a><a class="ox-raw" href="/explorations/raw/preludes/ontology.lisp">raw ↗</a></li><li><span class="ox-role">compiler</span><a class="ox-file" href="/explorations/source/preludes/ontology-compiler.lisp.html#L1">preludes/ontology-compiler.lisp</a><a class="ox-raw" href="/explorations/raw/preludes/ontology-compiler.lisp">raw ↗</a></li><li><span class="ox-role">model</span><a class="ox-file" href="/explorations/source/examples/support-desk/model.lisp.html#L1">examples/support-desk/model.lisp</a><a class="ox-raw" href="/explorations/raw/examples/support-desk/model.lisp">raw ↗</a></li><li><span class="ox-role">runner</span><a class="ox-file" href="/explorations/source/examples/support-desk/run.ts.html#L1">examples/support-desk/run.ts</a><a class="ox-raw" href="/explorations/raw/examples/support-desk/run.ts">raw ↗</a></li></ul></section>
+<section id="readme" class="oo-section ox-section"><p class="oo-overline"><span>02</span>Documentation</p><article class="ox-prose"><h1>Support desk</h1>
+<p>A Forma-only model exercises object creation, clear-then-set updates, references,
+relations, negation, ordering and grouped aggregates. It uses the bundled
+ontology language; there is no separate support-desk prelude.</p>
+<h2>Read and run</h2>
+<ul>
+<li>Language: <a href="/explorations/source/preludes/ontology.lisp.html">ontology.lisp</a>, with <a href="/explorations/source/preludes/ontology-compiler.lisp.html">construction hooks</a>.</li>
+<li>Model: <a href="/explorations/source/examples/support-desk/model.lisp.html">model.lisp</a>.</li>
+<li>Operations: <a href="/explorations/source/examples/support-desk/run.ts.html">run.ts</a>.</li>
+<li>Run: <code>pnpm example:support-desk</code>.</li>
+<li>Check: <code>pnpm model:check examples/support-desk/model.lisp</code>.</li>
+<li>Coverage and checked output: <a href="https://github.com/bjacobso/open-ontology/blob/main/test/agent-guide.test.ts">agent-guide.test.ts</a> and <a href="https://github.com/bjacobso/open-ontology/blob/main/apps/site/public/llms-full.txt">agent guide</a>.</li>
+</ul>
+<p>The run opens three synthetic tickets, escalates one, closes another and prints
+three Datalog query results from local in-memory Triplex. There is no durable
+server, product authorization or external help-desk integration.</p>
+<p class="ox-prose__src"><a href="/explorations/source/examples/support-desk/README.md.html#L1">examples/support-desk/README.md</a> · <a href="/explorations/raw/examples/support-desk/README.md">Raw Markdown ↗</a></p></article></section>
+<section id="run" class="oo-section ox-section"><div class="oo-head"><p class="oo-overline"><span>03</span>Executable notebook</p><h2>Run it, then <em>read what it did.</em></h2><p>Run in a clone with Node 24 and pnpm 10.11.0. Each run starts a fresh in-memory Triplex host. This static page does not run code in your browser; the output below is regenerated by running the example during site checks.</p></div>
+<div class="ox-run"><div class="oo-panel"><div class="oo-panel__head"><span><a href="/explorations/source/examples/support-desk/model.lisp.html#L1">examples/support-desk/model.lisp</a></span><span>model</span></div><pre tabindex="0"><code class="lang-lisp">(define-entity Customer
+  (:doc &quot;An organisation that raises tickets.&quot;)
+  (:field [customer/name String {:required true}]))
+
+(define-entity Engineer
+  (:field [engineer/name String {:required true}]))
+
+(define-entity Ticket
+  (:field [ticket/title String {:required true}])
+  (:field [ticket/customer Customer {:required true}])
+  (:field [ticket/status String {:required true}])
+  (:field [ticket/priority Int {:required true}])
+  (:field [ticket/opened-at Instant {:required true}]))
+
+(define-relation escalated-to Ticket Engineer
+  (:field [escalated-to/reason String {:required true}])
+  (:field [escalated-to/at Instant {:required true}]))
+
+(define-action open-ticket
+  (:input [ticket String {:required true}])
+  (:input [customer String {:required true}])
+  (:input [title String {:required true}])
+  (:input [priority Int {:required true}])
+  (:returns String)
+  (:do (create Ticket ticket
+         {:ticket/title title
+          :ticket/customer customer
+          :ticket/status &quot;open&quot;
+          :ticket/priority priority
+          :ticket/opened-at now})))
+
+(define-action escalate-ticket
+  (:input [ticket String {:required true}])
+  (:input [engineer String {:required true}])
+  (:input [reason String {:required true}])
+  (:returns String)
+  (:do (changes
+    (clear ticket :ticket/status)
+    (set ticket :ticket/status &quot;escalated&quot;)
+    (link escalated-to ticket engineer
+      {:escalated-to/reason reason :escalated-to/at now}))))
+
+(define-action close-ticket
+  (:input [ticket String {:required true}])
+  (:returns String)
+  (:do (changes
+    (clear ticket :ticket/status)
+    (set ticket :ticket/status &quot;closed&quot;))))
+
+(define-datalog-query open-work
+  (:query
+    {:find [&quot;?title&quot; &quot;?customer&quot; &quot;?priority&quot;]
+     :where [[&quot;?t&quot; &quot;:ticket/title&quot; &quot;?title&quot;]
+             [&quot;?t&quot; &quot;:ticket/priority&quot; &quot;?priority&quot;]
+             [&quot;?t&quot; &quot;:ticket/customer&quot; &quot;?c&quot;]
+             [&quot;?c&quot; &quot;:customer/name&quot; &quot;?customer&quot;]
+             [&quot;not&quot; [&quot;?t&quot; &quot;:ticket/status&quot; &quot;closed&quot;]]]
+     :orderBy [{:variable &quot;?priority&quot; :direction &quot;desc&quot;}]}))
+
+(define-datalog-query escalations
+  (:query
+    {:find [&quot;?title&quot; &quot;?engineer&quot; &quot;?reason&quot;]
+     :where [[&quot;?e&quot; &quot;:escalated-to/from&quot; &quot;?t&quot;]
+             [&quot;?e&quot; &quot;:escalated-to/to&quot; &quot;?who&quot;]
+             [&quot;?e&quot; &quot;:escalated-to/reason&quot; &quot;?reason&quot;]
+             [&quot;?t&quot; &quot;:ticket/title&quot; &quot;?title&quot;]
+             [&quot;?who&quot; &quot;:engineer/name&quot; &quot;?engineer&quot;]]}))
+
+(define-datalog-query tickets-by-status
+  (:query
+    {:find [&quot;?status&quot; &quot;?count&quot;]
+     :where [[&quot;?t&quot; &quot;:ticket/status&quot; &quot;?status&quot;]]
+     :aggregate [[&quot;count&quot; &quot;?t&quot; &quot;?count&quot;]]}))
+</code></pre></div>
+<div class="oo-panel oo-panel--out"><div class="oo-panel__head"><span><a href="/explorations/support-desk/output.json">output.json</a></span><span>pnpm example:support-desk</span></div><pre tabindex="0"><code>{
+  &quot;open-work&quot;: [
+    {
+      &quot;?title&quot;: &quot;VPN drops hourly&quot;,
+      &quot;?customer&quot;: &quot;Acme&quot;,
+      &quot;?priority&quot;: 2
+    },
+    {
+      &quot;?title&quot;: &quot;Invoice PDF blank&quot;,
+      &quot;?customer&quot;: &quot;Acme&quot;,
+      &quot;?priority&quot;: 1
+    }
+  ],
+  &quot;escalations&quot;: [
+    {
+      &quot;?title&quot;: &quot;VPN drops hourly&quot;,
+      &quot;?engineer&quot;: &quot;Lin&quot;,
+      &quot;?reason&quot;: &quot;Needs network access&quot;
+    }
+  ],
+  &quot;tickets-by-status&quot;: [
+    {
+      &quot;?status&quot;: &quot;escalated&quot;,
+      &quot;?count&quot;: 1
+    },
+    {
+      &quot;?status&quot;: &quot;open&quot;,
+      &quot;?count&quot;: 1
+    },
+    {
+      &quot;?status&quot;: &quot;closed&quot;,
+      &quot;?count&quot;: 1
+    }
+  ]
+}
+</code></pre></div></div></section></div></div></main>
+<footer class="oo-footer"><span class="oo-footer__brand"><b>Open Ontology</b> Experimental v0.1 · Local in-memory runtime.</span><nav aria-label="Footer navigation"><a href="/explorations/">All explorations</a><a href="/explorations/catalog.json">catalog.json</a><a href="/llms.txt">llms.txt</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">Source ↗</a></nav></footer>
+</div></body></html>

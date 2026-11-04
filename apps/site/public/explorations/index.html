@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f6f5ef">
+<title>Explorations · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Instrument+Serif:ital@0;1&amp;family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css"><script defer src="/site.js"></script></head>
+<body><div class="oo ox"><a class="oo-skip" href="#main">Skip to content</a>
+<header class="oo-nav"><a class="oo-brand" href="/" aria-label="Open Ontology home"><img src="/favicon.svg" width="24" height="24" alt=""><span>Open Ontology</span></a><nav aria-label="Main navigation"><a class="oo-nav__section" href="/#std">Standard library</a><a class="oo-nav__section" href="/#preludes">Preludes</a><a class="oo-nav__section" href="/explorations/" aria-current="page">Explorations</a><a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main" class="oo-main"><section class="oo-hero ox-hero ox-hero--solo"><div class="oo-hero__copy"><p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Open Ontology · Explorations</p><h1>Read the language. <em>Follow it into a running example.</em></h1>
+<p class="oo-lead">Business domains, platform sketches, and language experiments in one place. Each entry says what exists and where it runs: source with line links, rendered documentation, and checked output.</p>
+<div class="oo-actions"><a class="oo-primary" href="#catalog">Browse 16 explorations <span aria-hidden="true">↓</span></a><a class="oo-secondary" href="#adding">Add a domain <span aria-hidden="true">↓</span></a></div>
+<p class="oo-meta"><a href="/explorations/catalog.json">catalog.json</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology/blob/main/examples/catalog.json">Source ↗</a></p></div></section>
+<section class="oo-strip" aria-label="Exploration statuses"><div><i aria-hidden="true">▶</i><span>5 entries</span><strong>Runs locally</strong><small>Source, documentation, a command and tests</small></div><div><i aria-hidden="true">~</i><span>5 entries</span><strong>Design sketch</strong><small>Illustrative design, no command</small></div><div><i aria-hidden="true">PR</i><span>3 entries</span><strong>Open PR</strong><small>Separate work under review</small></div><div><i aria-hidden="true">↗</i><span>3 entries</span><strong>Upstream exploration</strong><small>Lives in another project</small></div></section>
+<section id="catalog" class="oo-section" aria-labelledby="catalog-title"><div class="oo-head"><p class="oo-overline"><span>01</span>The catalog</p><h2 id="catalog-title">Every domain, language and platform, <em>in one index.</em></h2><p>Runnable entries ship a model, a runner and a test in this repository. Sketches, open PRs and upstream work link to where they live; nothing here implies an integration that does not exist.</p></div>
+<div class="oo-cards ox-cards"><article class="oo-card ox-card ox-card--language"><p class="ox-card__kind">Language</p><h3 class="oo-card__title"><a href="/explorations/onto/">Onto / hotel stories</a></h3><p class="oo-card__story">An external OntoLang-style prelude: typed hotel records and stories lowered to portable IR and run on Triplex, with atomic observed-state guards.</p><ul class="oo-uses"><li>prelude</li><li>model</li><li>lowering</li><li>guards</li><li>operations</li><li>runner</li></ul><code class="oo-install">pnpm example:onto</code><div class="ox-card__foot"><span class="oo-status oo-status--today">Runs locally</span><span aria-hidden="true">→</span></div></article>
+<article class="oo-card ox-card ox-card--domain"><p class="ox-card__kind">Domain</p><h3 class="oo-card__title"><a href="/explorations/field-service/">Field service</a></h3><p class="oo-card__story">Equivalent TypeScript and Forma work-order models, checked for identical IR and run locally.</p><ul class="oo-uses"><li>prelude</li><li>compiler</li><li>model</li><li>runner</li></ul><code class="oo-install">pnpm example</code><div class="ox-card__foot"><span class="oo-status oo-status--today">Runs locally</span><span aria-hidden="true">→</span></div></article>
+<article class="oo-card ox-card ox-card--domain"><p class="ox-card__kind">Domain</p><h3 class="oo-card__title"><a href="/explorations/support-desk/">Support desk</a></h3><p class="oo-card__story">Tickets, references, escalation links, updates, negation and aggregate queries in Forma.</p><ul class="oo-uses"><li>prelude</li><li>compiler</li><li>model</li><li>runner</li></ul><code class="oo-install">pnpm example:support-desk</code><div class="ox-card__foot"><span class="oo-status oo-status--today">Runs locally</span><span aria-hidden="true">→</span></div></article>
+<article class="oo-card ox-card ox-card--domain"><p class="ox-card__kind">Domain</p><h3 class="oo-card__title"><a href="/explorations/github/">Git / GitHub</a></h3><p class="oo-card__story">Bundled Git and GitHub vocabularies: repositories, forks, branches, PRs, issues and local graph queries.</p><ul class="oo-uses"><li>prelude</li><li>library</li><li>model</li><li>runner</li></ul><code class="oo-install">pnpm example:github</code><div class="ox-card__foot"><span class="oo-status oo-status--today">Runs locally</span><span aria-hidden="true">→</span></div></article>
+<article class="oo-card ox-card ox-card--domain"><p class="ox-card__kind">Domain</p><h3 class="oo-card__title"><a href="/explorations/onboarded/">Onboarded</a></h3><p class="oo-card__story">Illustrative account language with checked scenarios, plus a TypeScript ontology and local Triplex transcript. The account checker is handwritten example code, not a Forma prelude.</p><ul class="oo-uses"><li>model</li><li>compiler</li><li>operations</li><li>runner</li></ul><code class="oo-install">pnpm example:onboarded</code><div class="ox-card__foot"><span class="oo-status oo-status--today">Runs locally</span><span aria-hidden="true">→</span></div></article>
+<article class="oo-card ox-card ox-card--platform"><p class="ox-card__kind">Platform</p><h3 class="oo-card__title"><a href="/explorations/stripe/">Stripe</a></h3><p class="oo-card__story">Homepage pricing and billing language sketch. No Stripe prelude, API adapter or runnable pricing example ships in this repository.</p><div class="ox-card__foot"><span class="oo-status oo-status--sketch">Design sketch</span><span aria-hidden="true">→</span></div></article>
+<article class="oo-card ox-card ox-card--platform"><p class="ox-card__kind">Platform</p><h3 class="oo-card__title"><a href="/explorations/salesforce/">Salesforce</a></h3><p class="oo-card__story">Homepage metadata language sketch. No Salesforce prelude or Metadata API compiler ships here.</p><div class="ox-card__foot"><span class="oo-status oo-status--sketch">Design sketch</span><span aria-hidden="true">→</span></div></article>
+<article class="oo-card ox-card ox-card--platform"><p class="ox-card__kind">Platform</p><h3 class="oo-card__title"><a href="/explorations/palantir/">Palantir / Foundry</a></h3><p class="oo-card__story">The bundled ontology language runs on Triplex. A separate open PR explores compiling portable models to Foundry Ontology as Code; it is not part of this checkout.</p><ul class="oo-uses"><li>prelude</li></ul><div class="ox-card__foot"><span class="oo-status oo-status--preview">Open PR</span><span aria-hidden="true">→</span></div></article>
+<article class="oo-card ox-card ox-card--framework"><p class="ox-card__kind">Framework</p><h3 class="oo-card__title"><a href="/explorations/foldkit/">Foldkit</a></h3><p class="oo-card__story">Forma's Elm-style application prototype generates Foldkit and Effect TypeScript. It lives upstream in Forma; Open Ontology does not use Foldkit.</p><div class="ox-card__foot"><span class="oo-status oo-status--external">Upstream exploration</span><span aria-hidden="true">→</span></div></article>
+<article class="oo-card ox-card ox-card--language"><p class="ox-card__kind">Language</p><h3 class="oo-card__title"><a href="/explorations/elm/">Elm architecture</a></h3><p class="oo-card__story">An upstream Forma prelude for Model / Message / update / view and checked command recovery. This is a Forma prototype targeting Foldkit, not an Elm compiler integration in this package.</p><div class="ox-card__foot"><span class="oo-status oo-status--external">Upstream exploration</span><span aria-hidden="true">→</span></div></article>
+<article class="oo-card ox-card ox-card--framework"><p class="ox-card__kind">Framework</p><h3 class="oo-card__title"><a href="/explorations/effect/">Effect</a></h3><p class="oo-card__story">Effect 4.1.1 runs this package. Forma's separate Effect language checks services, typed failures and layers and generates TypeScript; that language is upstream, not an Open Ontology domain prelude.</p><ul class="oo-uses"><li>compatibility</li></ul><div class="ox-card__foot"><span class="oo-status oo-status--external">Upstream exploration</span><span aria-hidden="true">→</span></div></article>
+<article class="oo-card ox-card ox-card--platform"><p class="ox-card__kind">Platform</p><h3 class="oo-card__title"><a href="/explorations/okta/">Okta</a></h3><p class="oo-card__story">Homepage groups, rules and app-assignment sketch. No executable prelude or provider integration ships here.</p><div class="ox-card__foot"><span class="oo-status oo-status--sketch">Design sketch</span><span aria-hidden="true">→</span></div></article>
+<article class="oo-card ox-card ox-card--platform"><p class="ox-card__kind">Platform</p><h3 class="oo-card__title"><a href="/explorations/pagerduty/">PagerDuty</a></h3><p class="oo-card__story">Homepage on-call scheduling and escalation sketch. No executable prelude or provider integration ships here.</p><div class="ox-card__foot"><span class="oo-status oo-status--sketch">Design sketch</span><span aria-hidden="true">→</span></div></article>
+<article class="oo-card ox-card ox-card--platform"><p class="ox-card__kind">Platform</p><h3 class="oo-card__title"><a href="/explorations/zapier/">Zapier</a></h3><p class="oo-card__story">A workflows-as-code landing-page study. The page is published static content, not an executable Zapier prelude or deployer.</p><div class="ox-card__foot"><span class="oo-status oo-status--sketch">Design sketch</span><span aria-hidden="true">→</span></div></article>
+<article class="oo-card ox-card ox-card--language"><p class="ox-card__kind">Language</p><h3 class="oo-card__title"><a href="/explorations/skills/">Skills as a primitive</a></h3><p class="oo-card__story">An open design exploration for skills as a first-class primitive, separate from the shipped ontology language.</p><div class="ox-card__foot"><span class="oo-status oo-status--preview">Open PR</span><span aria-hidden="true">→</span></div></article>
+<article class="oo-card ox-card ox-card--language"><p class="ox-card__kind">Language</p><h3 class="oo-card__title"><a href="/explorations/prelude-catalog/">Prelude guides</a></h3><p class="oo-card__story">A separate open PR proposes source landing pages for six bundled Lisp sources. This catalog indexes that work without treating it as merged.</p><ul class="oo-uses"><li>compiler</li></ul><div class="ox-card__foot"><span class="oo-status oo-status--preview">Open PR</span><span aria-hidden="true">→</span></div></article></div></section>
+<section id="adding" class="oo-section" aria-labelledby="adding-title"><div class="oo-head"><p class="oo-overline"><span>02</span>One convention</p><h2 id="adding-title">Add a domain the same way every time.</h2><p>One catalog entry drives this page, the per-example notebook, raw sources and the JSON index for agents. An entry can begin as a sketch and become runnable without changing its id or URL.</p></div>
+<article class="ox-prose"><h1>Adding a domain or exploration</h1>
+<p>Start with an entry in <a href="https://github.com/bjacobso/open-ontology/blob/main/examples/catalog.json">the catalog</a>. The
+<a href="https://open-ontology.com/explorations/">exploration index</a> presents the same
+catalog to people; its <a href="https://open-ontology.com/explorations/catalog.json">JSON</a>
+is available to agents. An entry can begin as a sketch and become runnable
+without changing its id or URL.</p>
+<h2>Choose the kind and status</h2>
+<p>A <strong>domain</strong> describes business records and operations (support desk, GitHub,
+Onboarded). A <strong>language</strong> adds authoring syntax or compilation (Onto). A
+<strong>platform</strong> targets another product (Stripe, Salesforce, Foundry). A
+<strong>framework</strong> concerns the host or generated application (Effect, Foldkit).
+These are catalog classifications, not new package APIs.</p>
+<div class="ox-table"><table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Evidence required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>runnable</code></td>
+<td>Checked-in README, model, runner, package script and behavior test</td>
+</tr>
+<tr>
+<td><code>sketch</code></td>
+<td>An explicit description and link to the design; no runnable command</td>
+</tr>
+<tr>
+<td><code>review</code></td>
+<td>Link to the separate open PR; do not imply it is merged</td>
+</tr>
+<tr>
+<td><code>external</code></td>
+<td>Link to upstream docs/source; no implied local command</td>
+</tr>
+</tbody></table></div>
+<p>For work outside this checkout, link its PR or upstream repository. Do not copy
+another branch&#39;s implementation or promote a homepage sketch to a working
+integration. Update entries when their linked work lands or closes.</p>
+<h2>A runnable example</h2>
+<p>Use <code>examples/&lt;id&gt;/</code> with a stable kebab-case id. Keep these responsibilities
+visible, even if a small example combines files:</p>
+<div class="ox-table"><table>
+<thead>
+<tr>
+<th>File or field</th>
+<th>Contract</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>README.md</code></td>
+<td>What it models, language/model/operations links, how to run, what is checked, what is omitted, operational limits</td>
+</tr>
+<tr>
+<td><code>model.lisp</code>, <code>model.forma</code> or <code>model.ts</code></td>
+<td>Business declarations, separate from scenario facts</td>
+</tr>
+<tr>
+<td><code>scenario.ts</code></td>
+<td>Deterministic synthetic facts, fixed business clock, commands and queries; reusable by tests</td>
+</tr>
+<tr>
+<td><code>run.ts</code></td>
+<td>Prints the scenario result; wire <code>pnpm example:&lt;id&gt;</code> in package.json</td>
+</tr>
+<tr>
+<td><code>test/&lt;id&gt;.test.ts</code></td>
+<td>Behavior coverage; a lowering golden and negative diagnostics when introducing a language</td>
+</tr>
+<tr>
+<td><code>onto.lisp</code> or another named prelude</td>
+<td>Only when introducing a language; keep experimental external languages in the example</td>
+</tr>
+<tr>
+<td><code>lower.ts</code></td>
+<td>Language IR → portable <code>OntologyIR</code>; report unsupported features</td>
+</tr>
+<tr>
+<td><code>guards.ts</code></td>
+<td>Host-specific checks if needed; state whether checks and writes are atomic</td>
+</tr>
+</tbody></table></div>
+<p>A shared language belongs in the catalog&#39;s <code>sources</code> with role <code>prelude</code>.
+An existing vocabulary belongs there as <code>library</code>. If the example has no
+prelude (such as Onboarded&#39;s handwritten account elaborator), say so. Link the
+actual implementation rather than inventing a language source.</p>
+<p>Reusable domain vocabulary can later move to <code>libraries/</code>, following
+<a href="https://github.com/bjacobso/open-ontology/blob/main/docs/git-libraries.md">Git&#39;s extension pattern</a>. A new bundled import needs an
+explicit entry in <code>src/forma-libraries.ts</code>; the catalog itself does not install
+or load a language. Keep portable IR JSON-safe. Do not import sibling project
+source; consume a pinned package dependency.</p>
+<h2>Register and publish the reading notebook</h2>
+<p>Add an entry to <code>examples/catalog.json</code>: <code>id</code>, <code>title</code>, <code>kind</code>, <code>status</code>,
+<code>summary</code>, <code>readme</code>, <code>command</code>, <code>test</code>, <code>sources</code>, and <code>links</code>. Each source has
+<code>path</code> and <code>role</code>; a runnable entry needs <code>model</code> and <code>runner</code> sources. Paths
+are repository-relative. Commands are direct <code>pnpm</code> package scripts with a
+<code>tsx examples/&lt;id&gt;/run.ts</code> entrypoint. An optional <code>output</code> fixture is checked
+against the command&#39;s JSON result.</p>
+<p>Run <code>pnpm site:export-explorations</code> after editing registered files. It produces
+checked-in static assets in <code>apps/site/public/explorations/</code>:</p>
+<ul>
+<li><code>/explorations/</code>: the catalog and this convention.</li>
+<li><code>/explorations/&lt;id&gt;/</code>: rendered README, sources, complete model, run command and actual output.</li>
+<li><code>/explorations/source/&lt;repo-path&gt;.html#L12</code>: full source with stable line links.</li>
+<li><code>/explorations/raw/&lt;repo-path&gt;</code>: byte-for-byte source, including raw Markdown.</li>
+<li><code>/explorations/&lt;id&gt;/output.json</code>: the scenario&#39;s result.</li>
+<li><code>/explorations/catalog.json</code>: the manifest for agents.</li>
+</ul>
+<p>These are static reading notebooks. They do not execute in the browser. The
+exporter runs each local example to capture the results; <code>pnpm site:check</code>
+reruns them and rejects stale assets, missing paths or invalid entries. No
+framework, server or SPA fallback is involved. Do not edit generated pages.</p>
+<p>Run <code>pnpm check</code> before opening a PR against <code>main</code>. Keep agent example links
+in sync. Describe exactly what runs and what is only checked, plus guard,
+identity, persistence and authorization limits where relevant. Deployment uses
+the existing pipeline; adding an entry does not deploy an integration.</p>
+</article></section></main>
+<footer class="oo-footer"><span class="oo-footer__brand"><b>Open Ontology</b> Experimental v0.1 · Local in-memory runtime.</span><nav aria-label="Footer navigation"><a href="/explorations/">All explorations</a><a href="/explorations/catalog.json">catalog.json</a><a href="/llms.txt">llms.txt</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">Source ↗</a></nav></footer>
+</div></body></html>

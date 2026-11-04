@@ -3,3 +3,4 @@ dist/
 *.tgz
 .wrangler/
 .alchemy/
+!vendor/open-ontology-onto-forma-0.3.0-onto.535cd41e.tgz

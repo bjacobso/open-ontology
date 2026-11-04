@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f6f5ef">
+<title>examples/field-service/model.lisp · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Instrument+Serif:ital@0;1&amp;family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css"><script defer src="/site.js"></script></head>
+<body><div class="oo ox"><a class="oo-skip" href="#main">Skip to content</a>
+<header class="oo-nav"><a class="oo-brand" href="/" aria-label="Open Ontology home"><img src="/favicon.svg" width="24" height="24" alt=""><span>Open Ontology</span></a><nav aria-label="Main navigation"><a class="oo-nav__section" href="/#std">Standard library</a><a class="oo-nav__section" href="/#preludes">Preludes</a><a class="oo-nav__section" href="/explorations/" aria-current="page">Explorations</a><a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main" class="oo-main"><section class="ox-hero ox-hero--source"><nav class="ox-crumbs" aria-label="Breadcrumb"><a href="/">Open Ontology</a><span aria-hidden="true">/</span><a href="/explorations/">Explorations</a><span aria-hidden="true">/</span>Source</nav>
+<p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Full source · lisp · 31 lines</p>
+<h1 class="oo-pkg ox-path">examples/field-service/model.lisp</h1>
+<div class="oo-actions"><a class="oo-primary" href="/explorations/raw/examples/field-service/model.lisp">Raw source <span aria-hidden="true">↗</span></a><a class="oo-secondary" href="https://github.com/bjacobso/open-ontology/blob/main/examples/field-service/model.lisp">View on GitHub <span aria-hidden="true">↗</span></a></div>
+<p class="oo-meta"><span>Click a line number to link to that line</span></p></section>
+<div class="oo-panel ox-source"><div class="oo-panel__head"><span>examples/field-service/model.lisp</span><span>lisp</span></div><pre tabindex="0"><span class="ox-line" id="L1"><a class="ox-line__n" href="#L1" aria-label="Line 1">1</a><code class="lang-lisp">(define-entity Technician</code></span>
+<span class="ox-line" id="L2"><a class="ox-line__n" href="#L2" aria-label="Line 2">2</a><code class="lang-lisp">  (:field [technician/name String {:required true}]))</code></span>
+<span class="ox-line" id="L3"><a class="ox-line__n" href="#L3" aria-label="Line 3">3</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L4"><a class="ox-line__n" href="#L4" aria-label="Line 4">4</a><code class="lang-lisp">(define-entity WorkOrder</code></span>
+<span class="ox-line" id="L5"><a class="ox-line__n" href="#L5" aria-label="Line 5">5</a><code class="lang-lisp">  (:field [work-order/title String {:required true}])</code></span>
+<span class="ox-line" id="L6"><a class="ox-line__n" href="#L6" aria-label="Line 6">6</a><code class="lang-lisp">  (:field [work-order/status String {:required true}]))</code></span>
+<span class="ox-line" id="L7"><a class="ox-line__n" href="#L7" aria-label="Line 7">7</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L8"><a class="ox-line__n" href="#L8" aria-label="Line 8">8</a><code class="lang-lisp">(define-relation assigned-to WorkOrder Technician</code></span>
+<span class="ox-line" id="L9"><a class="ox-line__n" href="#L9" aria-label="Line 9">9</a><code class="lang-lisp">  (:field [assigned-to/assigned-at Instant {:required true}]))</code></span>
+<span class="ox-line" id="L10"><a class="ox-line__n" href="#L10" aria-label="Line 10">10</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L11"><a class="ox-line__n" href="#L11" aria-label="Line 11">11</a><code class="lang-lisp">(define-action assign-work-order</code></span>
+<span class="ox-line" id="L12"><a class="ox-line__n" href="#L12" aria-label="Line 12">12</a><code class="lang-lisp">  (:input [workOrder String {:required true}])</code></span>
+<span class="ox-line" id="L13"><a class="ox-line__n" href="#L13" aria-label="Line 13">13</a><code class="lang-lisp">  (:input [technician String {:required true}])</code></span>
+<span class="ox-line" id="L14"><a class="ox-line__n" href="#L14" aria-label="Line 14">14</a><code class="lang-lisp">  (:returns String)</code></span>
+<span class="ox-line" id="L15"><a class="ox-line__n" href="#L15" aria-label="Line 15">15</a><code class="lang-lisp">  (:do (changes</code></span>
+<span class="ox-line" id="L16"><a class="ox-line__n" href="#L16" aria-label="Line 16">16</a><code class="lang-lisp">    (clear workOrder :work-order/status)</code></span>
+<span class="ox-line" id="L17"><a class="ox-line__n" href="#L17" aria-label="Line 17">17</a><code class="lang-lisp">    (set workOrder :work-order/status &quot;assigned&quot;)</code></span>
+<span class="ox-line" id="L18"><a class="ox-line__n" href="#L18" aria-label="Line 18">18</a><code class="lang-lisp">    (link assigned-to workOrder technician {:assigned-to/assigned-at now}))))</code></span>
+<span class="ox-line" id="L19"><a class="ox-line__n" href="#L19" aria-label="Line 19">19</a><code class="lang-lisp"> </code></span>
+<span class="ox-line" id="L20"><a class="ox-line__n" href="#L20" aria-label="Line 20">20</a><code class="lang-lisp">(define-datalog-query assigned-work</code></span>
+<span class="ox-line" id="L21"><a class="ox-line__n" href="#L21" aria-label="Line 21">21</a><code class="lang-lisp">  (:query</code></span>
+<span class="ox-line" id="L22"><a class="ox-line__n" href="#L22" aria-label="Line 22">22</a><code class="lang-lisp">    {:find [&quot;?title&quot; &quot;?technician&quot;]</code></span>
+<span class="ox-line" id="L23"><a class="ox-line__n" href="#L23" aria-label="Line 23">23</a><code class="lang-lisp">     :where</code></span>
+<span class="ox-line" id="L24"><a class="ox-line__n" href="#L24" aria-label="Line 24">24</a><code class="lang-lisp">       [[&quot;?work&quot; &quot;:work-order/title&quot; &quot;?title&quot;]</code></span>
+<span class="ox-line" id="L25"><a class="ox-line__n" href="#L25" aria-label="Line 25">25</a><code class="lang-lisp">        [&quot;?work&quot; &quot;:work-order/status&quot; &quot;?status&quot;]</code></span>
+<span class="ox-line" id="L26"><a class="ox-line__n" href="#L26" aria-label="Line 26">26</a><code class="lang-lisp">        [&quot;!=&quot; &quot;?status&quot; &quot;cancelled&quot;]</code></span>
+<span class="ox-line" id="L27"><a class="ox-line__n" href="#L27" aria-label="Line 27">27</a><code class="lang-lisp">        [&quot;not&quot; [&quot;?work&quot; &quot;:work-order/status&quot; &quot;archived&quot;]]</code></span>
+<span class="ox-line" id="L28"><a class="ox-line__n" href="#L28" aria-label="Line 28">28</a><code class="lang-lisp">        [&quot;?assignment&quot; &quot;:assigned-to/from&quot; &quot;?work&quot;]</code></span>
+<span class="ox-line" id="L29"><a class="ox-line__n" href="#L29" aria-label="Line 29">29</a><code class="lang-lisp">        [&quot;?assignment&quot; &quot;:assigned-to/to&quot; &quot;?person&quot;]</code></span>
+<span class="ox-line" id="L30"><a class="ox-line__n" href="#L30" aria-label="Line 30">30</a><code class="lang-lisp">        [&quot;?assignment&quot; &quot;:assigned-to/assigned-at&quot; &quot;?assignedAt&quot;]</code></span>
+<span class="ox-line" id="L31"><a class="ox-line__n" href="#L31" aria-label="Line 31">31</a><code class="lang-lisp">        [&quot;?person&quot; &quot;:technician/name&quot; &quot;?technician&quot;]]}))</code></span></pre></div></main>
+<footer class="oo-footer"><span class="oo-footer__brand"><b>Open Ontology</b> Experimental v0.1 · Local in-memory runtime.</span><nav aria-label="Footer navigation"><a href="/explorations/">All explorations</a><a href="/explorations/catalog.json">catalog.json</a><a href="/llms.txt">llms.txt</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">Source ↗</a></nav></footer>
+</div></body></html>

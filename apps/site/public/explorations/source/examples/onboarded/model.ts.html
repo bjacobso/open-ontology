@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f6f5ef">
+<title>examples/onboarded/model.ts · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Instrument+Serif:ital@0;1&amp;family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css"><script defer src="/site.js"></script></head>
+<body><div class="oo ox"><a class="oo-skip" href="#main">Skip to content</a>
+<header class="oo-nav"><a class="oo-brand" href="/" aria-label="Open Ontology home"><img src="/favicon.svg" width="24" height="24" alt=""><span>Open Ontology</span></a><nav aria-label="Main navigation"><a class="oo-nav__section" href="/#std">Standard library</a><a class="oo-nav__section" href="/#preludes">Preludes</a><a class="oo-nav__section" href="/explorations/" aria-current="page">Explorations</a><a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main" class="oo-main"><section class="ox-hero ox-hero--source"><nav class="ox-crumbs" aria-label="Breadcrumb"><a href="/">Open Ontology</a><span aria-hidden="true">/</span><a href="/explorations/">Explorations</a><span aria-hidden="true">/</span>Source</nav>
+<p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Full source · ts · 250 lines</p>
+<h1 class="oo-pkg ox-path">examples/onboarded/model.ts</h1>
+<div class="oo-actions"><a class="oo-primary" href="/explorations/raw/examples/onboarded/model.ts">Raw source <span aria-hidden="true">↗</span></a><a class="oo-secondary" href="https://github.com/bjacobso/open-ontology/blob/main/examples/onboarded/model.ts">View on GitHub <span aria-hidden="true">↗</span></a></div>
+<p class="oo-meta"><span>Click a line number to link to that line</span></p></section>
+<div class="oo-panel ox-source"><div class="oo-panel__head"><span>examples/onboarded/model.ts</span><span>ts</span></div><pre tabindex="0"><span class="ox-line" id="L1"><a class="ox-line__n" href="#L1" aria-label="Line 1">1</a><code>import { Schema } from &quot;effect&quot;;</code></span>
+<span class="ox-line" id="L2"><a class="ox-line__n" href="#L2" aria-label="Line 2">2</a><code>import { Change, Datalog, Input, Ontology, Property, defineOntology } from &quot;../../src/index.js&quot;;</code></span>
+<span class="ox-line" id="L3"><a class="ox-line__n" href="#L3" aria-label="Line 3">3</a><code> </code></span>
+<span class="ox-line" id="L4"><a class="ox-line__n" href="#L4" aria-label="Line 4">4</a><code>// A small directional model inspired by supplied schema/API context, not a production import.</code></span>
+<span class="ox-line" id="L5"><a class="ox-line__n" href="#L5" aria-label="Line 5">5</a><code>const Organization = Ontology.ObjectType(&quot;Organization&quot;, {</code></span>
+<span class="ox-line" id="L6"><a class="ox-line__n" href="#L6" aria-label="Line 6">6</a><code>  description: &quot;The organization boundary for accounts, users, and shared configuration. Connected organizations are outside this example.&quot;,</code></span>
+<span class="ox-line" id="L7"><a class="ox-line__n" href="#L7" aria-label="Line 7">7</a><code>  properties: { name: Property.make(&quot;:organization/name&quot;, Schema.String).required() },</code></span>
+<span class="ox-line" id="L8"><a class="ox-line__n" href="#L8" aria-label="Line 8">8</a><code>});</code></span>
+<span class="ox-line" id="L9"><a class="ox-line__n" href="#L9" aria-label="Line 9">9</a><code> </code></span>
+<span class="ox-line" id="L10"><a class="ox-line__n" href="#L10" aria-label="Line 10">10</a><code>const Account = Ontology.ObjectType(&quot;Account&quot;, {</code></span>
+<span class="ox-line" id="L11"><a class="ox-line__n" href="#L11" aria-label="Line 11">11</a><code>  description: &quot;An operational context inside an organization. An account is distinct from an employer; integrations and live/test modes are omitted here.&quot;,</code></span>
+<span class="ox-line" id="L12"><a class="ox-line__n" href="#L12" aria-label="Line 12">12</a><code>  properties: { organization: Property.ref(&quot;:account/organization&quot;, Organization).required() },</code></span>
+<span class="ox-line" id="L13"><a class="ox-line__n" href="#L13" aria-label="Line 13">13</a><code>});</code></span>
+<span class="ox-line" id="L14"><a class="ox-line__n" href="#L14" aria-label="Line 14">14</a><code> </code></span>
+<span class="ox-line" id="L15"><a class="ox-line__n" href="#L15" aria-label="Line 15">15</a><code>const User = Ontology.ObjectType(&quot;User&quot;, {</code></span>
+<span class="ox-line" id="L16"><a class="ox-line__n" href="#L16" aria-label="Line 16">16</a><code>  description: &quot;A dashboard user who may belong to organizations and groups, and be an employer assignee on a task.&quot;,</code></span>
+<span class="ox-line" id="L17"><a class="ox-line__n" href="#L17" aria-label="Line 17">17</a><code>  properties: { email: Property.make(&quot;:user/email&quot;, Schema.String).required() },</code></span>
+<span class="ox-line" id="L18"><a class="ox-line__n" href="#L18" aria-label="Line 18">18</a><code>});</code></span>
+<span class="ox-line" id="L19"><a class="ox-line__n" href="#L19" aria-label="Line 19">19</a><code> </code></span>
+<span class="ox-line" id="L20"><a class="ox-line__n" href="#L20" aria-label="Line 20">20</a><code>const OrganizationMembership = Ontology.ObjectType(&quot;OrganizationMembership&quot;, {</code></span>
+<span class="ox-line" id="L21"><a class="ox-line__n" href="#L21" aria-label="Line 21">21</a><code>  description: &quot;Connects a user to an organization. This example records membership but grants no access.&quot;,</code></span>
+<span class="ox-line" id="L22"><a class="ox-line__n" href="#L22" aria-label="Line 22">22</a><code>  properties: {</code></span>
+<span class="ox-line" id="L23"><a class="ox-line__n" href="#L23" aria-label="Line 23">23</a><code>    organization: Property.ref(&quot;:organization-membership/organization&quot;, Organization).required(),</code></span>
+<span class="ox-line" id="L24"><a class="ox-line__n" href="#L24" aria-label="Line 24">24</a><code>    user: Property.ref(&quot;:organization-membership/user&quot;, User).required(),</code></span>
+<span class="ox-line" id="L25"><a class="ox-line__n" href="#L25" aria-label="Line 25">25</a><code>  },</code></span>
+<span class="ox-line" id="L26"><a class="ox-line__n" href="#L26" aria-label="Line 26">26</a><code>});</code></span>
+<span class="ox-line" id="L27"><a class="ox-line__n" href="#L27" aria-label="Line 27">27</a><code> </code></span>
+<span class="ox-line" id="L28"><a class="ox-line__n" href="#L28" aria-label="Line 28">28</a><code>const UserGroup = Ontology.ObjectType(&quot;UserGroup&quot;, {</code></span>
+<span class="ox-line" id="L29"><a class="ox-line__n" href="#L29" aria-label="Line 29">29</a><code>  description: &quot;An organization-scoped group with permission and access-rule configuration. Rules are opaque data; this runtime does not evaluate them.&quot;,</code></span>
+<span class="ox-line" id="L30"><a class="ox-line__n" href="#L30" aria-label="Line 30">30</a><code>  properties: {</code></span>
+<span class="ox-line" id="L31"><a class="ox-line__n" href="#L31" aria-label="Line 31">31</a><code>    name: Property.make(&quot;:user-group/name&quot;, Schema.String).required(),</code></span>
+<span class="ox-line" id="L32"><a class="ox-line__n" href="#L32" aria-label="Line 32">32</a><code>    organization: Property.ref(&quot;:user-group/organization&quot;, Organization).required(),</code></span>
+<span class="ox-line" id="L33"><a class="ox-line__n" href="#L33" aria-label="Line 33">33</a><code>    permissions: Property.make(&quot;:user-group/permissions&quot;, Schema.Unknown),</code></span>
+<span class="ox-line" id="L34"><a class="ox-line__n" href="#L34" aria-label="Line 34">34</a><code>    accessRules: Property.make(&quot;:user-group/access-rules&quot;, Schema.Unknown),</code></span>
+<span class="ox-line" id="L35"><a class="ox-line__n" href="#L35" aria-label="Line 35">35</a><code>  },</code></span>
+<span class="ox-line" id="L36"><a class="ox-line__n" href="#L36" aria-label="Line 36">36</a><code>});</code></span>
+<span class="ox-line" id="L37"><a class="ox-line__n" href="#L37" aria-label="Line 37">37</a><code> </code></span>
+<span class="ox-line" id="L38"><a class="ox-line__n" href="#L38" aria-label="Line 38">38</a><code>const GroupMembership = Ontology.ObjectType(&quot;GroupMembership&quot;, {</code></span>
+<span class="ox-line" id="L39"><a class="ox-line__n" href="#L39" aria-label="Line 39">39</a><code>  description: &quot;Connects a dashboard user to a user group, separately from organization membership.&quot;,</code></span>
+<span class="ox-line" id="L40"><a class="ox-line__n" href="#L40" aria-label="Line 40">40</a><code>  properties: {</code></span>
+<span class="ox-line" id="L41"><a class="ox-line__n" href="#L41" aria-label="Line 41">41</a><code>    user: Property.ref(&quot;:group-membership/user&quot;, User).required(),</code></span>
+<span class="ox-line" id="L42"><a class="ox-line__n" href="#L42" aria-label="Line 42">42</a><code>    userGroup: Property.ref(&quot;:group-membership/user-group&quot;, UserGroup).required(),</code></span>
+<span class="ox-line" id="L43"><a class="ox-line__n" href="#L43" aria-label="Line 43">43</a><code>  },</code></span>
+<span class="ox-line" id="L44"><a class="ox-line__n" href="#L44" aria-label="Line 44">44</a><code>});</code></span>
+<span class="ox-line" id="L45"><a class="ox-line__n" href="#L45" aria-label="Line 45">45</a><code> </code></span>
+<span class="ox-line" id="L46"><a class="ox-line__n" href="#L46" aria-label="Line 46">46</a><code>const CustomProperty = Ontology.ObjectType(&quot;CustomProperty&quot;, {</code></span>
+<span class="ox-line" id="L47"><a class="ox-line__n" href="#L47" aria-label="Line 47">47</a><code>  description: &quot;A named domain attribute with a path, scalar type, and permission-scope flag. The flag is modeled as data, not an enforced authorization boundary.&quot;,</code></span>
+<span class="ox-line" id="L48"><a class="ox-line__n" href="#L48" aria-label="Line 48">48</a><code>  properties: {</code></span>
+<span class="ox-line" id="L49"><a class="ox-line__n" href="#L49" aria-label="Line 49">49</a><code>    organization: Property.ref(&quot;:custom-property/organization&quot;, Organization),</code></span>
+<span class="ox-line" id="L50"><a class="ox-line__n" href="#L50" aria-label="Line 50">50</a><code>    path: Property.make(&quot;:custom-property/path&quot;, Schema.String).required(),</code></span>
+<span class="ox-line" id="L51"><a class="ox-line__n" href="#L51" aria-label="Line 51">51</a><code>    scalarType: Property.make(&quot;:custom-property/scalar-type&quot;, Schema.String).required(),</code></span>
+<span class="ox-line" id="L52"><a class="ox-line__n" href="#L52" aria-label="Line 52">52</a><code>    isPermissionScope: Property.make(&quot;:custom-property/is-permission-scope&quot;, Schema.Boolean).required(),</code></span>
+<span class="ox-line" id="L53"><a class="ox-line__n" href="#L53" aria-label="Line 53">53</a><code>  },</code></span>
+<span class="ox-line" id="L54"><a class="ox-line__n" href="#L54" aria-label="Line 54">54</a><code>});</code></span>
+<span class="ox-line" id="L55"><a class="ox-line__n" href="#L55" aria-label="Line 55">55</a><code> </code></span>
+<span class="ox-line" id="L56"><a class="ox-line__n" href="#L56" aria-label="Line 56">56</a><code>const Employee = Ontology.ObjectType(&quot;Employee&quot;, {</code></span>
+<span class="ox-line" id="L57"><a class="ox-line__n" href="#L57" aria-label="Line 57">57</a><code>  description: &quot;An account-scoped person with placements and tasks. Personal details are reduced to a synthetic display name in this example.&quot;,</code></span>
+<span class="ox-line" id="L58"><a class="ox-line__n" href="#L58" aria-label="Line 58">58</a><code>  properties: {</code></span>
+<span class="ox-line" id="L59"><a class="ox-line__n" href="#L59" aria-label="Line 59">59</a><code>    name: Property.make(&quot;:employee/name&quot;, Schema.String).required(),</code></span>
+<span class="ox-line" id="L60"><a class="ox-line__n" href="#L60" aria-label="Line 60">60</a><code>    account: Property.ref(&quot;:employee/account&quot;, Account).required(),</code></span>
+<span class="ox-line" id="L61"><a class="ox-line__n" href="#L61" aria-label="Line 61">61</a><code>  },</code></span>
+<span class="ox-line" id="L62"><a class="ox-line__n" href="#L62" aria-label="Line 62">62</a><code>});</code></span>
+<span class="ox-line" id="L63"><a class="ox-line__n" href="#L63" aria-label="Line 63">63</a><code> </code></span>
+<span class="ox-line" id="L64"><a class="ox-line__n" href="#L64" aria-label="Line 64">64</a><code>const Employer = Ontology.ObjectType(&quot;Employer&quot;, {</code></span>
+<span class="ox-line" id="L65"><a class="ox-line__n" href="#L65" aria-label="Line 65">65</a><code>  description: &quot;An employer record inside an account. It provides employment context and is separate from the organization that owns the account.&quot;,</code></span>
+<span class="ox-line" id="L66"><a class="ox-line__n" href="#L66" aria-label="Line 66">66</a><code>  properties: {</code></span>
+<span class="ox-line" id="L67"><a class="ox-line__n" href="#L67" aria-label="Line 67">67</a><code>    name: Property.make(&quot;:employer/name&quot;, Schema.String).required(),</code></span>
+<span class="ox-line" id="L68"><a class="ox-line__n" href="#L68" aria-label="Line 68">68</a><code>    account: Property.ref(&quot;:employer/account&quot;, Account).required(),</code></span>
+<span class="ox-line" id="L69"><a class="ox-line__n" href="#L69" aria-label="Line 69">69</a><code>  },</code></span>
+<span class="ox-line" id="L70"><a class="ox-line__n" href="#L70" aria-label="Line 70">70</a><code>});</code></span>
+<span class="ox-line" id="L71"><a class="ox-line__n" href="#L71" aria-label="Line 71">71</a><code> </code></span>
+<span class="ox-line" id="L72"><a class="ox-line__n" href="#L72" aria-label="Line 72">72</a><code>const Placement = Ontology.ObjectType(&quot;Placement&quot;, {</code></span>
+<span class="ox-line" id="L73"><a class="ox-line__n" href="#L73" aria-label="Line 73">73</a><code>  description: &quot;Employment context for an employee, optionally with an employer. Client and job-type dimensions are omitted; tasks are not modeled as children of a placement.&quot;,</code></span>
+<span class="ox-line" id="L74"><a class="ox-line__n" href="#L74" aria-label="Line 74">74</a><code>  properties: {</code></span>
+<span class="ox-line" id="L75"><a class="ox-line__n" href="#L75" aria-label="Line 75">75</a><code>    account: Property.ref(&quot;:placement/account&quot;, Account).required(),</code></span>
+<span class="ox-line" id="L76"><a class="ox-line__n" href="#L76" aria-label="Line 76">76</a><code>    employee: Property.ref(&quot;:placement/employee&quot;, Employee).required(),</code></span>
+<span class="ox-line" id="L77"><a class="ox-line__n" href="#L77" aria-label="Line 77">77</a><code>    employer: Property.ref(&quot;:placement/employer&quot;, Employer),</code></span>
+<span class="ox-line" id="L78"><a class="ox-line__n" href="#L78" aria-label="Line 78">78</a><code>  },</code></span>
+<span class="ox-line" id="L79"><a class="ox-line__n" href="#L79" aria-label="Line 79">79</a><code>});</code></span>
+<span class="ox-line" id="L80"><a class="ox-line__n" href="#L80" aria-label="Line 80">80</a><code> </code></span>
+<span class="ox-line" id="L81"><a class="ox-line__n" href="#L81" aria-label="Line 81">81</a><code>const TaskLineage = Ontology.ObjectType(&quot;TaskLineage&quot;, {</code></span>
+<span class="ox-line" id="L82"><a class="ox-line__n" href="#L82" aria-label="Line 82">82</a><code>  description: &quot;A form's identity across versions. Policies refer to this lineage, while a running task refers to a concrete template.&quot;,</code></span>
+<span class="ox-line" id="L83"><a class="ox-line__n" href="#L83" aria-label="Line 83">83</a><code>  properties: { name: Property.make(&quot;:task-lineage/name&quot;, Schema.String).required() },</code></span>
+<span class="ox-line" id="L84"><a class="ox-line__n" href="#L84" aria-label="Line 84">84</a><code>});</code></span>
+<span class="ox-line" id="L85"><a class="ox-line__n" href="#L85" aria-label="Line 85">85</a><code> </code></span>
+<span class="ox-line" id="L86"><a class="ox-line__n" href="#L86" aria-label="Line 86">86</a><code>const TaskVersion = Ontology.ObjectType(&quot;TaskVersion&quot;, {</code></span>
+<span class="ox-line" id="L87"><a class="ox-line__n" href="#L87" aria-label="Line 87">87</a><code>  description: &quot;A version of a form lineage, with a publication status. Publication, inheritance, and deployment behavior are not implemented here.&quot;,</code></span>
+<span class="ox-line" id="L88"><a class="ox-line__n" href="#L88" aria-label="Line 88">88</a><code>  properties: {</code></span>
+<span class="ox-line" id="L89"><a class="ox-line__n" href="#L89" aria-label="Line 89">89</a><code>    taskLineage: Property.ref(&quot;:task-version/task-lineage&quot;, TaskLineage).required(),</code></span>
+<span class="ox-line" id="L90"><a class="ox-line__n" href="#L90" aria-label="Line 90">90</a><code>    status: Property.make(&quot;:task-version/status&quot;, Schema.String).required(),</code></span>
+<span class="ox-line" id="L91"><a class="ox-line__n" href="#L91" aria-label="Line 91">91</a><code>  },</code></span>
+<span class="ox-line" id="L92"><a class="ox-line__n" href="#L92" aria-label="Line 92">92</a><code>});</code></span>
+<span class="ox-line" id="L93"><a class="ox-line__n" href="#L93" aria-label="Line 93">93</a><code> </code></span>
+<span class="ox-line" id="L94"><a class="ox-line__n" href="#L94" aria-label="Line 94">94</a><code>const TaskTemplate = Ontology.ObjectType(&quot;TaskTemplate&quot;, {</code></span>
+<span class="ox-line" id="L95"><a class="ox-line__n" href="#L95" aria-label="Line 95">95</a><code>  description: &quot;The concrete form definition for a version and lineage. A template contains page templates and is referenced by running tasks.&quot;,</code></span>
+<span class="ox-line" id="L96"><a class="ox-line__n" href="#L96" aria-label="Line 96">96</a><code>  properties: {</code></span>
+<span class="ox-line" id="L97"><a class="ox-line__n" href="#L97" aria-label="Line 97">97</a><code>    name: Property.make(&quot;:task-template/name&quot;, Schema.String).required(),</code></span>
+<span class="ox-line" id="L98"><a class="ox-line__n" href="#L98" aria-label="Line 98">98</a><code>    taskLineage: Property.ref(&quot;:task-template/task-lineage&quot;, TaskLineage).required(),</code></span>
+<span class="ox-line" id="L99"><a class="ox-line__n" href="#L99" aria-label="Line 99">99</a><code>    taskVersion: Property.ref(&quot;:task-template/task-version&quot;, TaskVersion).required(),</code></span>
+<span class="ox-line" id="L100"><a class="ox-line__n" href="#L100" aria-label="Line 100">100</a><code>  },</code></span>
+<span class="ox-line" id="L101"><a class="ox-line__n" href="#L101" aria-label="Line 101">101</a><code>});</code></span>
+<span class="ox-line" id="L102"><a class="ox-line__n" href="#L102" aria-label="Line 102">102</a><code> </code></span>
+<span class="ox-line" id="L103"><a class="ox-line__n" href="#L103" aria-label="Line 103">103</a><code>const SubtaskTemplate = Ontology.ObjectType(&quot;SubtaskTemplate&quot;, {</code></span>
+<span class="ox-line" id="L104"><a class="ox-line__n" href="#L104" aria-label="Line 104">104</a><code>  description: &quot;A page of a form, with an assignee type such as employee, employer, or system. Page ordering and options are simplified away.&quot;,</code></span>
+<span class="ox-line" id="L105"><a class="ox-line__n" href="#L105" aria-label="Line 105">105</a><code>  properties: {</code></span>
+<span class="ox-line" id="L106"><a class="ox-line__n" href="#L106" aria-label="Line 106">106</a><code>    taskTemplate: Property.ref(&quot;:subtask-template/task-template&quot;, TaskTemplate).required(),</code></span>
+<span class="ox-line" id="L107"><a class="ox-line__n" href="#L107" aria-label="Line 107">107</a><code>    assigneeType: Property.make(&quot;:subtask-template/assignee-type&quot;, Schema.String).required(),</code></span>
+<span class="ox-line" id="L108"><a class="ox-line__n" href="#L108" aria-label="Line 108">108</a><code>  },</code></span>
+<span class="ox-line" id="L109"><a class="ox-line__n" href="#L109" aria-label="Line 109">109</a><code>});</code></span>
+<span class="ox-line" id="L110"><a class="ox-line__n" href="#L110" aria-label="Line 110">110</a><code> </code></span>
+<span class="ox-line" id="L111"><a class="ox-line__n" href="#L111" aria-label="Line 111">111</a><code>const FieldTemplate = Ontology.ObjectType(&quot;FieldTemplate&quot;, {</code></span>
+<span class="ox-line" id="L112"><a class="ox-line__n" href="#L112" aria-label="Line 112">112</a><code>  description: &quot;A field with a data path and an optional rule, normally on a page template. Rule evaluation, repeatable groups, and formula elaboration are outside this example.&quot;,</code></span>
+<span class="ox-line" id="L113"><a class="ox-line__n" href="#L113" aria-label="Line 113">113</a><code>  properties: {</code></span>
+<span class="ox-line" id="L114"><a class="ox-line__n" href="#L114" aria-label="Line 114">114</a><code>    subtaskTemplate: Property.ref(&quot;:field-template/subtask-template&quot;, SubtaskTemplate),</code></span>
+<span class="ox-line" id="L115"><a class="ox-line__n" href="#L115" aria-label="Line 115">115</a><code>    path: Property.make(&quot;:field-template/path&quot;, Schema.String).required(),</code></span>
+<span class="ox-line" id="L116"><a class="ox-line__n" href="#L116" aria-label="Line 116">116</a><code>    required: Property.make(&quot;:field-template/required&quot;, Schema.Boolean).required(),</code></span>
+<span class="ox-line" id="L117"><a class="ox-line__n" href="#L117" aria-label="Line 117">117</a><code>    rule: Property.make(&quot;:field-template/rule&quot;, Schema.Unknown),</code></span>
+<span class="ox-line" id="L118"><a class="ox-line__n" href="#L118" aria-label="Line 118">118</a><code>  },</code></span>
+<span class="ox-line" id="L119"><a class="ox-line__n" href="#L119" aria-label="Line 119">119</a><code>});</code></span>
+<span class="ox-line" id="L120"><a class="ox-line__n" href="#L120" aria-label="Line 120">120</a><code> </code></span>
+<span class="ox-line" id="L121"><a class="ox-line__n" href="#L121" aria-label="Line 121">121</a><code>const Task = Ontology.ObjectType(&quot;Task&quot;, {</code></span>
+<span class="ox-line" id="L122"><a class="ox-line__n" href="#L122" aria-label="Line 122">122</a><code>  description: &quot;A running instance of a form for an employee in an account, optionally scoped to an employer and assigned to a dashboard user. Demo actions and next-action values are illustrative.&quot;,</code></span>
+<span class="ox-line" id="L123"><a class="ox-line__n" href="#L123" aria-label="Line 123">123</a><code>  properties: {</code></span>
+<span class="ox-line" id="L124"><a class="ox-line__n" href="#L124" aria-label="Line 124">124</a><code>    account: Property.ref(&quot;:task/account&quot;, Account).required(),</code></span>
+<span class="ox-line" id="L125"><a class="ox-line__n" href="#L125" aria-label="Line 125">125</a><code>    employee: Property.ref(&quot;:task/employee&quot;, Employee).required(),</code></span>
+<span class="ox-line" id="L126"><a class="ox-line__n" href="#L126" aria-label="Line 126">126</a><code>    employer: Property.ref(&quot;:task/employer&quot;, Employer),</code></span>
+<span class="ox-line" id="L127"><a class="ox-line__n" href="#L127" aria-label="Line 127">127</a><code>    template: Property.ref(&quot;:task/template&quot;, TaskTemplate).required(),</code></span>
+<span class="ox-line" id="L128"><a class="ox-line__n" href="#L128" aria-label="Line 128">128</a><code>    employerAssignee: Property.ref(&quot;:task/employer-assignee&quot;, User),</code></span>
+<span class="ox-line" id="L129"><a class="ox-line__n" href="#L129" aria-label="Line 129">129</a><code>    status: Property.make(&quot;:task/status&quot;, Schema.String).required(),</code></span>
+<span class="ox-line" id="L130"><a class="ox-line__n" href="#L130" aria-label="Line 130">130</a><code>    nextAction: Property.make(&quot;:task/next-action&quot;, Schema.String),</code></span>
+<span class="ox-line" id="L131"><a class="ox-line__n" href="#L131" aria-label="Line 131">131</a><code>    startedAt: Property.instant(&quot;:task/started-at&quot;),</code></span>
+<span class="ox-line" id="L132"><a class="ox-line__n" href="#L132" aria-label="Line 132">132</a><code>  },</code></span>
+<span class="ox-line" id="L133"><a class="ox-line__n" href="#L133" aria-label="Line 133">133</a><code>});</code></span>
+<span class="ox-line" id="L134"><a class="ox-line__n" href="#L134" aria-label="Line 134">134</a><code> </code></span>
+<span class="ox-line" id="L135"><a class="ox-line__n" href="#L135" aria-label="Line 135">135</a><code>const Policy = Ontology.ObjectType(&quot;Policy&quot;, {</code></span>
+<span class="ox-line" id="L136"><a class="ox-line__n" href="#L136" aria-label="Line 136">136</a><code>  description: &quot;Configuration describing when forms should be required. Account ownership is optional to allow shared policies; policy evaluation is not implemented.&quot;,</code></span>
+<span class="ox-line" id="L137"><a class="ox-line__n" href="#L137" aria-label="Line 137">137</a><code>  properties: {</code></span>
+<span class="ox-line" id="L138"><a class="ox-line__n" href="#L138" aria-label="Line 138">138</a><code>    name: Property.make(&quot;:policy/name&quot;, Schema.String).required(),</code></span>
+<span class="ox-line" id="L139"><a class="ox-line__n" href="#L139" aria-label="Line 139">139</a><code>    account: Property.ref(&quot;:policy/account&quot;, Account),</code></span>
+<span class="ox-line" id="L140"><a class="ox-line__n" href="#L140" aria-label="Line 140">140</a><code>    rules: Property.make(&quot;:policy/rules&quot;, Schema.Unknown),</code></span>
+<span class="ox-line" id="L141"><a class="ox-line__n" href="#L141" aria-label="Line 141">141</a><code>  },</code></span>
+<span class="ox-line" id="L142"><a class="ox-line__n" href="#L142" aria-label="Line 142">142</a><code>});</code></span>
+<span class="ox-line" id="L143"><a class="ox-line__n" href="#L143" aria-label="Line 143">143</a><code> </code></span>
+<span class="ox-line" id="L144"><a class="ox-line__n" href="#L144" aria-label="Line 144">144</a><code>const PolicyForm = Ontology.ObjectType(&quot;PolicyForm&quot;, {</code></span>
+<span class="ox-line" id="L145"><a class="ox-line__n" href="#L145" aria-label="Line 145">145</a><code>  description: &quot;Connects a policy to a form lineage, optionally with a form-specific rule. This records configuration without generating suggested tasks.&quot;,</code></span>
+<span class="ox-line" id="L146"><a class="ox-line__n" href="#L146" aria-label="Line 146">146</a><code>  properties: {</code></span>
+<span class="ox-line" id="L147"><a class="ox-line__n" href="#L147" aria-label="Line 147">147</a><code>    policy: Property.ref(&quot;:policy-form/policy&quot;, Policy).required(),</code></span>
+<span class="ox-line" id="L148"><a class="ox-line__n" href="#L148" aria-label="Line 148">148</a><code>    taskLineage: Property.ref(&quot;:policy-form/task-lineage&quot;, TaskLineage).required(),</code></span>
+<span class="ox-line" id="L149"><a class="ox-line__n" href="#L149" aria-label="Line 149">149</a><code>    rule: Property.make(&quot;:policy-form/rule&quot;, Schema.Unknown),</code></span>
+<span class="ox-line" id="L150"><a class="ox-line__n" href="#L150" aria-label="Line 150">150</a><code>  },</code></span>
+<span class="ox-line" id="L151"><a class="ox-line__n" href="#L151" aria-label="Line 151">151</a><code>});</code></span>
+<span class="ox-line" id="L152"><a class="ox-line__n" href="#L152" aria-label="Line 152">152</a><code> </code></span>
+<span class="ox-line" id="L153"><a class="ox-line__n" href="#L153" aria-label="Line 153">153</a><code>const Automation = Ontology.ObjectType(&quot;Automation&quot;, {</code></span>
+<span class="ox-line" id="L154"><a class="ox-line__n" href="#L154" aria-label="Line 154">154</a><code>  description: &quot;A named automation with a trigger entity and optional account scope. Trigger facts, versioned actions, and execution traces are omitted; no automation engine is implied.&quot;,</code></span>
+<span class="ox-line" id="L155"><a class="ox-line__n" href="#L155" aria-label="Line 155">155</a><code>  properties: {</code></span>
+<span class="ox-line" id="L156"><a class="ox-line__n" href="#L156" aria-label="Line 156">156</a><code>    name: Property.make(&quot;:automation/name&quot;, Schema.String).required(),</code></span>
+<span class="ox-line" id="L157"><a class="ox-line__n" href="#L157" aria-label="Line 157">157</a><code>    account: Property.ref(&quot;:automation/account&quot;, Account),</code></span>
+<span class="ox-line" id="L158"><a class="ox-line__n" href="#L158" aria-label="Line 158">158</a><code>    triggerEntity: Property.make(&quot;:automation/trigger-entity&quot;, Schema.String).required(),</code></span>
+<span class="ox-line" id="L159"><a class="ox-line__n" href="#L159" aria-label="Line 159">159</a><code>  },</code></span>
+<span class="ox-line" id="L160"><a class="ox-line__n" href="#L160" aria-label="Line 160">160</a><code>});</code></span>
+<span class="ox-line" id="L161"><a class="ox-line__n" href="#L161" aria-label="Line 161">161</a><code> </code></span>
+<span class="ox-line" id="L162"><a class="ox-line__n" href="#L162" aria-label="Line 162">162</a><code>const AuthzInferenceRule = Ontology.ObjectType(&quot;AuthzInferenceRule&quot;, {</code></span>
+<span class="ox-line" id="L163"><a class="ox-line__n" href="#L163" aria-label="Line 163">163</a><code>  description: &quot;Account configuration naming the entity types involved in an authorization inference. The example stores these names without enforcing the inference.&quot;,</code></span>
+<span class="ox-line" id="L164"><a class="ox-line__n" href="#L164" aria-label="Line 164">164</a><code>  properties: {</code></span>
+<span class="ox-line" id="L165"><a class="ox-line__n" href="#L165" aria-label="Line 165">165</a><code>    account: Property.ref(&quot;:authz-inference-rule/account&quot;, Account).required(),</code></span>
+<span class="ox-line" id="L166"><a class="ox-line__n" href="#L166" aria-label="Line 166">166</a><code>    inferredFromEntity: Property.make(&quot;:authz-inference-rule/inferred-from-entity&quot;, Schema.String).required(),</code></span>
+<span class="ox-line" id="L167"><a class="ox-line__n" href="#L167" aria-label="Line 167">167</a><code>    appliedToEntity: Property.make(&quot;:authz-inference-rule/applied-to-entity&quot;, Schema.String).required(),</code></span>
+<span class="ox-line" id="L168"><a class="ox-line__n" href="#L168" aria-label="Line 168">168</a><code>  },</code></span>
+<span class="ox-line" id="L169"><a class="ox-line__n" href="#L169" aria-label="Line 169">169</a><code>});</code></span>
+<span class="ox-line" id="L170"><a class="ox-line__n" href="#L170" aria-label="Line 170">170</a><code> </code></span>
+<span class="ox-line" id="L171"><a class="ox-line__n" href="#L171" aria-label="Line 171">171</a><code>const StartTask = Ontology.ActionType(&quot;start-task&quot;, {</code></span>
+<span class="ox-line" id="L172"><a class="ox-line__n" href="#L172" aria-label="Line 172">172</a><code>  description: &quot;Demo action creating an employee task against a concrete template. It does not call the supplied API or evaluate policy requirements.&quot;,</code></span>
+<span class="ox-line" id="L173"><a class="ox-line__n" href="#L173" aria-label="Line 173">173</a><code>  input: Schema.Struct({ task: Schema.String, account: Schema.String, employee: Schema.String, template: Schema.String }),</code></span>
+<span class="ox-line" id="L174"><a class="ox-line__n" href="#L174" aria-label="Line 174">174</a><code>  changes: [Change.create(Task, Input.value(&quot;task&quot;), {</code></span>
+<span class="ox-line" id="L175"><a class="ox-line__n" href="#L175" aria-label="Line 175">175</a><code>    &quot;:task/account&quot;: Input.value(&quot;account&quot;),</code></span>
+<span class="ox-line" id="L176"><a class="ox-line__n" href="#L176" aria-label="Line 176">176</a><code>    &quot;:task/employee&quot;: Input.value(&quot;employee&quot;),</code></span>
+<span class="ox-line" id="L177"><a class="ox-line__n" href="#L177" aria-label="Line 177">177</a><code>    &quot;:task/template&quot;: Input.value(&quot;template&quot;),</code></span>
+<span class="ox-line" id="L178"><a class="ox-line__n" href="#L178" aria-label="Line 178">178</a><code>    &quot;:task/status&quot;: &quot;requires_action&quot;,</code></span>
+<span class="ox-line" id="L179"><a class="ox-line__n" href="#L179" aria-label="Line 179">179</a><code>    &quot;:task/next-action&quot;: &quot;employee-input&quot;,</code></span>
+<span class="ox-line" id="L180"><a class="ox-line__n" href="#L180" aria-label="Line 180">180</a><code>    &quot;:task/started-at&quot;: Input.now,</code></span>
+<span class="ox-line" id="L181"><a class="ox-line__n" href="#L181" aria-label="Line 181">181</a><code>  })],</code></span>
+<span class="ox-line" id="L182"><a class="ox-line__n" href="#L182" aria-label="Line 182">182</a><code>});</code></span>
+<span class="ox-line" id="L183"><a class="ox-line__n" href="#L183" aria-label="Line 183">183</a><code> </code></span>
+<span class="ox-line" id="L184"><a class="ox-line__n" href="#L184" aria-label="Line 184">184</a><code>const RequestReview = Ontology.ActionType(&quot;request-review&quot;, {</code></span>
+<span class="ox-line" id="L185"><a class="ox-line__n" href="#L185" aria-label="Line 185">185</a><code>  description: &quot;Demo action moving the next action to employer-review and replacing the employer assignee. It performs no permission, document, or completion checks.&quot;,</code></span>
+<span class="ox-line" id="L186"><a class="ox-line__n" href="#L186" aria-label="Line 186">186</a><code>  input: Schema.Struct({ task: Schema.String, user: Schema.String }),</code></span>
+<span class="ox-line" id="L187"><a class="ox-line__n" href="#L187" aria-label="Line 187">187</a><code>  changes: [</code></span>
+<span class="ox-line" id="L188"><a class="ox-line__n" href="#L188" aria-label="Line 188">188</a><code>    Change.clear(Input.value(&quot;task&quot;), Task.properties.nextAction),</code></span>
+<span class="ox-line" id="L189"><a class="ox-line__n" href="#L189" aria-label="Line 189">189</a><code>    Change.set(Input.value(&quot;task&quot;), Task.properties.nextAction, &quot;employer-review&quot;),</code></span>
+<span class="ox-line" id="L190"><a class="ox-line__n" href="#L190" aria-label="Line 190">190</a><code>    Change.clear(Input.value(&quot;task&quot;), Task.properties.employerAssignee),</code></span>
+<span class="ox-line" id="L191"><a class="ox-line__n" href="#L191" aria-label="Line 191">191</a><code>    Change.set(Input.value(&quot;task&quot;), Task.properties.employerAssignee, Input.value(&quot;user&quot;)),</code></span>
+<span class="ox-line" id="L192"><a class="ox-line__n" href="#L192" aria-label="Line 192">192</a><code>  ],</code></span>
+<span class="ox-line" id="L193"><a class="ox-line__n" href="#L193" aria-label="Line 193">193</a><code>});</code></span>
+<span class="ox-line" id="L194"><a class="ox-line__n" href="#L194" aria-label="Line 194">194</a><code> </code></span>
+<span class="ox-line" id="L195"><a class="ox-line__n" href="#L195" aria-label="Line 195">195</a><code>const v = Datalog.variables({</code></span>
+<span class="ox-line" id="L196"><a class="ox-line__n" href="#L196" aria-label="Line 196">196</a><code>  task: Task.entity, employee: Employee.entity, employeeName: Schema.String,</code></span>
+<span class="ox-line" id="L197"><a class="ox-line__n" href="#L197" aria-label="Line 197">197</a><code>  template: TaskTemplate.entity, formName: Schema.String, status: Schema.String,</code></span>
+<span class="ox-line" id="L198"><a class="ox-line__n" href="#L198" aria-label="Line 198">198</a><code>  nextAction: Schema.String, user: User.entity, assigneeEmail: Schema.String,</code></span>
+<span class="ox-line" id="L199"><a class="ox-line__n" href="#L199" aria-label="Line 199">199</a><code>  version: TaskVersion.entity, lineage: TaskLineage.entity, lineageName: Schema.String,</code></span>
+<span class="ox-line" id="L200"><a class="ox-line__n" href="#L200" aria-label="Line 200">200</a><code>});</code></span>
+<span class="ox-line" id="L201"><a class="ox-line__n" href="#L201" aria-label="Line 201">201</a><code> </code></span>
+<span class="ox-line" id="L202"><a class="ox-line__n" href="#L202" aria-label="Line 202">202</a><code>const EmployeeTasks = Ontology.QueryType(&quot;employee-tasks&quot;, {</code></span>
+<span class="ox-line" id="L203"><a class="ox-line__n" href="#L203" aria-label="Line 203">203</a><code>  description: &quot;Joins running tasks to employees and concrete form templates. Results are not permission-filtered.&quot;,</code></span>
+<span class="ox-line" id="L204"><a class="ox-line__n" href="#L204" aria-label="Line 204">204</a><code>  query: Datalog.query({</code></span>
+<span class="ox-line" id="L205"><a class="ox-line__n" href="#L205" aria-label="Line 205">205</a><code>    find: [v.employeeName, v.formName, v.status, v.nextAction],</code></span>
+<span class="ox-line" id="L206"><a class="ox-line__n" href="#L206" aria-label="Line 206">206</a><code>    where: [</code></span>
+<span class="ox-line" id="L207"><a class="ox-line__n" href="#L207" aria-label="Line 207">207</a><code>      Datalog.match(v.task, Task.properties.employee, v.employee),</code></span>
+<span class="ox-line" id="L208"><a class="ox-line__n" href="#L208" aria-label="Line 208">208</a><code>      Datalog.match(v.task, Task.properties.template, v.template),</code></span>
+<span class="ox-line" id="L209"><a class="ox-line__n" href="#L209" aria-label="Line 209">209</a><code>      Datalog.match(v.task, Task.properties.status, v.status),</code></span>
+<span class="ox-line" id="L210"><a class="ox-line__n" href="#L210" aria-label="Line 210">210</a><code>      Datalog.match(v.task, Task.properties.nextAction, v.nextAction),</code></span>
+<span class="ox-line" id="L211"><a class="ox-line__n" href="#L211" aria-label="Line 211">211</a><code>      Datalog.match(v.employee, Employee.properties.name, v.employeeName),</code></span>
+<span class="ox-line" id="L212"><a class="ox-line__n" href="#L212" aria-label="Line 212">212</a><code>      Datalog.match(v.template, TaskTemplate.properties.name, v.formName),</code></span>
+<span class="ox-line" id="L213"><a class="ox-line__n" href="#L213" aria-label="Line 213">213</a><code>    ],</code></span>
+<span class="ox-line" id="L214"><a class="ox-line__n" href="#L214" aria-label="Line 214">214</a><code>  }),</code></span>
+<span class="ox-line" id="L215"><a class="ox-line__n" href="#L215" aria-label="Line 215">215</a><code>});</code></span>
+<span class="ox-line" id="L216"><a class="ox-line__n" href="#L216" aria-label="Line 216">216</a><code> </code></span>
+<span class="ox-line" id="L217"><a class="ox-line__n" href="#L217" aria-label="Line 217">217</a><code>const ReviewQueue = Ontology.QueryType(&quot;review-queue&quot;, {</code></span>
+<span class="ox-line" id="L218"><a class="ox-line__n" href="#L218" aria-label="Line 218">218</a><code>  description: &quot;Demo query joining employee tasks needing employer review to their assigned dashboard users. It is not the production pending-employer-tasks API or an access rule.&quot;,</code></span>
+<span class="ox-line" id="L219"><a class="ox-line__n" href="#L219" aria-label="Line 219">219</a><code>  query: Datalog.query({</code></span>
+<span class="ox-line" id="L220"><a class="ox-line__n" href="#L220" aria-label="Line 220">220</a><code>    find: [v.employeeName, v.assigneeEmail],</code></span>
+<span class="ox-line" id="L221"><a class="ox-line__n" href="#L221" aria-label="Line 221">221</a><code>    where: [</code></span>
+<span class="ox-line" id="L222"><a class="ox-line__n" href="#L222" aria-label="Line 222">222</a><code>      Datalog.match(v.task, Task.properties.status, &quot;requires_action&quot;),</code></span>
+<span class="ox-line" id="L223"><a class="ox-line__n" href="#L223" aria-label="Line 223">223</a><code>      Datalog.match(v.task, Task.properties.nextAction, &quot;employer-review&quot;),</code></span>
+<span class="ox-line" id="L224"><a class="ox-line__n" href="#L224" aria-label="Line 224">224</a><code>      Datalog.match(v.task, Task.properties.employee, v.employee),</code></span>
+<span class="ox-line" id="L225"><a class="ox-line__n" href="#L225" aria-label="Line 225">225</a><code>      Datalog.match(v.employee, Employee.properties.name, v.employeeName),</code></span>
+<span class="ox-line" id="L226"><a class="ox-line__n" href="#L226" aria-label="Line 226">226</a><code>      Datalog.match(v.task, Task.properties.employerAssignee, v.user),</code></span>
+<span class="ox-line" id="L227"><a class="ox-line__n" href="#L227" aria-label="Line 227">227</a><code>      Datalog.match(v.user, User.properties.email, v.assigneeEmail),</code></span>
+<span class="ox-line" id="L228"><a class="ox-line__n" href="#L228" aria-label="Line 228">228</a><code>    ],</code></span>
+<span class="ox-line" id="L229"><a class="ox-line__n" href="#L229" aria-label="Line 229">229</a><code>  }),</code></span>
+<span class="ox-line" id="L230"><a class="ox-line__n" href="#L230" aria-label="Line 230">230</a><code>});</code></span>
+<span class="ox-line" id="L231"><a class="ox-line__n" href="#L231" aria-label="Line 231">231</a><code> </code></span>
+<span class="ox-line" id="L232"><a class="ox-line__n" href="#L232" aria-label="Line 232">232</a><code>const FormVersions = Ontology.QueryType(&quot;form-versions&quot;, {</code></span>
+<span class="ox-line" id="L233"><a class="ox-line__n" href="#L233" aria-label="Line 233">233</a><code>  description: &quot;Shows concrete templates alongside the form lineage and version status. No release or deployment operation is performed.&quot;,</code></span>
+<span class="ox-line" id="L234"><a class="ox-line__n" href="#L234" aria-label="Line 234">234</a><code>  query: Datalog.query({</code></span>
+<span class="ox-line" id="L235"><a class="ox-line__n" href="#L235" aria-label="Line 235">235</a><code>    find: [v.lineageName, v.formName, v.status],</code></span>
+<span class="ox-line" id="L236"><a class="ox-line__n" href="#L236" aria-label="Line 236">236</a><code>    where: [</code></span>
+<span class="ox-line" id="L237"><a class="ox-line__n" href="#L237" aria-label="Line 237">237</a><code>      Datalog.match(v.template, TaskTemplate.properties.taskVersion, v.version),</code></span>
+<span class="ox-line" id="L238"><a class="ox-line__n" href="#L238" aria-label="Line 238">238</a><code>      Datalog.match(v.version, TaskVersion.properties.taskLineage, v.lineage),</code></span>
+<span class="ox-line" id="L239"><a class="ox-line__n" href="#L239" aria-label="Line 239">239</a><code>      Datalog.match(v.version, TaskVersion.properties.status, v.status),</code></span>
+<span class="ox-line" id="L240"><a class="ox-line__n" href="#L240" aria-label="Line 240">240</a><code>      Datalog.match(v.lineage, TaskLineage.properties.name, v.lineageName),</code></span>
+<span class="ox-line" id="L241"><a class="ox-line__n" href="#L241" aria-label="Line 241">241</a><code>      Datalog.match(v.template, TaskTemplate.properties.name, v.formName),</code></span>
+<span class="ox-line" id="L242"><a class="ox-line__n" href="#L242" aria-label="Line 242">242</a><code>    ],</code></span>
+<span class="ox-line" id="L243"><a class="ox-line__n" href="#L243" aria-label="Line 243">243</a><code>  }),</code></span>
+<span class="ox-line" id="L244"><a class="ox-line__n" href="#L244" aria-label="Line 244">244</a><code>});</code></span>
+<span class="ox-line" id="L245"><a class="ox-line__n" href="#L245" aria-label="Line 245">245</a><code> </code></span>
+<span class="ox-line" id="L246"><a class="ox-line__n" href="#L246" aria-label="Line 246">246</a><code>export const onboarded = defineOntology({ name: &quot;onboarded-example&quot;, version: &quot;2&quot; }, [</code></span>
+<span class="ox-line" id="L247"><a class="ox-line__n" href="#L247" aria-label="Line 247">247</a><code>  Organization, Account, User, OrganizationMembership, UserGroup, GroupMembership, CustomProperty,</code></span>
+<span class="ox-line" id="L248"><a class="ox-line__n" href="#L248" aria-label="Line 248">248</a><code>  Employee, Employer, Placement, TaskLineage, TaskVersion, TaskTemplate, SubtaskTemplate, FieldTemplate,</code></span>
+<span class="ox-line" id="L249"><a class="ox-line__n" href="#L249" aria-label="Line 249">249</a><code>  Task, Policy, PolicyForm, Automation, AuthzInferenceRule, StartTask, RequestReview, EmployeeTasks, ReviewQueue, FormVersions,</code></span>
+<span class="ox-line" id="L250"><a class="ox-line__n" href="#L250" aria-label="Line 250">250</a><code>]);</code></span></pre></div></main>
+<footer class="oo-footer"><span class="oo-footer__brand"><b>Open Ontology</b> Experimental v0.1 · Local in-memory runtime.</span><nav aria-label="Footer navigation"><a href="/explorations/">All explorations</a><a href="/explorations/catalog.json">catalog.json</a><a href="/llms.txt">llms.txt</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">Source ↗</a></nav></footer>
+</div></body></html>
