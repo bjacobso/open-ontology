@@ -2,7 +2,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const checks = [
-  { path: "workers/subdomain", label: "Workers subdomain", permission: "Account Settings Read" },
+  { path: "workers/subdomain", label: "Workers subdomain", permission: "Workers Scripts Edit" },
   { path: "workers/scripts", label: "Workers scripts", permission: "Workers Scripts Edit" },
   { path: "secrets_store/stores", label: "Alchemy state-store Secrets Store", permission: "Secrets Store Edit" },
 ] as const;
