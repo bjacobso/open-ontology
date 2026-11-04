@@ -153,7 +153,8 @@ not implement either compiler fix.
 ## Forma package provenance
 
 The npm 0.3.0 tarball predates the descriptor API used here. This example uses
-an isolated, MIT-licensed, pinned upstream snapshot as the development package
+an isolated, MIT-licensed snapshot of latest Forma `main` (resolved to commit
+`535cd41ec7f81f3229b810df6f374ebfa04c16c7`) as the development package
 `@open-ontology/onto-forma`; the package's existing `@formalang/ts` dependency
 stays unchanged. See [the provenance and rebuild instructions](../../vendor/README.md).
 Both APIs are consumed through package exports; no sibling project source is imported.

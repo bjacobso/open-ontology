@@ -238,11 +238,11 @@
       "links": [
         {
           "title": "Forma application prototype",
-          "url": "https://github.com/bjacobso/forma/blob/fb1bb6699a1554eb7dcc19a3627f9da355800752/docs/elm.md"
+          "url": "https://github.com/bjacobso/forma/blob/535cd41ec7f81f3229b810df6f374ebfa04c16c7/docs/elm.md"
         },
         {
           "title": "Raw Elm prelude",
-          "url": "https://raw.githubusercontent.com/bjacobso/forma/fb1bb6699a1554eb7dcc19a3627f9da355800752/preludes/elm.lisp"
+          "url": "https://raw.githubusercontent.com/bjacobso/forma/535cd41ec7f81f3229b810df6f374ebfa04c16c7/preludes/elm.lisp"
         }
       ]
     },
@@ -256,11 +256,11 @@
       "links": [
         {
           "title": "Prototype documentation",
-          "url": "https://github.com/bjacobso/forma/blob/fb1bb6699a1554eb7dcc19a3627f9da355800752/docs/elm.md"
+          "url": "https://github.com/bjacobso/forma/blob/535cd41ec7f81f3229b810df6f374ebfa04c16c7/docs/elm.md"
         },
         {
           "title": "Raw prelude",
-          "url": "https://raw.githubusercontent.com/bjacobso/forma/fb1bb6699a1554eb7dcc19a3627f9da355800752/preludes/elm.lisp"
+          "url": "https://raw.githubusercontent.com/bjacobso/forma/535cd41ec7f81f3229b810df6f374ebfa04c16c7/preludes/elm.lisp"
         }
       ]
     },
@@ -279,7 +279,7 @@
       "links": [
         {
           "title": "Forma for Effect",
-          "url": "https://github.com/bjacobso/forma/blob/fb1bb6699a1554eb7dcc19a3627f9da355800752/docs/effect.md"
+          "url": "https://github.com/bjacobso/forma/blob/535cd41ec7f81f3229b810df6f374ebfa04c16c7/docs/effect.md"
         }
       ]
     },

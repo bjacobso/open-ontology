@@ -34,8 +34,8 @@ importers:
         specifier: 4.1.1
         version: 4.1.1(effect@4.1.1)(redis@6.3.1)
       '@open-ontology/onto-forma':
-        specifier: file:vendor/open-ontology-onto-forma-0.3.0-onto.fb1bb669.tgz
-        version: file:vendor/open-ontology-onto-forma-0.3.0-onto.fb1bb669.tgz(effect@4.1.1)
+        specifier: file:vendor/open-ontology-onto-forma-0.3.0-onto.535cd41e.tgz
+        version: file:vendor/open-ontology-onto-forma-0.3.0-onto.535cd41e.tgz(effect@4.1.1)
       '@types/node':
         specifier: 25.9.1
         version: 25.9.1
@@ -939,9 +939,9 @@ packages:
       '@emnapi/core': ^1.7.1 || ^2.0.0-alpha.4
       '@emnapi/runtime': ^1.7.1 || ^2.0.0-alpha.4
 
-  '@open-ontology/onto-forma@file:vendor/open-ontology-onto-forma-0.3.0-onto.fb1bb669.tgz':
-    resolution: {integrity: sha512-ZMjMZcmcgmJMrz0f+bSCH73oSUGBL/mT/P01EGaF3v+z7nvFwzcniqJ+fbpFQ2KZMoklHTkDlpjmTpM7jG2Siw==, tarball: file:vendor/open-ontology-onto-forma-0.3.0-onto.fb1bb669.tgz}
-    version: 0.3.0-onto.fb1bb669
+  '@open-ontology/onto-forma@file:vendor/open-ontology-onto-forma-0.3.0-onto.535cd41e.tgz':
+    resolution: {integrity: sha512-yl546t2GVIDQLg0OUTUqumB/Ch0wgkpCd26vgd/VEU/6pLGjP8eeia+KY+XHCmvjueP+YHNDBNiWkqSJTbL62A==, tarball: file:vendor/open-ontology-onto-forma-0.3.0-onto.535cd41e.tgz}
+    version: 0.3.0-onto.535cd41e
     peerDependencies:
       effect: ^4.1.1
 
@@ -2616,7 +2616,7 @@ snapshots:
       '@tybys/wasm-util': 0.10.4
     optional: true
 
-  '@open-ontology/onto-forma@file:vendor/open-ontology-onto-forma-0.3.0-onto.fb1bb669.tgz(effect@4.1.1)':
+  '@open-ontology/onto-forma@file:vendor/open-ontology-onto-forma-0.3.0-onto.535cd41e.tgz(effect@4.1.1)':
     dependencies:
       effect: 4.1.1
 

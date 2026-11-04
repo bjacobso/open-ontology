@@ -56,7 +56,7 @@
   "devDependencies": {
     "@alchemy.run/cloudflare": "2.0.0-beta.84",
     "@effect/platform-node": "4.1.1",
-    "@open-ontology/onto-forma": "file:vendor/open-ontology-onto-forma-0.3.0-onto.fb1bb669.tgz",
+    "@open-ontology/onto-forma": "file:vendor/open-ontology-onto-forma-0.3.0-onto.535cd41e.tgz",
     "@types/node": "25.9.1",
     "alchemy": "2.0.0-beta.84",
     "effect": "4.1.1",

@@ -39,7 +39,7 @@ describe("external Onto language prelude", () => {
   });
 
   const broken = [
-    ["misspelled rule field", "reservation.check-in", "reservation.checkin", "elaborate/hole-type", "error", /Missing field/],
+    ["misspelled rule field", "reservation.check-in", "reservation.checkin", "elaborate/hole-type", "error", /no field checkin.*did you mean check-in/],
     ["formula path returns a name", "invoice.reservation.room-class.rate", "invoice.reservation.room-class.name", "elaborate/hole-type", "error", /mismatch/i],
     ["unknown set state", ":sets {:status :checked-in}", ":sets {:status :checked_in}", "onto/unknown-state", "error", /checked_in/],
     ["unknown guard state", "(is? reservation.status :confirmed)", "(is? reservation.status :confirmd)", "onto/unknown-state", "error", /requested.*confirmed.*declined.*checked-in.*checked-out/],
