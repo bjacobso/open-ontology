@@ -42,3 +42,7 @@ pnpm exec alchemy state read --help
 ```
 
 `test/deploy.test.ts` plans the actual entrypoint for production and multiple previews with an in-memory state store and a provider that cannot deploy, and checks the OAuth/PKCE compatibility patch and authenticated HTTP state reads. With an existing state store and Cloudflare credentials, `pnpm exec alchemy plan --stage prod --no-input` inspects the live migration. Do not pass `--yes` for a local plan: Alchemy can otherwise provision or upgrade a state store during planning. `pnpm site:deploy` is the pipeline's production command; do not run it from a workspace.
+
+## Exploration notebooks
+
+`examples/catalog.json` is the shared index. `pnpm site:export-explorations` renders checked-in static pages under `public/explorations/`, raw sources and line anchors, Markdown documentation, and actual JSON output from each runnable example. `pnpm site:check` re-executes examples and checks that all artifacts match. The pages require no client runtime and retain the existing 404 handling. See [the addition convention](../../docs/adding-domains.md).

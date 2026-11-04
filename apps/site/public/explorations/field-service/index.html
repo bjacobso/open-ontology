@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Field service · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css">
+<link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index"></head>
+<body class="explore"><a class="skip" href="#main">Skip to content</a><header class="explore-nav"><a href="/">Open Ontology</a><nav aria-label="Main navigation"><a href="/explorations/">Explorations</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main"><a class="back" href="/explorations/">← All explorations</a>
+<p class="eyebrow">domain <span class="status runnable">Runs locally</span></p>
+<h1>Field service</h1><p class="lead">Equivalent TypeScript and Forma work-order models, checked for identical IR and run locally.</p>
+<nav class="page-nav" aria-label="Notebook sections"><a href="#readme">Readme</a><a href="#sources">Sources</a><a href="#run">Run example</a></nav>
+<div class="notebook"><aside><p class="eyebrow">In this exploration</p><a href="#sources">Language &amp; source</a><a href="#readme">Documentation</a><a href="#run">Model &amp; results</a><a href="/explorations/#adding">Add an exploration ↗</a></aside><div class="notebook-body">
+<section id="sources"><h2>Language &amp; source</h2><ul class="source-list"><li><span>prelude</span><a href="/explorations/source/preludes/ontology.lisp.html#L1">preludes/ontology.lisp</a><a class="raw-link" href="/explorations/raw/preludes/ontology.lisp">raw ↗</a></li><li><span>compiler</span><a href="/explorations/source/preludes/ontology-compiler.lisp.html#L1">preludes/ontology-compiler.lisp</a><a class="raw-link" href="/explorations/raw/preludes/ontology-compiler.lisp">raw ↗</a></li><li><span>model</span><a href="/explorations/source/examples/field-service/model.lisp.html#L1">examples/field-service/model.lisp</a><a class="raw-link" href="/explorations/raw/examples/field-service/model.lisp">raw ↗</a></li><li><span>model</span><a href="/explorations/source/examples/field-service/model.ts.html#L1">examples/field-service/model.ts</a><a class="raw-link" href="/explorations/raw/examples/field-service/model.ts">raw ↗</a></li><li><span>runner</span><a href="/explorations/source/examples/field-service/run.ts.html#L1">examples/field-service/run.ts</a><a class="raw-link" href="/explorations/raw/examples/field-service/run.ts">raw ↗</a></li></ul></section>
+<section id="readme" class="markdown"><p class="eyebrow">Documentation <a href="/explorations/raw/examples/field-service/README.md">Raw Markdown ↗</a></p><h1>Field service</h1>
+<p>The same work-order model is authored in TypeScript and Forma. A test compares
+their portable <code>OntologyIR</code>. The language is the package&#39;s bundled ontology
+prelude; there is no separate field-service language prelude.</p>
+<h2>Read and run</h2>
+<ul>
+<li>Language: <a href="/explorations/source/preludes/ontology.lisp.html">ontology.lisp</a>, with <a href="/explorations/source/preludes/ontology-compiler.lisp.html">construction hooks</a>.</li>
+<li>Model: <a href="/explorations/source/examples/field-service/model.lisp.html">model.lisp</a> or <a href="/explorations/source/examples/field-service/model.ts.html">model.ts</a>.</li>
+<li>Operations: <a href="/explorations/source/examples/field-service/run.ts.html">run.ts</a>.</li>
+<li>Run: <code>pnpm example</code>.</li>
+<li>Check: <code>pnpm model:check examples/field-service/model.lisp</code>.</li>
+<li>Coverage: <a href="https://github.com/bjacobso/open-ontology/blob/main/test/field-service.test.ts">field-service.test.ts</a>.</li>
+</ul>
+<p>The run seeds a technician and work order, invokes <code>assign-work-order</code> and
+prints <code>assigned-work</code> from local in-memory Triplex. Facts and actor ids are
+synthetic; this does not provide persistence, a server or authorization.</p>
+</section>
+<section id="run"><p class="eyebrow">Executable notebook</p><h2>Run the example</h2><p>Run in a clone with Node 24 and pnpm 10.11.0. Each run starts a fresh in-memory Triplex host.</p>
+<pre><code>pnpm install --frozen-lockfile
+pnpm example</code></pre>
+<h3>The model</h3><p><a href="/explorations/source/examples/field-service/model.lisp.html#L1">Full model with line links</a> · <a href="/explorations/raw/examples/field-service/model.lisp">Raw</a></p><pre tabindex="0"><code>(define-entity Technician
+  (:field [technician/name String {:required true}]))
+
+(define-entity WorkOrder
+  (:field [work-order/title String {:required true}])
+  (:field [work-order/status String {:required true}]))
+
+(define-relation assigned-to WorkOrder Technician
+  (:field [assigned-to/assigned-at Instant {:required true}]))
+
+(define-action assign-work-order
+  (:input [workOrder String {:required true}])
+  (:input [technician String {:required true}])
+  (:returns String)
+  (:do (changes
+    (clear workOrder :work-order/status)
+    (set workOrder :work-order/status &quot;assigned&quot;)
+    (link assigned-to workOrder technician {:assigned-to/assigned-at now}))))
+
+(define-datalog-query assigned-work
+  (:query
+    {:find [&quot;?title&quot; &quot;?technician&quot;]
+     :where
+       [[&quot;?work&quot; &quot;:work-order/title&quot; &quot;?title&quot;]
+        [&quot;?work&quot; &quot;:work-order/status&quot; &quot;?status&quot;]
+        [&quot;!=&quot; &quot;?status&quot; &quot;cancelled&quot;]
+        [&quot;not&quot; [&quot;?work&quot; &quot;:work-order/status&quot; &quot;archived&quot;]]
+        [&quot;?assignment&quot; &quot;:assigned-to/from&quot; &quot;?work&quot;]
+        [&quot;?assignment&quot; &quot;:assigned-to/to&quot; &quot;?person&quot;]
+        [&quot;?assignment&quot; &quot;:assigned-to/assigned-at&quot; &quot;?assignedAt&quot;]
+        [&quot;?person&quot; &quot;:technician/name&quot; &quot;?technician&quot;]]}))
+</code></pre>
+<h3>Checked output</h3><p>This output is regenerated by running the example during site checks. Run the command locally to execute it; this static page does not run code in your browser. <a href="/explorations/field-service/output.json">Output as JSON</a></p>
+<pre tabindex="0"><code>[
+  {
+    &quot;?title&quot;: &quot;Repair cooling pump&quot;,
+    &quot;?technician&quot;: &quot;Ada&quot;
+  }
+]
+</code></pre></section>
+</div></div></main><footer>Experimental v0.1 · Local in-memory runtime. <a href="/explorations/">All explorations</a></footer></body></html>

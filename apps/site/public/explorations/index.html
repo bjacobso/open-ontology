@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorations · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css">
+<link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index"></head>
+<body class="explore"><a class="skip" href="#main">Skip to content</a><header class="explore-nav"><a href="/">Open Ontology</a><nav aria-label="Main navigation"><a href="/explorations/">Explorations</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main"><p class="eyebrow">Open Ontology / field notes</p><h1>Read the language.<br>Follow it into a running example.</h1>
+<p class="lead">Business domains, platform sketches, and language experiments in one place. Each entry says what exists and where it runs.</p>
+<p class="intro-links"><a href="#catalog">Browse 16 explorations ↓</a><a href="#adding">Add a domain →</a><a href="/explorations/catalog.json">Machine-readable index ↗</a></p>
+<p class="legend"><strong>Runs locally</strong> includes source, documentation, a command and coverage. <strong>Design sketch</strong> is illustrative. <strong>Open PR</strong> is separate work under review. <strong>Upstream exploration</strong> lives in another project.</p>
+<section id="catalog" class="catalog-grid" aria-label="Exploration catalog"><article class="exploration-card"><p class="eyebrow">language <span class="status runnable">Runs locally</span></p><h2><a href="/explorations/onto/">Onto / hotel stories <span aria-hidden="true">↗</span></a></h2><p>An external OntoLang-style prelude: typed hotel records and stories lowered to portable IR and run on Triplex, with atomic observed-state guards.</p><a class="card-link" href="/explorations/onto/">Read, inspect source & run →</a></article>
+<article class="exploration-card"><p class="eyebrow">domain <span class="status runnable">Runs locally</span></p><h2><a href="/explorations/field-service/">Field service <span aria-hidden="true">↗</span></a></h2><p>Equivalent TypeScript and Forma work-order models, checked for identical IR and run locally.</p><a class="card-link" href="/explorations/field-service/">Read, inspect source & run →</a></article>
+<article class="exploration-card"><p class="eyebrow">domain <span class="status runnable">Runs locally</span></p><h2><a href="/explorations/support-desk/">Support desk <span aria-hidden="true">↗</span></a></h2><p>Tickets, references, escalation links, updates, negation and aggregate queries in Forma.</p><a class="card-link" href="/explorations/support-desk/">Read, inspect source & run →</a></article>
+<article class="exploration-card"><p class="eyebrow">domain <span class="status runnable">Runs locally</span></p><h2><a href="/explorations/github/">Git / GitHub <span aria-hidden="true">↗</span></a></h2><p>Bundled Git and GitHub vocabularies: repositories, forks, branches, PRs, issues and local graph queries.</p><a class="card-link" href="/explorations/github/">Read, inspect source & run →</a></article>
+<article class="exploration-card"><p class="eyebrow">domain <span class="status runnable">Runs locally</span></p><h2><a href="/explorations/onboarded/">Onboarded <span aria-hidden="true">↗</span></a></h2><p>Illustrative account language with checked scenarios, plus a TypeScript ontology and local Triplex transcript. The account checker is handwritten example code, not a Forma prelude.</p><a class="card-link" href="/explorations/onboarded/">Read, inspect source & run →</a></article>
+<article class="exploration-card"><p class="eyebrow">platform <span class="status sketch">Design sketch</span></p><h2><a href="/explorations/stripe/">Stripe <span aria-hidden="true">↗</span></a></h2><p>Homepage pricing and billing language sketch. No Stripe prelude, API adapter or runnable pricing example ships in this repository.</p><a class="card-link" href="/explorations/stripe/">Read the exploration →</a></article>
+<article class="exploration-card"><p class="eyebrow">platform <span class="status sketch">Design sketch</span></p><h2><a href="/explorations/salesforce/">Salesforce <span aria-hidden="true">↗</span></a></h2><p>Homepage metadata language sketch. No Salesforce prelude or Metadata API compiler ships here.</p><a class="card-link" href="/explorations/salesforce/">Read the exploration →</a></article>
+<article class="exploration-card"><p class="eyebrow">platform <span class="status review">Open PR</span></p><h2><a href="/explorations/palantir/">Palantir / Foundry <span aria-hidden="true">↗</span></a></h2><p>The bundled ontology language runs on Triplex. A separate open PR explores compiling portable models to Foundry Ontology as Code; it is not part of this checkout.</p><a class="card-link" href="/explorations/palantir/">Read the exploration →</a></article>
+<article class="exploration-card"><p class="eyebrow">framework <span class="status external">Upstream exploration</span></p><h2><a href="/explorations/foldkit/">Foldkit <span aria-hidden="true">↗</span></a></h2><p>Forma's Elm-style application prototype generates Foldkit and Effect TypeScript. It lives upstream in Forma; Open Ontology does not use Foldkit.</p><a class="card-link" href="/explorations/foldkit/">Read the exploration →</a></article>
+<article class="exploration-card"><p class="eyebrow">language <span class="status external">Upstream exploration</span></p><h2><a href="/explorations/elm/">Elm architecture <span aria-hidden="true">↗</span></a></h2><p>An upstream Forma prelude for Model / Message / update / view and checked command recovery. This is a Forma prototype targeting Foldkit, not an Elm compiler integration in this package.</p><a class="card-link" href="/explorations/elm/">Read the exploration →</a></article>
+<article class="exploration-card"><p class="eyebrow">framework <span class="status external">Upstream exploration</span></p><h2><a href="/explorations/effect/">Effect <span aria-hidden="true">↗</span></a></h2><p>Effect 4.1.1 runs this package. Forma's separate Effect language checks services, typed failures and layers and generates TypeScript; that language is upstream, not an Open Ontology domain prelude.</p><a class="card-link" href="/explorations/effect/">Read the exploration →</a></article>
+<article class="exploration-card"><p class="eyebrow">platform <span class="status sketch">Design sketch</span></p><h2><a href="/explorations/okta/">Okta <span aria-hidden="true">↗</span></a></h2><p>Homepage groups, rules and app-assignment sketch. No executable prelude or provider integration ships here.</p><a class="card-link" href="/explorations/okta/">Read the exploration →</a></article>
+<article class="exploration-card"><p class="eyebrow">platform <span class="status sketch">Design sketch</span></p><h2><a href="/explorations/pagerduty/">PagerDuty <span aria-hidden="true">↗</span></a></h2><p>Homepage on-call scheduling and escalation sketch. No executable prelude or provider integration ships here.</p><a class="card-link" href="/explorations/pagerduty/">Read the exploration →</a></article>
+<article class="exploration-card"><p class="eyebrow">platform <span class="status sketch">Design sketch</span></p><h2><a href="/explorations/zapier/">Zapier <span aria-hidden="true">↗</span></a></h2><p>A workflows-as-code landing-page study. The page is published static content, not an executable Zapier prelude or deployer.</p><a class="card-link" href="/explorations/zapier/">Read the exploration →</a></article>
+<article class="exploration-card"><p class="eyebrow">language <span class="status review">Open PR</span></p><h2><a href="/explorations/skills/">Skills as a primitive <span aria-hidden="true">↗</span></a></h2><p>An open design exploration for skills as a first-class primitive, separate from the shipped ontology language.</p><a class="card-link" href="/explorations/skills/">Read the exploration →</a></article>
+<article class="exploration-card"><p class="eyebrow">language <span class="status review">Open PR</span></p><h2><a href="/explorations/prelude-catalog/">Prelude guides <span aria-hidden="true">↗</span></a></h2><p>A separate open PR proposes source landing pages for six bundled Lisp sources. This catalog indexes that work without treating it as merged.</p><a class="card-link" href="/explorations/prelude-catalog/">Read the exploration →</a></article></section>
+<section id="adding" class="adding markdown"><p class="eyebrow">One convention</p><h1>Adding a domain or exploration</h1>
+<p>Start with an entry in <a href="https://github.com/bjacobso/open-ontology/blob/main/examples/catalog.json">the catalog</a>. The
+<a href="https://open-ontology.com/explorations/">exploration index</a> presents the same
+catalog to people; its <a href="https://open-ontology.com/explorations/catalog.json">JSON</a>
+is available to agents. An entry can begin as a sketch and become runnable
+without changing its id or URL.</p>
+<h2>Choose the kind and status</h2>
+<p>A <strong>domain</strong> describes business records and operations (support desk, GitHub,
+Onboarded). A <strong>language</strong> adds authoring syntax or compilation (Onto). A
+<strong>platform</strong> targets another product (Stripe, Salesforce, Foundry). A
+<strong>framework</strong> concerns the host or generated application (Effect, Foldkit).
+These are catalog classifications, not new package APIs.</p>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Evidence required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>runnable</code></td>
+<td>Checked-in README, model, runner, package script and behavior test</td>
+</tr>
+<tr>
+<td><code>sketch</code></td>
+<td>An explicit description and link to the design; no runnable command</td>
+</tr>
+<tr>
+<td><code>review</code></td>
+<td>Link to the separate open PR; do not imply it is merged</td>
+</tr>
+<tr>
+<td><code>external</code></td>
+<td>Link to upstream docs/source; no implied local command</td>
+</tr>
+</tbody></table>
+<p>For work outside this checkout, link its PR or upstream repository. Do not copy
+another branch&#39;s implementation or promote a homepage sketch to a working
+integration. Update entries when their linked work lands or closes.</p>
+<h2>A runnable example</h2>
+<p>Use <code>examples/&lt;id&gt;/</code> with a stable kebab-case id. Keep these responsibilities
+visible, even if a small example combines files:</p>
+<table>
+<thead>
+<tr>
+<th>File or field</th>
+<th>Contract</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>README.md</code></td>
+<td>What it models, language/model/operations links, how to run, what is checked, what is omitted, operational limits</td>
+</tr>
+<tr>
+<td><code>model.lisp</code>, <code>model.forma</code> or <code>model.ts</code></td>
+<td>Business declarations, separate from scenario facts</td>
+</tr>
+<tr>
+<td><code>scenario.ts</code></td>
+<td>Deterministic synthetic facts, fixed business clock, commands and queries; reusable by tests</td>
+</tr>
+<tr>
+<td><code>run.ts</code></td>
+<td>Prints the scenario result; wire <code>pnpm example:&lt;id&gt;</code> in package.json</td>
+</tr>
+<tr>
+<td><code>test/&lt;id&gt;.test.ts</code></td>
+<td>Behavior coverage; a lowering golden and negative diagnostics when introducing a language</td>
+</tr>
+<tr>
+<td><code>onto.lisp</code> or another named prelude</td>
+<td>Only when introducing a language; keep experimental external languages in the example</td>
+</tr>
+<tr>
+<td><code>lower.ts</code></td>
+<td>Language IR → portable <code>OntologyIR</code>; report unsupported features</td>
+</tr>
+<tr>
+<td><code>guards.ts</code></td>
+<td>Host-specific checks if needed; state whether checks and writes are atomic</td>
+</tr>
+</tbody></table>
+<p>A shared language belongs in the catalog&#39;s <code>sources</code> with role <code>prelude</code>.
+An existing vocabulary belongs there as <code>library</code>. If the example has no
+prelude (such as Onboarded&#39;s handwritten account elaborator), say so. Link the
+actual implementation rather than inventing a language source.</p>
+<p>Reusable domain vocabulary can later move to <code>libraries/</code>, following
+<a href="https://github.com/bjacobso/open-ontology/blob/main/docs/git-libraries.md">Git&#39;s extension pattern</a>. A new bundled import needs an
+explicit entry in <code>src/forma-libraries.ts</code>; the catalog itself does not install
+or load a language. Keep portable IR JSON-safe. Do not import sibling project
+source; consume a pinned package dependency.</p>
+<h2>Register and publish the reading notebook</h2>
+<p>Add an entry to <code>examples/catalog.json</code>: <code>id</code>, <code>title</code>, <code>kind</code>, <code>status</code>,
+<code>summary</code>, <code>readme</code>, <code>command</code>, <code>test</code>, <code>sources</code>, and <code>links</code>. Each source has
+<code>path</code> and <code>role</code>; a runnable entry needs <code>model</code> and <code>runner</code> sources. Paths
+are repository-relative. Commands are direct <code>pnpm</code> package scripts with a
+<code>tsx examples/&lt;id&gt;/run.ts</code> entrypoint. An optional <code>output</code> fixture is checked
+against the command&#39;s JSON result.</p>
+<p>Run <code>pnpm site:export-explorations</code> after editing registered files. It produces
+checked-in static assets in <code>apps/site/public/explorations/</code>:</p>
+<ul>
+<li><code>/explorations/</code>: the catalog and this convention.</li>
+<li><code>/explorations/&lt;id&gt;/</code>: rendered README, sources, complete model, run command and actual output.</li>
+<li><code>/explorations/source/&lt;repo-path&gt;.html#L12</code>: full source with stable line links.</li>
+<li><code>/explorations/raw/&lt;repo-path&gt;</code>: byte-for-byte source, including raw Markdown.</li>
+<li><code>/explorations/&lt;id&gt;/output.json</code>: the scenario&#39;s result.</li>
+<li><code>/explorations/catalog.json</code>: the manifest for agents.</li>
+</ul>
+<p>These are static reading notebooks. They do not execute in the browser. The
+exporter runs each local example to capture the results; <code>pnpm site:check</code>
+reruns them and rejects stale assets, missing paths or invalid entries. No
+framework, server or SPA fallback is involved. Do not edit generated pages.</p>
+<p>Run <code>pnpm check</code> before opening a PR against <code>main</code>. Keep agent example links
+in sync. Describe exactly what runs and what is only checked, plus guard,
+identity, persistence and authorization limits where relevant. Deployment uses
+the existing pipeline; adding an entry does not deploy an integration.</p>
+</section></main><footer>Experimental v0.1 · Local in-memory runtime. <a href="/explorations/">All explorations</a></footer></body></html>

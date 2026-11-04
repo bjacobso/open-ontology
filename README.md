@@ -2,7 +2,7 @@
 
 `@open-ontology/ontology` defines a portable ontology model, compiles TypeScript and Forma sources to the same JSON-safe IR, and runs actions and named Datalog queries on Triplex.
 
-Maturity: **experimental (v0.1)**. One package, four executable examples, and a local in-memory runtime; no durable server or npm release yet.
+Maturity: **experimental (v0.1)**. One package, five executable examples, and a local in-memory runtime; no durable server or npm release yet.
 
 The selected implementation was adapted from the [historical Open Ontology repository](https://github.com/bjacobso/open-ontology-legacy) at [commit `7c2ff8a`](https://github.com/bjacobso/open-ontology-legacy/commit/7c2ff8a614b9f06a6e530aa80d0c7311dc81a323), especially its `packages/ontology` directory. The current code removes its server convenience method and does not bring over the old workspace or runtime.
 
@@ -21,12 +21,21 @@ pnpm example
 pnpm example:support-desk
 pnpm example:github
 pnpm example:onboarded
+pnpm example:onto
 pnpm model:check examples/support-desk/model.lisp
 ```
 
 `pnpm example` loads [the TypeScript model](examples/field-service/model.ts) and [the Forma model](examples/field-service/model.lisp), checks their IR for equivalence, seeds an in-memory Triplex host, invokes `assign-work-order`, and prints the `assigned-work` query result. `pnpm example:support-desk` runs a Forma-only model that exercises `create`, `clear` followed by `set`, reference fields, relations, negation, ordering, and aggregates.
 
 `pnpm model:check <model.lisp | model.ts>` elaborates a model, applies the runtime's naming and input-schema rules, and reports errors with `file:line:col`. It also warns about models that compile but misbehave: queries that match undeclared attributes or find unbound variables, optional inputs used by changes, single-valued fields set without a preceding `clear`, and changes that target a fixed object id. Pass `--json` for machine-readable output.
+
+## Explore or add a domain
+
+The [exploration catalog](https://open-ontology.com/explorations/) indexes runnable domains, language integrations, platform sketches and upstream framework work, including Stripe, Salesforce, Onto, Onboarded, Palantir, Foldkit, Elm and Effect. Each local example has a rendered README, full source with line links, a runnable model and output regenerated from its command. Sketches and open PRs are labeled separately.
+
+[Add a domain or exploration](docs/adding-domains.md) using the single [catalog manifest](examples/catalog.json), then run `pnpm site:export-explorations`. `pnpm site:check` reruns the notebooks and rejects stale sources or output. These are static reading notebooks; execution happens in a clone.
+
+`pnpm example:onto` loads an external OntoLang-style Forma prelude, lowers the hotel model to portable IR and plays guarded stories on Triplex. It demonstrates atomic observed-entity preconditions without changes to the runtime adapter. [The example README](examples/onto/README.md) lists the checked-only rules, unlowered invoice formula, and host limits.
 
 ## Git and GitHub libraries
 

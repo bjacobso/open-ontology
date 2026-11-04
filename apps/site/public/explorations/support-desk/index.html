@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support desk · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css">
+<link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index"></head>
+<body class="explore"><a class="skip" href="#main">Skip to content</a><header class="explore-nav"><a href="/">Open Ontology</a><nav aria-label="Main navigation"><a href="/explorations/">Explorations</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main"><a class="back" href="/explorations/">← All explorations</a>
+<p class="eyebrow">domain <span class="status runnable">Runs locally</span></p>
+<h1>Support desk</h1><p class="lead">Tickets, references, escalation links, updates, negation and aggregate queries in Forma.</p>
+<nav class="page-nav" aria-label="Notebook sections"><a href="#readme">Readme</a><a href="#sources">Sources</a><a href="#run">Run example</a></nav>
+<div class="notebook"><aside><p class="eyebrow">In this exploration</p><a href="#sources">Language &amp; source</a><a href="#readme">Documentation</a><a href="#run">Model &amp; results</a><a href="/explorations/#adding">Add an exploration ↗</a></aside><div class="notebook-body">
+<section id="sources"><h2>Language &amp; source</h2><ul class="source-list"><li><span>prelude</span><a href="/explorations/source/preludes/ontology.lisp.html#L1">preludes/ontology.lisp</a><a class="raw-link" href="/explorations/raw/preludes/ontology.lisp">raw ↗</a></li><li><span>compiler</span><a href="/explorations/source/preludes/ontology-compiler.lisp.html#L1">preludes/ontology-compiler.lisp</a><a class="raw-link" href="/explorations/raw/preludes/ontology-compiler.lisp">raw ↗</a></li><li><span>model</span><a href="/explorations/source/examples/support-desk/model.lisp.html#L1">examples/support-desk/model.lisp</a><a class="raw-link" href="/explorations/raw/examples/support-desk/model.lisp">raw ↗</a></li><li><span>runner</span><a href="/explorations/source/examples/support-desk/run.ts.html#L1">examples/support-desk/run.ts</a><a class="raw-link" href="/explorations/raw/examples/support-desk/run.ts">raw ↗</a></li></ul></section>
+<section id="readme" class="markdown"><p class="eyebrow">Documentation <a href="/explorations/raw/examples/support-desk/README.md">Raw Markdown ↗</a></p><h1>Support desk</h1>
+<p>A Forma-only model exercises object creation, clear-then-set updates, references,
+relations, negation, ordering and grouped aggregates. It uses the bundled
+ontology language; there is no separate support-desk prelude.</p>
+<h2>Read and run</h2>
+<ul>
+<li>Language: <a href="/explorations/source/preludes/ontology.lisp.html">ontology.lisp</a>, with <a href="/explorations/source/preludes/ontology-compiler.lisp.html">construction hooks</a>.</li>
+<li>Model: <a href="/explorations/source/examples/support-desk/model.lisp.html">model.lisp</a>.</li>
+<li>Operations: <a href="/explorations/source/examples/support-desk/run.ts.html">run.ts</a>.</li>
+<li>Run: <code>pnpm example:support-desk</code>.</li>
+<li>Check: <code>pnpm model:check examples/support-desk/model.lisp</code>.</li>
+<li>Coverage and checked output: <a href="https://github.com/bjacobso/open-ontology/blob/main/test/agent-guide.test.ts">agent-guide.test.ts</a> and <a href="https://github.com/bjacobso/open-ontology/blob/main/apps/site/public/llms-full.txt">agent guide</a>.</li>
+</ul>
+<p>The run opens three synthetic tickets, escalates one, closes another and prints
+three Datalog query results from local in-memory Triplex. There is no durable
+server, product authorization or external help-desk integration.</p>
+</section>
+<section id="run"><p class="eyebrow">Executable notebook</p><h2>Run the example</h2><p>Run in a clone with Node 24 and pnpm 10.11.0. Each run starts a fresh in-memory Triplex host.</p>
+<pre><code>pnpm install --frozen-lockfile
+pnpm example:support-desk</code></pre>
+<h3>The model</h3><p><a href="/explorations/source/examples/support-desk/model.lisp.html#L1">Full model with line links</a> · <a href="/explorations/raw/examples/support-desk/model.lisp">Raw</a></p><pre tabindex="0"><code>(define-entity Customer
+  (:doc &quot;An organisation that raises tickets.&quot;)
+  (:field [customer/name String {:required true}]))
+
+(define-entity Engineer
+  (:field [engineer/name String {:required true}]))
+
+(define-entity Ticket
+  (:field [ticket/title String {:required true}])
+  (:field [ticket/customer Customer {:required true}])
+  (:field [ticket/status String {:required true}])
+  (:field [ticket/priority Int {:required true}])
+  (:field [ticket/opened-at Instant {:required true}]))
+
+(define-relation escalated-to Ticket Engineer
+  (:field [escalated-to/reason String {:required true}])
+  (:field [escalated-to/at Instant {:required true}]))
+
+(define-action open-ticket
+  (:input [ticket String {:required true}])
+  (:input [customer String {:required true}])
+  (:input [title String {:required true}])
+  (:input [priority Int {:required true}])
+  (:returns String)
+  (:do (create Ticket ticket
+         {:ticket/title title
+          :ticket/customer customer
+          :ticket/status &quot;open&quot;
+          :ticket/priority priority
+          :ticket/opened-at now})))
+
+(define-action escalate-ticket
+  (:input [ticket String {:required true}])
+  (:input [engineer String {:required true}])
+  (:input [reason String {:required true}])
+  (:returns String)
+  (:do (changes
+    (clear ticket :ticket/status)
+    (set ticket :ticket/status &quot;escalated&quot;)
+    (link escalated-to ticket engineer
+      {:escalated-to/reason reason :escalated-to/at now}))))
+
+(define-action close-ticket
+  (:input [ticket String {:required true}])
+  (:returns String)
+  (:do (changes
+    (clear ticket :ticket/status)
+    (set ticket :ticket/status &quot;closed&quot;))))
+
+(define-datalog-query open-work
+  (:query
+    {:find [&quot;?title&quot; &quot;?customer&quot; &quot;?priority&quot;]
+     :where [[&quot;?t&quot; &quot;:ticket/title&quot; &quot;?title&quot;]
+             [&quot;?t&quot; &quot;:ticket/priority&quot; &quot;?priority&quot;]
+             [&quot;?t&quot; &quot;:ticket/customer&quot; &quot;?c&quot;]
+             [&quot;?c&quot; &quot;:customer/name&quot; &quot;?customer&quot;]
+             [&quot;not&quot; [&quot;?t&quot; &quot;:ticket/status&quot; &quot;closed&quot;]]]
+     :orderBy [{:variable &quot;?priority&quot; :direction &quot;desc&quot;}]}))
+
+(define-datalog-query escalations
+  (:query
+    {:find [&quot;?title&quot; &quot;?engineer&quot; &quot;?reason&quot;]
+     :where [[&quot;?e&quot; &quot;:escalated-to/from&quot; &quot;?t&quot;]
+             [&quot;?e&quot; &quot;:escalated-to/to&quot; &quot;?who&quot;]
+             [&quot;?e&quot; &quot;:escalated-to/reason&quot; &quot;?reason&quot;]
+             [&quot;?t&quot; &quot;:ticket/title&quot; &quot;?title&quot;]
+             [&quot;?who&quot; &quot;:engineer/name&quot; &quot;?engineer&quot;]]}))
+
+(define-datalog-query tickets-by-status
+  (:query
+    {:find [&quot;?status&quot; &quot;?count&quot;]
+     :where [[&quot;?t&quot; &quot;:ticket/status&quot; &quot;?status&quot;]]
+     :aggregate [[&quot;count&quot; &quot;?t&quot; &quot;?count&quot;]]}))
+</code></pre>
+<h3>Checked output</h3><p>This output is regenerated by running the example during site checks. Run the command locally to execute it; this static page does not run code in your browser. <a href="/explorations/support-desk/output.json">Output as JSON</a></p>
+<pre tabindex="0"><code>{
+  &quot;open-work&quot;: [
+    {
+      &quot;?title&quot;: &quot;VPN drops hourly&quot;,
+      &quot;?customer&quot;: &quot;Acme&quot;,
+      &quot;?priority&quot;: 2
+    },
+    {
+      &quot;?title&quot;: &quot;Invoice PDF blank&quot;,
+      &quot;?customer&quot;: &quot;Acme&quot;,
+      &quot;?priority&quot;: 1
+    }
+  ],
+  &quot;escalations&quot;: [
+    {
+      &quot;?title&quot;: &quot;VPN drops hourly&quot;,
+      &quot;?engineer&quot;: &quot;Lin&quot;,
+      &quot;?reason&quot;: &quot;Needs network access&quot;
+    }
+  ],
+  &quot;tickets-by-status&quot;: [
+    {
+      &quot;?status&quot;: &quot;escalated&quot;,
+      &quot;?count&quot;: 1
+    },
+    {
+      &quot;?status&quot;: &quot;open&quot;,
+      &quot;?count&quot;: 1
+    },
+    {
+      &quot;?status&quot;: &quot;closed&quot;,
+      &quot;?count&quot;: 1
+    }
+  ]
+}
+</code></pre></section>
+</div></div></main><footer>Experimental v0.1 · Local in-memory runtime. <a href="/explorations/">All explorations</a></footer></body></html>

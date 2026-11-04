@@ -17,6 +17,9 @@ const pages = Object.fromEntries(readdirSync(publicDir, { recursive: true })
 const texts = { "llms.txt": read("llms.txt"), "llms-full.txt": read("llms-full.txt") };
 
 const checkRepoLink = (source, url) => {
+  // PRs, issues and non-main source links describe explorations outside this checkout.
+  const remotePath = url.slice(repoUrl.length);
+  if (/^(?:pull|issues)\/\d+(?:$|[#?])/.test(remotePath) || /^(?:blob|tree)\/(?!main\/)/.test(remotePath)) return;
   const path = url.startsWith(rawRepoUrl)
     ? url.slice(rawRepoUrl.length).replace(/[#?].*$/, "")
     : url.slice(repoUrl.length).replace(/^(?:blob|tree)\/main\//, "").replace(/[#?].*$/, "");

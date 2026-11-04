@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>examples/onto/guards.ts · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css">
+<link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index"></head>
+<body class="explore"><a class="skip" href="#main">Skip to content</a><header class="explore-nav"><a href="/">Open Ontology</a><nav aria-label="Main navigation"><a href="/explorations/">Explorations</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main"><p class="eyebrow">Full source · ts</p><h1 class="source-title">examples/onto/guards.ts</h1>
+<p><a href="/explorations/raw/examples/onto/guards.ts">Raw source</a> · <a href="https://github.com/bjacobso/open-ontology/blob/main/examples/onto/guards.ts">View on GitHub ↗</a></p>
+<p>Click a line number to copy its location from your address bar.</p><pre class="source-code" tabindex="0"><span class="source-line" id="L1"><a class="line-number" href="#L1" aria-label="Line 1">1</a><code>import { Effect } from &quot;effect&quot;;</code></span>
+<span class="source-line" id="L2"><a class="line-number" href="#L2" aria-label="Line 2">2</a><code>import { EntityId, Triples, type TransactionPrecondition, type Triple } from &quot;@triplex-build/triplex&quot;;</code></span>
+<span class="source-line" id="L3"><a class="line-number" href="#L3" aria-label="Line 3">3</a><code>import { makeOntologyRuntime } from &quot;../../src/runtime.js&quot;;</code></span>
+<span class="source-line" id="L4"><a class="line-number" href="#L4" aria-label="Line 4">4</a><code>import type { OntologyIR } from &quot;../../src/ir.js&quot;;</code></span>
+<span class="source-line" id="L5"><a class="line-number" href="#L5" aria-label="Line 5">5</a><code>import type { ElaboratedDeclaration } from &quot;@open-ontology/onto-forma/descriptor&quot;;</code></span>
+<span class="source-line" id="L6"><a class="line-number" href="#L6" aria-label="Line 6">6</a><code>import { attribute, nounsOf, stepsOf, type Expression } from &quot;./lower.js&quot;;</code></span>
+<span class="source-line" id="L7"><a class="line-number" href="#L7" aria-label="Line 7">7</a><code> </code></span>
+<span class="source-line" id="L8"><a class="line-number" href="#L8" aria-label="Line 8">8</a><code>type View = Readonly&lt;Record&lt;string, unknown&gt;&gt;;</code></span>
+<span class="source-line" id="L9"><a class="line-number" href="#L9" aria-label="Line 9">9</a><code>const numeric = (x: unknown): number =&gt; {</code></span>
+<span class="source-line" id="L10"><a class="line-number" href="#L10" aria-label="Line 10">10</a><code>  if (typeof x !== &quot;number&quot; || !Number.isFinite(x)) throw new TypeError(&quot;Expected a finite number&quot;);</code></span>
+<span class="source-line" id="L11"><a class="line-number" href="#L11" aria-label="Line 11">11</a><code>  return x;</code></span>
+<span class="source-line" id="L12"><a class="line-number" href="#L12" aria-label="Line 12">12</a><code>};</code></span>
+<span class="source-line" id="L13"><a class="line-number" href="#L13" aria-label="Line 13">13</a><code>const instant = (x: unknown): number =&gt; numeric(typeof x === &quot;string&quot; ? Date.parse(x) : x);</code></span>
+<span class="source-line" id="L14"><a class="line-number" href="#L14" aria-label="Line 14">14</a><code>const list = (x: unknown): readonly unknown[] =&gt; {</code></span>
+<span class="source-line" id="L15"><a class="line-number" href="#L15" aria-label="Line 15">15</a><code>  if (!Array.isArray(x)) throw new TypeError(&quot;Expected a list&quot;);</code></span>
+<span class="source-line" id="L16"><a class="line-number" href="#L16" aria-label="Line 16">16</a><code>  return x;</code></span>
+<span class="source-line" id="L17"><a class="line-number" href="#L17" aria-label="Line 17">17</a><code>};</code></span>
+<span class="source-line" id="L18"><a class="line-number" href="#L18" aria-label="Line 18">18</a><code> </code></span>
+<span class="source-line" id="L19"><a class="line-number" href="#L19" aria-label="Line 19">19</a><code>/** Interpreter for canonical RuntimeExpr data; no eval, host calls, or Forma compiler workarounds. */</code></span>
+<span class="source-line" id="L20"><a class="line-number" href="#L20" aria-label="Line 20">20</a><code>export const evaluate = (expression: unknown, scope: View): unknown =&gt; {</code></span>
+<span class="source-line" id="L21"><a class="line-number" href="#L21" aria-label="Line 21">21</a><code>  if (expression !== null &amp;&amp; typeof expression === &quot;object&quot; &amp;&amp; !Array.isArray(expression)) {</code></span>
+<span class="source-line" id="L22"><a class="line-number" href="#L22" aria-label="Line 22">22</a><code>    const value = expression as Record&lt;string, unknown&gt;;</code></span>
+<span class="source-line" id="L23"><a class="line-number" href="#L23" aria-label="Line 23">23</a><code>    if (value[&quot;kind&quot;] === &quot;raw-expr&quot;) return evaluate(value[&quot;expr&quot;], scope);</code></span>
+<span class="source-line" id="L24"><a class="line-number" href="#L24" aria-label="Line 24">24</a><code>    if (value[&quot;$forma.runtimeExpr&quot;] === &quot;string-literal&quot;) return value[&quot;value&quot;];</code></span>
+<span class="source-line" id="L25"><a class="line-number" href="#L25" aria-label="Line 25">25</a><code>    throw new TypeError(&quot;Unknown expression object&quot;);</code></span>
+<span class="source-line" id="L26"><a class="line-number" href="#L26" aria-label="Line 26">26</a><code>  }</code></span>
+<span class="source-line" id="L27"><a class="line-number" href="#L27" aria-label="Line 27">27</a><code>  if (typeof expression === &quot;string&quot;) {</code></span>
+<span class="source-line" id="L28"><a class="line-number" href="#L28" aria-label="Line 28">28</a><code>    if (expression.startsWith(&quot;:&quot;)) return expression.slice(1);</code></span>
+<span class="source-line" id="L29"><a class="line-number" href="#L29" aria-label="Line 29">29</a><code>    return expression.split(&quot;.&quot;).reduce&lt;unknown&gt;((v, key) =&gt;</code></span>
+<span class="source-line" id="L30"><a class="line-number" href="#L30" aria-label="Line 30">30</a><code>      v !== null &amp;&amp; typeof v === &quot;object&quot; ? (v as View)[key] : undefined, scope);</code></span>
+<span class="source-line" id="L31"><a class="line-number" href="#L31" aria-label="Line 31">31</a><code>  }</code></span>
+<span class="source-line" id="L32"><a class="line-number" href="#L32" aria-label="Line 32">32</a><code>  if (!Array.isArray(expression)) return expression;</code></span>
+<span class="source-line" id="L33"><a class="line-number" href="#L33" aria-label="Line 33">33</a><code>  if (expression.length === 0 || typeof expression[0] !== &quot;string&quot; || expression[0].startsWith(&quot;:&quot;)) {</code></span>
+<span class="source-line" id="L34"><a class="line-number" href="#L34" aria-label="Line 34">34</a><code>    return expression.map((x) =&gt; evaluate(x, scope));</code></span>
+<span class="source-line" id="L35"><a class="line-number" href="#L35" aria-label="Line 35">35</a><code>  }</code></span>
+<span class="source-line" id="L36"><a class="line-number" href="#L36" aria-label="Line 36">36</a><code>  const [op, ...args] = expression as [string, ...unknown[]];</code></span>
+<span class="source-line" id="L37"><a class="line-number" href="#L37" aria-label="Line 37">37</a><code>  const at = (i: number) =&gt; evaluate(args[i], scope);</code></span>
+<span class="source-line" id="L38"><a class="line-number" href="#L38" aria-label="Line 38">38</a><code>  switch (op) {</code></span>
+<span class="source-line" id="L39"><a class="line-number" href="#L39" aria-label="Line 39">39</a><code>    case &quot;and&quot;: return args.every((x) =&gt; evaluate(x, scope) === true);</code></span>
+<span class="source-line" id="L40"><a class="line-number" href="#L40" aria-label="Line 40">40</a><code>    case &quot;or&quot;: return args.some((x) =&gt; evaluate(x, scope) === true);</code></span>
+<span class="source-line" id="L41"><a class="line-number" href="#L41" aria-label="Line 41">41</a><code>    case &quot;not&quot;: return at(0) !== true;</code></span>
+<span class="source-line" id="L42"><a class="line-number" href="#L42" aria-label="Line 42">42</a><code>    case &quot;=&quot;: case &quot;is?&quot;: return at(0) === at(1);</code></span>
+<span class="source-line" id="L43"><a class="line-number" href="#L43" aria-label="Line 43">43</a><code>    case &quot;known?&quot;: return at(0) !== undefined &amp;&amp; at(0) !== null;</code></span>
+<span class="source-line" id="L44"><a class="line-number" href="#L44" aria-label="Line 44">44</a><code>    case &quot;in?&quot;: return list(at(1)).includes(at(0));</code></span>
+<span class="source-line" id="L45"><a class="line-number" href="#L45" aria-label="Line 45">45</a><code>    case &quot;before?&quot;: return instant(at(0)) &lt; instant(at(1));</code></span>
+<span class="source-line" id="L46"><a class="line-number" href="#L46" aria-label="Line 46">46</a><code>    case &quot;after?&quot;: return instant(at(0)) &gt; instant(at(1));</code></span>
+<span class="source-line" id="L47"><a class="line-number" href="#L47" aria-label="Line 47">47</a><code>    case &quot;days-between&quot;: return Math.floor((instant(at(1)) - instant(at(0))) / 86_400_000);</code></span>
+<span class="source-line" id="L48"><a class="line-number" href="#L48" aria-label="Line 48">48</a><code>    case &quot;sum&quot;: return list(at(0)).reduce&lt;number&gt;((sum, x) =&gt; sum + numeric(x), 0);</code></span>
+<span class="source-line" id="L49"><a class="line-number" href="#L49" aria-label="Line 49">49</a><code>    case &quot;+&quot;: return args.reduce&lt;number&gt;((sum, x) =&gt; sum + numeric(evaluate(x, scope)), 0);</code></span>
+<span class="source-line" id="L50"><a class="line-number" href="#L50" aria-label="Line 50">50</a><code>    case &quot;*&quot;: return args.reduce&lt;number&gt;((product, x) =&gt; product * numeric(evaluate(x, scope)), 1);</code></span>
+<span class="source-line" id="L51"><a class="line-number" href="#L51" aria-label="Line 51">51</a><code>    case &quot;-&quot;: return args.length === 1 ? -numeric(at(0)) : numeric(at(0)) - numeric(at(1));</code></span>
+<span class="source-line" id="L52"><a class="line-number" href="#L52" aria-label="Line 52">52</a><code>    case &quot;/&quot;: return numeric(numeric(at(0)) / numeric(at(1)));</code></span>
+<span class="source-line" id="L53"><a class="line-number" href="#L53" aria-label="Line 53">53</a><code>    case &quot;map&quot;: case &quot;filter&quot;: {</code></span>
+<span class="source-line" id="L54"><a class="line-number" href="#L54" aria-label="Line 54">54</a><code>      const fn = args[0];</code></span>
+<span class="source-line" id="L55"><a class="line-number" href="#L55" aria-label="Line 55">55</a><code>      if (!Array.isArray(fn) || fn[0] !== &quot;fn&quot; || !Array.isArray(fn[1]) || typeof fn[1][0] !== &quot;string&quot;) {</code></span>
+<span class="source-line" id="L56"><a class="line-number" href="#L56" aria-label="Line 56">56</a><code>        throw new TypeError(`${op} expects a single-argument fn`);</code></span>
+<span class="source-line" id="L57"><a class="line-number" href="#L57" aria-label="Line 57">57</a><code>      }</code></span>
+<span class="source-line" id="L58"><a class="line-number" href="#L58" aria-label="Line 58">58</a><code>      const parameter = fn[1][0];</code></span>
+<span class="source-line" id="L59"><a class="line-number" href="#L59" aria-label="Line 59">59</a><code>      const apply = (x: unknown) =&gt; evaluate(fn[2], { ...scope, [parameter]: x });</code></span>
+<span class="source-line" id="L60"><a class="line-number" href="#L60" aria-label="Line 60">60</a><code>      return op === &quot;map&quot; ? list(at(1)).map(apply) : list(at(1)).filter((x) =&gt; apply(x) === true);</code></span>
+<span class="source-line" id="L61"><a class="line-number" href="#L61" aria-label="Line 61">61</a><code>    }</code></span>
+<span class="source-line" id="L62"><a class="line-number" href="#L62" aria-label="Line 62">62</a><code>    default: throw new TypeError(`Unsupported Onto expression: ${op}`);</code></span>
+<span class="source-line" id="L63"><a class="line-number" href="#L63" aria-label="Line 63">63</a><code>  }</code></span>
+<span class="source-line" id="L64"><a class="line-number" href="#L64" aria-label="Line 64">64</a><code>};</code></span>
+<span class="source-line" id="L65"><a class="line-number" href="#L65" aria-label="Line 65">65</a><code> </code></span>
+<span class="source-line" id="L66"><a class="line-number" href="#L66" aria-label="Line 66">66</a><code>export type StepResult = {</code></span>
+<span class="source-line" id="L67"><a class="line-number" href="#L67" aria-label="Line 67">67</a><code>  readonly accepted: boolean;</code></span>
+<span class="source-line" id="L68"><a class="line-number" href="#L68" aria-label="Line 68">68</a><code>  readonly reason?: string;</code></span>
+<span class="source-line" id="L69"><a class="line-number" href="#L69" aria-label="Line 69">69</a><code>  readonly commandId: string;</code></span>
+<span class="source-line" id="L70"><a class="line-number" href="#L70" aria-label="Line 70">70</a><code>};</code></span>
+<span class="source-line" id="L71"><a class="line-number" href="#L71" aria-label="Line 71">71</a><code> </code></span>
+<span class="source-line" id="L72"><a class="line-number" href="#L72" aria-label="Line 72">72</a><code>/** Guard every observed entity (including absence) and pass preconditions at the Triples boundary. */</code></span>
+<span class="source-line" id="L73"><a class="line-number" href="#L73" aria-label="Line 73">73</a><code>export const makeStoryHost = (declarations: readonly ElaboratedDeclaration[], ir: OntologyIR) =&gt; {</code></span>
+<span class="source-line" id="L74"><a class="line-number" href="#L74" aria-label="Line 74">74</a><code>  const runtime = makeOntologyRuntime(ir);</code></span>
+<span class="source-line" id="L75"><a class="line-number" href="#L75" aria-label="Line 75">75</a><code>  const nouns = nounsOf(declarations);</code></span>
+<span class="source-line" id="L76"><a class="line-number" href="#L76" aria-label="Line 76">76</a><code>  const steps = stepsOf(declarations);</code></span>
+<span class="source-line" id="L77"><a class="line-number" href="#L77" aria-label="Line 77">77</a><code>  return {</code></span>
+<span class="source-line" id="L78"><a class="line-number" href="#L78" aria-label="Line 78">78</a><code>    runtime,</code></span>
+<span class="source-line" id="L79"><a class="line-number" href="#L79" aria-label="Line 79">79</a><code>    invoke: (name: string, input: View, options: { readonly actor: string; readonly commandId: string; readonly now: number },</code></span>
+<span class="source-line" id="L80"><a class="line-number" href="#L80" aria-label="Line 80">80</a><code>      beforeCommit?: Effect.Effect&lt;void, never, Triples&gt;) =&gt; Effect.gen(function* () {</code></span>
+<span class="source-line" id="L81"><a class="line-number" href="#L81" aria-label="Line 81">81</a><code>      const step = steps.find((s) =&gt; s.name === name)?.step;</code></span>
+<span class="source-line" id="L82"><a class="line-number" href="#L82" aria-label="Line 82">82</a><code>      if (!step) throw new TypeError(`Unknown story step ${name}`);</code></span>
+<span class="source-line" id="L83"><a class="line-number" href="#L83" aria-label="Line 83">83</a><code>      const triples = yield* Triples;</code></span>
+<span class="source-line" id="L84"><a class="line-number" href="#L84" aria-label="Line 84">84</a><code>      const snapshots = new Map&lt;string, readonly Triple[]&gt;();</code></span>
+<span class="source-line" id="L85"><a class="line-number" href="#L85" aria-label="Line 85">85</a><code>      const read = (id: string) =&gt; Effect.gen(function* () {</code></span>
+<span class="source-line" id="L86"><a class="line-number" href="#L86" aria-label="Line 86">86</a><code>        const cached = snapshots.get(id);</code></span>
+<span class="source-line" id="L87"><a class="line-number" href="#L87" aria-label="Line 87">87</a><code>        if (cached) return cached;</code></span>
+<span class="source-line" id="L88"><a class="line-number" href="#L88" aria-label="Line 88">88</a><code>        const facts = yield* triples.entity(EntityId.make(id));</code></span>
+<span class="source-line" id="L89"><a class="line-number" href="#L89" aria-label="Line 89">89</a><code>        snapshots.set(id, facts);</code></span>
+<span class="source-line" id="L90"><a class="line-number" href="#L90" aria-label="Line 90">90</a><code>        return facts;</code></span>
+<span class="source-line" id="L91"><a class="line-number" href="#L91" aria-label="Line 91">91</a><code>      });</code></span>
+<span class="source-line" id="L92"><a class="line-number" href="#L92" aria-label="Line 92">92</a><code>      const view = (owner: string, id: string, depth: number, initial?: View): Effect.Effect&lt;View | undefined, unknown&gt; =&gt;</code></span>
+<span class="source-line" id="L93"><a class="line-number" href="#L93" aria-label="Line 93">93</a><code>        Effect.gen(function* () {</code></span>
+<span class="source-line" id="L94"><a class="line-number" href="#L94" aria-label="Line 94">94</a><code>          const facts = yield* read(id);</code></span>
+<span class="source-line" id="L95"><a class="line-number" href="#L95" aria-label="Line 95">95</a><code>          if (!initial &amp;&amp; facts.length === 0) return undefined;</code></span>
+<span class="source-line" id="L96"><a class="line-number" href="#L96" aria-label="Line 96">96</a><code>          const noun = nouns.find((n) =&gt; n.name === owner)!;</code></span>
+<span class="source-line" id="L97"><a class="line-number" href="#L97" aria-label="Line 97">97</a><code>          const record: Record&lt;string, unknown&gt; = {};</code></span>
+<span class="source-line" id="L98"><a class="line-number" href="#L98" aria-label="Line 98">98</a><code>          for (const field of noun.fields) {</code></span>
+<span class="source-line" id="L99"><a class="line-number" href="#L99" aria-label="Line 99">99</a><code>            const stored = facts.filter((f) =&gt; f.attribute === attribute(owner, field.name)).map((f) =&gt; f.value.value);</code></span>
+<span class="source-line" id="L100"><a class="line-number" href="#L100" aria-label="Line 100">100</a><code>            const values = initial &amp;&amp; field.name in initial</code></span>
+<span class="source-line" id="L101"><a class="line-number" href="#L101" aria-label="Line 101">101</a><code>              ? field.many ? list(initial[field.name]) : [initial[field.name]] : stored;</code></span>
+<span class="source-line" id="L102"><a class="line-number" href="#L102" aria-label="Line 102">102</a><code>            const resolved: unknown[] = [];</code></span>
+<span class="source-line" id="L103"><a class="line-number" href="#L103" aria-label="Line 103">103</a><code>            for (const value of values) {</code></span>
+<span class="source-line" id="L104"><a class="line-number" href="#L104" aria-label="Line 104">104</a><code>              resolved.push(field.link &amp;&amp; depth &gt; 0 ? yield* view(field.link, String(value), depth - 1) : value);</code></span>
+<span class="source-line" id="L105"><a class="line-number" href="#L105" aria-label="Line 105">105</a><code>            }</code></span>
+<span class="source-line" id="L106"><a class="line-number" href="#L106" aria-label="Line 106">106</a><code>            record[field.name] = field.many ? resolved : resolved[0];</code></span>
+<span class="source-line" id="L107"><a class="line-number" href="#L107" aria-label="Line 107">107</a><code>          }</code></span>
+<span class="source-line" id="L108"><a class="line-number" href="#L108" aria-label="Line 108">108</a><code>          return record;</code></span>
+<span class="source-line" id="L109"><a class="line-number" href="#L109" aria-label="Line 109">109</a><code>        });</code></span>
+<span class="source-line" id="L110"><a class="line-number" href="#L110" aria-label="Line 110">110</a><code>      const id = String(input[&quot;id&quot;]);</code></span>
+<span class="source-line" id="L111"><a class="line-number" href="#L111" aria-label="Line 111">111</a><code>      const current = yield* read(id);</code></span>
+<span class="source-line" id="L112"><a class="line-number" href="#L112" aria-label="Line 112">112</a><code>      const refuse = (reason: string): StepResult =&gt; ({ accepted: false, reason, commandId: options.commandId });</code></span>
+<span class="source-line" id="L113"><a class="line-number" href="#L113" aria-label="Line 113">113</a><code>      const noun = nouns.find((n) =&gt; n.name === step.object)!;</code></span>
+<span class="source-line" id="L114"><a class="line-number" href="#L114" aria-label="Line 114">114</a><code>      // Check terminal states before creation/guard checks, including attempts to reuse a create step.</code></span>
+<span class="source-line" id="L115"><a class="line-number" href="#L115" aria-label="Line 115">115</a><code>      for (const set of step.sets) {</code></span>
+<span class="source-line" id="L116"><a class="line-number" href="#L116" aria-label="Line 116">116</a><code>        const field = noun.fields.find((f) =&gt; f.name === set.field)!;</code></span>
+<span class="source-line" id="L117"><a class="line-number" href="#L117" aria-label="Line 117">117</a><code>        const value = current.find((f) =&gt; f.attribute === attribute(noun.name, field.name))?.value.value;</code></span>
+<span class="source-line" id="L118"><a class="line-number" href="#L118" aria-label="Line 118">118</a><code>        if (field.final.includes(String(value)) &amp;&amp; value !== set.value) return refuse(`final ${noun.name}.${field.name}: ${value}`);</code></span>
+<span class="source-line" id="L119"><a class="line-number" href="#L119" aria-label="Line 119">119</a><code>      }</code></span>
+<span class="source-line" id="L120"><a class="line-number" href="#L120" aria-label="Line 120">120</a><code>      if (step.creates &amp;&amp; current.length &gt; 0) return refuse(&quot;record already exists&quot;);</code></span>
+<span class="source-line" id="L121"><a class="line-number" href="#L121" aria-label="Line 121">121</a><code>      if (!step.creates &amp;&amp; current.length === 0) return refuse(&quot;record does not exist&quot;);</code></span>
+<span class="source-line" id="L122"><a class="line-number" href="#L122" aria-label="Line 122">122</a><code>      const record = yield* view(step.object, id, 3, step.creates ? input : undefined);</code></span>
+<span class="source-line" id="L123"><a class="line-number" href="#L123" aria-label="Line 123">123</a><code>      const scope = { [step.object.toLowerCase()]: record, now: options.now };</code></span>
+<span class="source-line" id="L124"><a class="line-number" href="#L124" aria-label="Line 124">124</a><code>      const failed = step.requires.find((e: Expression) =&gt; evaluate(e, scope) !== true);</code></span>
+<span class="source-line" id="L125"><a class="line-number" href="#L125" aria-label="Line 125">125</a><code>      if (failed) return refuse(`requires ${JSON.stringify(failed.expr)}`);</code></span>
+<span class="source-line" id="L126"><a class="line-number" href="#L126" aria-label="Line 126">126</a><code>      const preconditions: readonly TransactionPrecondition[] = [...snapshots].map(([entityId, facts]) =&gt; ({</code></span>
+<span class="source-line" id="L127"><a class="line-number" href="#L127" aria-label="Line 127">127</a><code>        _tag: &quot;EntityState&quot;, entityId: EntityId.make(entityId), tripleIds: facts.map((f) =&gt; f.id),</code></span>
+<span class="source-line" id="L128"><a class="line-number" href="#L128" aria-label="Line 128">128</a><code>      }));</code></span>
+<span class="source-line" id="L129"><a class="line-number" href="#L129" aria-label="Line 129">129</a><code>      if (beforeCommit) yield* beforeCommit;</code></span>
+<span class="source-line" id="L130"><a class="line-number" href="#L130" aria-label="Line 130">130</a><code>      // invoke() does not forward preconditions. A scoped service decorator adds them to its actual write.</code></span>
+<span class="source-line" id="L131"><a class="line-number" href="#L131" aria-label="Line 131">131</a><code>      const receipt = yield* runtime.invoke(name, input, options).pipe(Effect.provideService(Triples, {</code></span>
+<span class="source-line" id="L132"><a class="line-number" href="#L132" aria-label="Line 132">132</a><code>        ...triples,</code></span>
+<span class="source-line" id="L133"><a class="line-number" href="#L133" aria-label="Line 133">133</a><code>        transact: (operations, meta) =&gt; triples.transact(operations, {</code></span>
+<span class="source-line" id="L134"><a class="line-number" href="#L134" aria-label="Line 134">134</a><code>          ...meta, preconditions: [...(meta?.preconditions ?? []), ...preconditions],</code></span>
+<span class="source-line" id="L135"><a class="line-number" href="#L135" aria-label="Line 135">135</a><code>        }),</code></span>
+<span class="source-line" id="L136"><a class="line-number" href="#L136" aria-label="Line 136">136</a><code>      }), Effect.result);</code></span>
+<span class="source-line" id="L137"><a class="line-number" href="#L137" aria-label="Line 137">137</a><code>      if (receipt._tag === &quot;Failure&quot;) {</code></span>
+<span class="source-line" id="L138"><a class="line-number" href="#L138" aria-label="Line 138">138</a><code>        if (receipt.failure._tag === &quot;TransactionConflictError&quot;) return refuse(&quot;concurrent entity change; retry from fresh state&quot;);</code></span>
+<span class="source-line" id="L139"><a class="line-number" href="#L139" aria-label="Line 139">139</a><code>        return yield* Effect.fail(receipt.failure);</code></span>
+<span class="source-line" id="L140"><a class="line-number" href="#L140" aria-label="Line 140">140</a><code>      }</code></span>
+<span class="source-line" id="L141"><a class="line-number" href="#L141" aria-label="Line 141">141</a><code>      return { accepted: true, commandId: options.commandId } satisfies StepResult;</code></span>
+<span class="source-line" id="L142"><a class="line-number" href="#L142" aria-label="Line 142">142</a><code>    }),</code></span>
+<span class="source-line" id="L143"><a class="line-number" href="#L143" aria-label="Line 143">143</a><code>  };</code></span>
+<span class="source-line" id="L144"><a class="line-number" href="#L144" aria-label="Line 144">144</a><code>};</code></span></pre></main><footer>Experimental v0.1 · Local in-memory runtime. <a href="/explorations/">All explorations</a></footer></body></html>

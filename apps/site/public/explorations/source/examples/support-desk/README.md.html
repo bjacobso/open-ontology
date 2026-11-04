@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>examples/support-desk/README.md · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css">
+<link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index"></head>
+<body class="explore"><a class="skip" href="#main">Skip to content</a><header class="explore-nav"><a href="/">Open Ontology</a><nav aria-label="Main navigation"><a href="/explorations/">Explorations</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main"><p class="eyebrow">Full source · md</p><h1 class="source-title">examples/support-desk/README.md</h1>
+<p><a href="/explorations/raw/examples/support-desk/README.md">Raw source</a> · <a href="https://github.com/bjacobso/open-ontology/blob/main/examples/support-desk/README.md">View on GitHub ↗</a></p>
+<p>Click a line number to copy its location from your address bar.</p><pre class="source-code" tabindex="0"><span class="source-line" id="L1"><a class="line-number" href="#L1" aria-label="Line 1">1</a><code># Support desk</code></span>
+<span class="source-line" id="L2"><a class="line-number" href="#L2" aria-label="Line 2">2</a><code> </code></span>
+<span class="source-line" id="L3"><a class="line-number" href="#L3" aria-label="Line 3">3</a><code>A Forma-only model exercises object creation, clear-then-set updates, references,</code></span>
+<span class="source-line" id="L4"><a class="line-number" href="#L4" aria-label="Line 4">4</a><code>relations, negation, ordering and grouped aggregates. It uses the bundled</code></span>
+<span class="source-line" id="L5"><a class="line-number" href="#L5" aria-label="Line 5">5</a><code>ontology language; there is no separate support-desk prelude.</code></span>
+<span class="source-line" id="L6"><a class="line-number" href="#L6" aria-label="Line 6">6</a><code> </code></span>
+<span class="source-line" id="L7"><a class="line-number" href="#L7" aria-label="Line 7">7</a><code>## Read and run</code></span>
+<span class="source-line" id="L8"><a class="line-number" href="#L8" aria-label="Line 8">8</a><code> </code></span>
+<span class="source-line" id="L9"><a class="line-number" href="#L9" aria-label="Line 9">9</a><code>- Language: [ontology.lisp](../../preludes/ontology.lisp), with [construction hooks](../../preludes/ontology-compiler.lisp).</code></span>
+<span class="source-line" id="L10"><a class="line-number" href="#L10" aria-label="Line 10">10</a><code>- Model: [model.lisp](model.lisp).</code></span>
+<span class="source-line" id="L11"><a class="line-number" href="#L11" aria-label="Line 11">11</a><code>- Operations: [run.ts](run.ts).</code></span>
+<span class="source-line" id="L12"><a class="line-number" href="#L12" aria-label="Line 12">12</a><code>- Run: `pnpm example:support-desk`.</code></span>
+<span class="source-line" id="L13"><a class="line-number" href="#L13" aria-label="Line 13">13</a><code>- Check: `pnpm model:check examples/support-desk/model.lisp`.</code></span>
+<span class="source-line" id="L14"><a class="line-number" href="#L14" aria-label="Line 14">14</a><code>- Coverage and checked output: [agent-guide.test.ts](../../test/agent-guide.test.ts) and [agent guide](../../apps/site/public/llms-full.txt).</code></span>
+<span class="source-line" id="L15"><a class="line-number" href="#L15" aria-label="Line 15">15</a><code> </code></span>
+<span class="source-line" id="L16"><a class="line-number" href="#L16" aria-label="Line 16">16</a><code>The run opens three synthetic tickets, escalates one, closes another and prints</code></span>
+<span class="source-line" id="L17"><a class="line-number" href="#L17" aria-label="Line 17">17</a><code>three Datalog query results from local in-memory Triplex. There is no durable</code></span>
+<span class="source-line" id="L18"><a class="line-number" href="#L18" aria-label="Line 18">18</a><code>server, product authorization or external help-desk integration.</code></span></pre></main><footer>Experimental v0.1 · Local in-memory runtime. <a href="/explorations/">All explorations</a></footer></body></html>

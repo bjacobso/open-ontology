@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>examples/onboarded/account/elaborate.ts · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css">
+<link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index"></head>
+<body class="explore"><a class="skip" href="#main">Skip to content</a><header class="explore-nav"><a href="/">Open Ontology</a><nav aria-label="Main navigation"><a href="/explorations/">Explorations</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main"><p class="eyebrow">Full source · ts</p><h1 class="source-title">examples/onboarded/account/elaborate.ts</h1>
+<p><a href="/explorations/raw/examples/onboarded/account/elaborate.ts">Raw source</a> · <a href="https://github.com/bjacobso/open-ontology/blob/main/examples/onboarded/account/elaborate.ts">View on GitHub ↗</a></p>
+<p>Click a line number to copy its location from your address bar.</p><pre class="source-code" tabindex="0"><span class="source-line" id="L1"><a class="line-number" href="#L1" aria-label="Line 1">1</a><code>import { parse, toSExprMany, type SExpr } from &quot;@formalang/ts/reader&quot;;</code></span>
+<span class="source-line" id="L2"><a class="line-number" href="#L2" aria-label="Line 2">2</a><code>import type {</code></span>
+<span class="source-line" id="L3"><a class="line-number" href="#L3" aria-label="Line 3">3</a><code>  Account, AccountProgram, Attribute, AttributeType, Automation, Comparison, Declaration, Diagnostic,</code></span>
+<span class="source-line" id="L4"><a class="line-number" href="#L4" aria-label="Line 4">4</a><code>  EmailExpectation, Entity, Expectation, Field, FieldTarget, Form, Formula, Group, Integration, Loc, Page,</code></span>
+<span class="source-line" id="L5"><a class="line-number" href="#L5" aria-label="Line 5">5</a><code>  Param, Policy, Rule, Scalar, Scenario, ScenarioAction, Step, Trigger, Value,</code></span>
+<span class="source-line" id="L6"><a class="line-number" href="#L6" aria-label="Line 6">6</a><code>} from &quot;./model.js&quot;;</code></span>
+<span class="source-line" id="L7"><a class="line-number" href="#L7" aria-label="Line 7">7</a><code> </code></span>
+<span class="source-line" id="L8"><a class="line-number" href="#L8" aria-label="Line 8">8</a><code>type Sym = Extract&lt;SExpr, { _tag: &quot;Sym&quot; }&gt;;</code></span>
+<span class="source-line" id="L9"><a class="line-number" href="#L9" aria-label="Line 9">9</a><code> </code></span>
+<span class="source-line" id="L10"><a class="line-number" href="#L10" aria-label="Line 10">10</a><code>class AccountError extends Error {</code></span>
+<span class="source-line" id="L11"><a class="line-number" href="#L11" aria-label="Line 11">11</a><code>  constructor(message: string, readonly loc?: Loc) {</code></span>
+<span class="source-line" id="L12"><a class="line-number" href="#L12" aria-label="Line 12">12</a><code>    super(message);</code></span>
+<span class="source-line" id="L13"><a class="line-number" href="#L13" aria-label="Line 13">13</a><code>  }</code></span>
+<span class="source-line" id="L14"><a class="line-number" href="#L14" aria-label="Line 14">14</a><code>}</code></span>
+<span class="source-line" id="L15"><a class="line-number" href="#L15" aria-label="Line 15">15</a><code> </code></span>
+<span class="source-line" id="L16"><a class="line-number" href="#L16" aria-label="Line 16">16</a><code>/** A reference to a declaration that already failed; its own error is the one worth reading. */</code></span>
+<span class="source-line" id="L17"><a class="line-number" href="#L17" aria-label="Line 17">17</a><code>class Cascade extends AccountError {}</code></span>
+<span class="source-line" id="L18"><a class="line-number" href="#L18" aria-label="Line 18">18</a><code> </code></span>
+<span class="source-line" id="L19"><a class="line-number" href="#L19" aria-label="Line 19">19</a><code>function fail(node: SExpr | undefined, message: string, fallback?: Loc): never {</code></span>
+<span class="source-line" id="L20"><a class="line-number" href="#L20" aria-label="Line 20">20</a><code>  throw new AccountError(message, node?.loc ?? fallback);</code></span>
+<span class="source-line" id="L21"><a class="line-number" href="#L21" aria-label="Line 21">21</a><code>}</code></span>
+<span class="source-line" id="L22"><a class="line-number" href="#L22" aria-label="Line 22">22</a><code> </code></span>
+<span class="source-line" id="L23"><a class="line-number" href="#L23" aria-label="Line 23">23</a><code>const isSym = (node: SExpr | undefined): node is Sym =&gt; node?._tag === &quot;Sym&quot;;</code></span>
+<span class="source-line" id="L24"><a class="line-number" href="#L24" aria-label="Line 24">24</a><code>const keywordOf = (node: SExpr | undefined): string | undefined =&gt;</code></span>
+<span class="source-line" id="L25"><a class="line-number" href="#L25" aria-label="Line 25">25</a><code>  isSym(node) &amp;&amp; node.name.startsWith(&quot;:&quot;) ? node.name.slice(1) : undefined;</code></span>
+<span class="source-line" id="L26"><a class="line-number" href="#L26" aria-label="Line 26">26</a><code>const isWord = (node: SExpr | undefined): node is Sym =&gt; isSym(node) &amp;&amp; !node.name.startsWith(&quot;:&quot;);</code></span>
+<span class="source-line" id="L27"><a class="line-number" href="#L27" aria-label="Line 27">27</a><code>const isPath = (node: SExpr | undefined): boolean =&gt; isWord(node) &amp;&amp; node.name.includes(&quot;.&quot;);</code></span>
+<span class="source-line" id="L28"><a class="line-number" href="#L28" aria-label="Line 28">28</a><code>const headOf = (node: SExpr | undefined): string | undefined =&gt;</code></span>
+<span class="source-line" id="L29"><a class="line-number" href="#L29" aria-label="Line 29">29</a><code>  node?._tag === &quot;List&quot; &amp;&amp; isSym(node.items[0]) ? node.items[0].name : undefined;</code></span>
+<span class="source-line" id="L30"><a class="line-number" href="#L30" aria-label="Line 30">30</a><code>const show = (node: SExpr): string =&gt; {</code></span>
+<span class="source-line" id="L31"><a class="line-number" href="#L31" aria-label="Line 31">31</a><code>  switch (node._tag) {</code></span>
+<span class="source-line" id="L32"><a class="line-number" href="#L32" aria-label="Line 32">32</a><code>    case &quot;Sym&quot;: return node.name;</code></span>
+<span class="source-line" id="L33"><a class="line-number" href="#L33" aria-label="Line 33">33</a><code>    case &quot;Str&quot;: return JSON.stringify(node.value);</code></span>
+<span class="source-line" id="L34"><a class="line-number" href="#L34" aria-label="Line 34">34</a><code>    case &quot;Num&quot;: case &quot;Bool&quot;: return String(node.value);</code></span>
+<span class="source-line" id="L35"><a class="line-number" href="#L35" aria-label="Line 35">35</a><code>    default: return node._tag.toLowerCase();</code></span>
+<span class="source-line" id="L36"><a class="line-number" href="#L36" aria-label="Line 36">36</a><code>  }</code></span>
+<span class="source-line" id="L37"><a class="line-number" href="#L37" aria-label="Line 37">37</a><code>};</code></span>
+<span class="source-line" id="L38"><a class="line-number" href="#L38" aria-label="Line 38">38</a><code> </code></span>
+<span class="source-line" id="L39"><a class="line-number" href="#L39" aria-label="Line 39">39</a><code>const distance = (a: string, b: string): number =&gt; {</code></span>
+<span class="source-line" id="L40"><a class="line-number" href="#L40" aria-label="Line 40">40</a><code>  const row = Array.from({ length: b.length + 1 }, (_, i) =&gt; i);</code></span>
+<span class="source-line" id="L41"><a class="line-number" href="#L41" aria-label="Line 41">41</a><code>  for (let i = 1; i &lt;= a.length; i++) {</code></span>
+<span class="source-line" id="L42"><a class="line-number" href="#L42" aria-label="Line 42">42</a><code>    let previous = row[0]!;</code></span>
+<span class="source-line" id="L43"><a class="line-number" href="#L43" aria-label="Line 43">43</a><code>    row[0] = i;</code></span>
+<span class="source-line" id="L44"><a class="line-number" href="#L44" aria-label="Line 44">44</a><code>    for (let j = 1; j &lt;= b.length; j++) {</code></span>
+<span class="source-line" id="L45"><a class="line-number" href="#L45" aria-label="Line 45">45</a><code>      const current = row[j]!;</code></span>
+<span class="source-line" id="L46"><a class="line-number" href="#L46" aria-label="Line 46">46</a><code>      row[j] = Math.min(row[j]! + 1, row[j - 1]! + 1, previous + (a[i - 1] === b[j - 1] ? 0 : 1));</code></span>
+<span class="source-line" id="L47"><a class="line-number" href="#L47" aria-label="Line 47">47</a><code>      previous = current;</code></span>
+<span class="source-line" id="L48"><a class="line-number" href="#L48" aria-label="Line 48">48</a><code>    }</code></span>
+<span class="source-line" id="L49"><a class="line-number" href="#L49" aria-label="Line 49">49</a><code>  }</code></span>
+<span class="source-line" id="L50"><a class="line-number" href="#L50" aria-label="Line 50">50</a><code>  return row[b.length]!;</code></span>
+<span class="source-line" id="L51"><a class="line-number" href="#L51" aria-label="Line 51">51</a><code>};</code></span>
+<span class="source-line" id="L52"><a class="line-number" href="#L52" aria-label="Line 52">52</a><code> </code></span>
+<span class="source-line" id="L53"><a class="line-number" href="#L53" aria-label="Line 53">53</a><code>const suggest = (name: string, candidates: Iterable&lt;string&gt;, prefix = &quot;&quot;): string =&gt; {</code></span>
+<span class="source-line" id="L54"><a class="line-number" href="#L54" aria-label="Line 54">54</a><code>  let best: string | undefined;</code></span>
+<span class="source-line" id="L55"><a class="line-number" href="#L55" aria-label="Line 55">55</a><code>  let bestDistance = Math.max(2, Math.floor(name.length / 3)) + 1;</code></span>
+<span class="source-line" id="L56"><a class="line-number" href="#L56" aria-label="Line 56">56</a><code>  for (const candidate of candidates) {</code></span>
+<span class="source-line" id="L57"><a class="line-number" href="#L57" aria-label="Line 57">57</a><code>    const d = distance(name, candidate);</code></span>
+<span class="source-line" id="L58"><a class="line-number" href="#L58" aria-label="Line 58">58</a><code>    if (d &lt; bestDistance) [best, bestDistance] = [candidate, d];</code></span>
+<span class="source-line" id="L59"><a class="line-number" href="#L59" aria-label="Line 59">59</a><code>  }</code></span>
+<span class="source-line" id="L60"><a class="line-number" href="#L60" aria-label="Line 60">60</a><code>  return best === undefined ? &quot;&quot; : ` Did you mean ${prefix}${best}?`;</code></span>
+<span class="source-line" id="L61"><a class="line-number" href="#L61" aria-label="Line 61">61</a><code>};</code></span>
+<span class="source-line" id="L62"><a class="line-number" href="#L62" aria-label="Line 62">62</a><code> </code></span>
+<span class="source-line" id="L63"><a class="line-number" href="#L63" aria-label="Line 63">63</a><code>const symbol = (node: SExpr | undefined, what: string, fallback?: Loc): string =&gt;</code></span>
+<span class="source-line" id="L64"><a class="line-number" href="#L64" aria-label="Line 64">64</a><code>  isWord(node) ? node.name : fail(node, `Expected ${what}`, fallback);</code></span>
+<span class="source-line" id="L65"><a class="line-number" href="#L65" aria-label="Line 65">65</a><code>const string = (node: SExpr | undefined, what: string, fallback?: Loc): string =&gt;</code></span>
+<span class="source-line" id="L66"><a class="line-number" href="#L66" aria-label="Line 66">66</a><code>  node?._tag === &quot;Str&quot; ? node.value : fail(node, `Expected ${what} as a string`, fallback);</code></span>
+<span class="source-line" id="L67"><a class="line-number" href="#L67" aria-label="Line 67">67</a><code>const number = (node: SExpr | undefined, what: string, fallback?: Loc): number =&gt;</code></span>
+<span class="source-line" id="L68"><a class="line-number" href="#L68" aria-label="Line 68">68</a><code>  node?._tag === &quot;Num&quot; ? node.value : fail(node, `Expected ${what} as a number`, fallback);</code></span>
+<span class="source-line" id="L69"><a class="line-number" href="#L69" aria-label="Line 69">69</a><code>const items = (node: SExpr | undefined, what: string, fallback?: Loc): readonly SExpr[] =&gt;</code></span>
+<span class="source-line" id="L70"><a class="line-number" href="#L70" aria-label="Line 70">70</a><code>  node?._tag === &quot;Vector&quot; ? node.items : fail(node, `Expected ${what} as a [vector]`, fallback);</code></span>
+<span class="source-line" id="L71"><a class="line-number" href="#L71" aria-label="Line 71">71</a><code>const kebab = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;</code></span>
+<span class="source-line" id="L72"><a class="line-number" href="#L72" aria-label="Line 72">72</a><code>const name = (node: SExpr | undefined, what: string, fallback?: Loc): string =&gt; {</code></span>
+<span class="source-line" id="L73"><a class="line-number" href="#L73" aria-label="Line 73">73</a><code>  const value = symbol(node, what, fallback);</code></span>
+<span class="source-line" id="L74"><a class="line-number" href="#L74" aria-label="Line 74">74</a><code>  return kebab.test(value) ? value : fail(node, `${value} must be lowercase kebab-case`);</code></span>
+<span class="source-line" id="L75"><a class="line-number" href="#L75" aria-label="Line 75">75</a><code>};</code></span>
+<span class="source-line" id="L76"><a class="line-number" href="#L76" aria-label="Line 76">76</a><code> </code></span>
+<span class="source-line" id="L77"><a class="line-number" href="#L77" aria-label="Line 77">77</a><code>interface Options {</code></span>
+<span class="source-line" id="L78"><a class="line-number" href="#L78" aria-label="Line 78">78</a><code>  readonly positional: SExpr[];</code></span>
+<span class="source-line" id="L79"><a class="line-number" href="#L79" aria-label="Line 79">79</a><code>  readonly flags: Set&lt;string&gt;;</code></span>
+<span class="source-line" id="L80"><a class="line-number" href="#L80" aria-label="Line 80">80</a><code>  readonly values: Map&lt;string, SExpr&gt;;</code></span>
+<span class="source-line" id="L81"><a class="line-number" href="#L81" aria-label="Line 81">81</a><code>}</code></span>
+<span class="source-line" id="L82"><a class="line-number" href="#L82" aria-label="Line 82">82</a><code> </code></span>
+<span class="source-line" id="L83"><a class="line-number" href="#L83" aria-label="Line 83">83</a><code>/** Split `positional... :flag :option value` arguments, rejecting options a form does not take. */</code></span>
+<span class="source-line" id="L84"><a class="line-number" href="#L84" aria-label="Line 84">84</a><code>const options = (args: readonly SExpr[], flags: ReadonlySet&lt;string&gt;, valued: ReadonlySet&lt;string&gt;): Options =&gt; {</code></span>
+<span class="source-line" id="L85"><a class="line-number" href="#L85" aria-label="Line 85">85</a><code>  const result: Options = { positional: [], flags: new Set(), values: new Map() };</code></span>
+<span class="source-line" id="L86"><a class="line-number" href="#L86" aria-label="Line 86">86</a><code>  for (let i = 0; i &lt; args.length; i++) {</code></span>
+<span class="source-line" id="L87"><a class="line-number" href="#L87" aria-label="Line 87">87</a><code>    const arg = args[i]!;</code></span>
+<span class="source-line" id="L88"><a class="line-number" href="#L88" aria-label="Line 88">88</a><code>    const key = keywordOf(arg);</code></span>
+<span class="source-line" id="L89"><a class="line-number" href="#L89" aria-label="Line 89">89</a><code>    if (key === undefined) {</code></span>
+<span class="source-line" id="L90"><a class="line-number" href="#L90" aria-label="Line 90">90</a><code>      result.positional.push(arg);</code></span>
+<span class="source-line" id="L91"><a class="line-number" href="#L91" aria-label="Line 91">91</a><code>      continue;</code></span>
+<span class="source-line" id="L92"><a class="line-number" href="#L92" aria-label="Line 92">92</a><code>    }</code></span>
+<span class="source-line" id="L93"><a class="line-number" href="#L93" aria-label="Line 93">93</a><code>    if (flags.has(key)) result.flags.add(key);</code></span>
+<span class="source-line" id="L94"><a class="line-number" href="#L94" aria-label="Line 94">94</a><code>    else if (valued.has(key)) {</code></span>
+<span class="source-line" id="L95"><a class="line-number" href="#L95" aria-label="Line 95">95</a><code>      if (i + 1 &gt;= args.length) fail(arg, `:${key} needs a value`);</code></span>
+<span class="source-line" id="L96"><a class="line-number" href="#L96" aria-label="Line 96">96</a><code>      result.values.set(key, args[++i]!);</code></span>
+<span class="source-line" id="L97"><a class="line-number" href="#L97" aria-label="Line 97">97</a><code>    } else fail(arg, `Unknown option :${key}.${suggest(key, [...flags, ...valued], &quot;:&quot;)}`);</code></span>
+<span class="source-line" id="L98"><a class="line-number" href="#L98" aria-label="Line 98">98</a><code>  }</code></span>
+<span class="source-line" id="L99"><a class="line-number" href="#L99" aria-label="Line 99">99</a><code>  return result;</code></span>
+<span class="source-line" id="L100"><a class="line-number" href="#L100" aria-label="Line 100">100</a><code>};</code></span>
+<span class="source-line" id="L101"><a class="line-number" href="#L101" aria-label="Line 101">101</a><code> </code></span>
+<span class="source-line" id="L102"><a class="line-number" href="#L102" aria-label="Line 102">102</a><code>const scalarNames: ReadonlySet&lt;string&gt; = new Set([&quot;string&quot;, &quot;boolean&quot;, &quot;date&quot;, &quot;datetime&quot;, &quot;integer&quot;, &quot;decimal&quot;, &quot;address&quot;]);</code></span>
+<span class="source-line" id="L103"><a class="line-number" href="#L103" aria-label="Line 103">103</a><code>const placementEntities: ReadonlySet&lt;Entity&gt; = new Set([&quot;placement&quot;, &quot;employee&quot;, &quot;employer&quot;, &quot;client&quot;, &quot;job&quot;]);</code></span>
+<span class="source-line" id="L104"><a class="line-number" href="#L104" aria-label="Line 104">104</a><code>const extendable: ReadonlySet&lt;string&gt; = placementEntities;</code></span>
+<span class="source-line" id="L105"><a class="line-number" href="#L105" aria-label="Line 105">105</a><code> </code></span>
+<span class="source-line" id="L106"><a class="line-number" href="#L106" aria-label="Line 106">106</a><code>const builtin = (entity: Entity, attribute: string, type: AttributeType, label: string): Attribute =&gt; ({</code></span>
+<span class="source-line" id="L107"><a class="line-number" href="#L107" aria-label="Line 107">107</a><code>  entity, name: attribute, path: `${entity}.${attribute}`, type, label, builtin: true,</code></span>
+<span class="source-line" id="L108"><a class="line-number" href="#L108" aria-label="Line 108">108</a><code>  searchable: false, sensitive: false, scope: false,</code></span>
+<span class="source-line" id="L109"><a class="line-number" href="#L109" aria-label="Line 109">109</a><code>});</code></span>
+<span class="source-line" id="L110"><a class="line-number" href="#L110" aria-label="Line 110">110</a><code> </code></span>
+<span class="source-line" id="L111"><a class="line-number" href="#L111" aria-label="Line 111">111</a><code>/** A small slice of the platform catalog: the built-in facts this example reads. */</code></span>
+<span class="source-line" id="L112"><a class="line-number" href="#L112" aria-label="Line 112">112</a><code>export const builtinAttributes: readonly Attribute[] = [</code></span>
+<span class="source-line" id="L113"><a class="line-number" href="#L113" aria-label="Line 113">113</a><code>  builtin(&quot;employee&quot;, &quot;first-name&quot;, { kind: &quot;string&quot; }, &quot;First name&quot;),</code></span>
+<span class="source-line" id="L114"><a class="line-number" href="#L114" aria-label="Line 114">114</a><code>  builtin(&quot;employee&quot;, &quot;last-name&quot;, { kind: &quot;string&quot; }, &quot;Last name&quot;),</code></span>
+<span class="source-line" id="L115"><a class="line-number" href="#L115" aria-label="Line 115">115</a><code>  builtin(&quot;employee&quot;, &quot;email&quot;, { kind: &quot;string&quot; }, &quot;Email&quot;),</code></span>
+<span class="source-line" id="L116"><a class="line-number" href="#L116" aria-label="Line 116">116</a><code>  builtin(&quot;employer&quot;, &quot;name&quot;, { kind: &quot;string&quot; }, &quot;Employer name&quot;),</code></span>
+<span class="source-line" id="L117"><a class="line-number" href="#L117" aria-label="Line 117">117</a><code>  builtin(&quot;client&quot;, &quot;name&quot;, { kind: &quot;string&quot; }, &quot;Client name&quot;),</code></span>
+<span class="source-line" id="L118"><a class="line-number" href="#L118" aria-label="Line 118">118</a><code>  builtin(&quot;job&quot;, &quot;name&quot;, { kind: &quot;string&quot; }, &quot;Job name&quot;),</code></span>
+<span class="source-line" id="L119"><a class="line-number" href="#L119" aria-label="Line 119">119</a><code>  builtin(&quot;placement&quot;, &quot;start-date&quot;, { kind: &quot;date&quot; }, &quot;Start date&quot;),</code></span>
+<span class="source-line" id="L120"><a class="line-number" href="#L120" aria-label="Line 120">120</a><code>  builtin(&quot;task&quot;, &quot;status&quot;, {</code></span>
+<span class="source-line" id="L121"><a class="line-number" href="#L121" aria-label="Line 121">121</a><code>    kind: &quot;enum&quot;,</code></span>
+<span class="source-line" id="L122"><a class="line-number" href="#L122" aria-label="Line 122">122</a><code>    options: [</code></span>
+<span class="source-line" id="L123"><a class="line-number" href="#L123" aria-label="Line 123">123</a><code>      { value: &quot;requires-action&quot;, label: &quot;Requires action&quot; },</code></span>
+<span class="source-line" id="L124"><a class="line-number" href="#L124" aria-label="Line 124">124</a><code>      { value: &quot;completed&quot;, label: &quot;Completed&quot; },</code></span>
+<span class="source-line" id="L125"><a class="line-number" href="#L125" aria-label="Line 125">125</a><code>      { value: &quot;expired&quot;, label: &quot;Expired&quot; },</code></span>
+<span class="source-line" id="L126"><a class="line-number" href="#L126" aria-label="Line 126">126</a><code>    ],</code></span>
+<span class="source-line" id="L127"><a class="line-number" href="#L127" aria-label="Line 127">127</a><code>  }, &quot;Task status&quot;),</code></span>
+<span class="source-line" id="L128"><a class="line-number" href="#L128" aria-label="Line 128">128</a><code>  builtin(&quot;task&quot;, &quot;due-at&quot;, { kind: &quot;date&quot; }, &quot;Due date&quot;),</code></span>
+<span class="source-line" id="L129"><a class="line-number" href="#L129" aria-label="Line 129">129</a><code>];</code></span>
+<span class="source-line" id="L130"><a class="line-number" href="#L130" aria-label="Line 130">130</a><code> </code></span>
+<span class="source-line" id="L131"><a class="line-number" href="#L131" aria-label="Line 131">131</a><code>const permissions: ReadonlySet&lt;string&gt; = new Set([</code></span>
+<span class="source-line" id="L132"><a class="line-number" href="#L132" aria-label="Line 132">132</a><code>  &quot;placement/read&quot;, &quot;placement/edit&quot;, &quot;employee/read&quot;, &quot;employee/edit&quot;, &quot;task/read&quot;, &quot;task/edit&quot;,</code></span>
+<span class="source-line" id="L133"><a class="line-number" href="#L133" aria-label="Line 133">133</a><code>  &quot;task/assign&quot;, &quot;form/read&quot;, &quot;form/edit&quot;, &quot;policy/read&quot;, &quot;policy/edit&quot;,</code></span>
+<span class="source-line" id="L134"><a class="line-number" href="#L134" aria-label="Line 134">134</a><code>]);</code></span>
+<span class="source-line" id="L135"><a class="line-number" href="#L135" aria-label="Line 135">135</a><code> </code></span>
+<span class="source-line" id="L136"><a class="line-number" href="#L136" aria-label="Line 136">136</a><code>const typeName = (type: AttributeType): string =&gt; type.kind === &quot;enum&quot; ? &quot;choice&quot; : type.kind;</code></span>
+<span class="source-line" id="L137"><a class="line-number" href="#L137" aria-label="Line 137">137</a><code> </code></span>
+<span class="source-line" id="L138"><a class="line-number" href="#L138" aria-label="Line 138">138</a><code>interface Scope {</code></span>
+<span class="source-line" id="L139"><a class="line-number" href="#L139" aria-label="Line 139">139</a><code>  readonly allows: (attribute: Attribute) =&gt; string | undefined;</code></span>
+<span class="source-line" id="L140"><a class="line-number" href="#L140" aria-label="Line 140">140</a><code>  readonly answers?: ReadonlyMap&lt;string, AttributeType&gt;;</code></span>
+<span class="source-line" id="L141"><a class="line-number" href="#L141" aria-label="Line 141">141</a><code>}</code></span>
+<span class="source-line" id="L142"><a class="line-number" href="#L142" aria-label="Line 142">142</a><code> </code></span>
+<span class="source-line" id="L143"><a class="line-number" href="#L143" aria-label="Line 143">143</a><code>const placementScope = (who: string): Scope =&gt; ({</code></span>
+<span class="source-line" id="L144"><a class="line-number" href="#L144" aria-label="Line 144">144</a><code>  allows: (attribute) =&gt; placementEntities.has(attribute.entity)</code></span>
+<span class="source-line" id="L145"><a class="line-number" href="#L145" aria-label="Line 145">145</a><code>    ? undefined</code></span>
+<span class="source-line" id="L146"><a class="line-number" href="#L146" aria-label="Line 146">146</a><code>    : `${who} read placement, employee, employer, client, and job facts; ${attribute.path} is a ${attribute.entity} fact`,</code></span>
+<span class="source-line" id="L147"><a class="line-number" href="#L147" aria-label="Line 147">147</a><code>});</code></span>
+<span class="source-line" id="L148"><a class="line-number" href="#L148" aria-label="Line 148">148</a><code>const taskScope: Scope = {</code></span>
+<span class="source-line" id="L149"><a class="line-number" href="#L149" aria-label="Line 149">149</a><code>  allows: (attribute) =&gt; attribute.entity === &quot;task&quot; || attribute.entity === &quot;employee&quot;</code></span>
+<span class="source-line" id="L150"><a class="line-number" href="#L150" aria-label="Line 150">150</a><code>    ? undefined</code></span>
+<span class="source-line" id="L151"><a class="line-number" href="#L151" aria-label="Line 151">151</a><code>    : `A task trigger loads task and employee facts; ${attribute.path} is not available`,</code></span>
+<span class="source-line" id="L152"><a class="line-number" href="#L152" aria-label="Line 152">152</a><code>};</code></span>
+<span class="source-line" id="L153"><a class="line-number" href="#L153" aria-label="Line 153">153</a><code>const accessScope: Scope = {</code></span>
+<span class="source-line" id="L154"><a class="line-number" href="#L154" aria-label="Line 154">154</a><code>  allows: (attribute) =&gt; attribute.scope</code></span>
+<span class="source-line" id="L155"><a class="line-number" href="#L155" aria-label="Line 155">155</a><code>    ? undefined</code></span>
+<span class="source-line" id="L156"><a class="line-number" href="#L156" aria-label="Line 156">156</a><code>    : `Access rules may read only :scope attributes; ${attribute.path} is not marked :scope`,</code></span>
+<span class="source-line" id="L157"><a class="line-number" href="#L157" aria-label="Line 157">157</a><code>};</code></span>
+<span class="source-line" id="L158"><a class="line-number" href="#L158" aria-label="Line 158">158</a><code>const anyScope: Scope = { allows: () =&gt; undefined };</code></span>
+<span class="source-line" id="L159"><a class="line-number" href="#L159" aria-label="Line 159">159</a><code> </code></span>
+<span class="source-line" id="L160"><a class="line-number" href="#L160" aria-label="Line 160">160</a><code>interface Context {</code></span>
+<span class="source-line" id="L161"><a class="line-number" href="#L161" aria-label="Line 161">161</a><code>  account?: Account;</code></span>
+<span class="source-line" id="L162"><a class="line-number" href="#L162" aria-label="Line 162">162</a><code>  readonly attributes: Map&lt;string, Attribute&gt;;</code></span>
+<span class="source-line" id="L163"><a class="line-number" href="#L163" aria-label="Line 163">163</a><code>  readonly rules: Map&lt;string, Rule&gt;;</code></span>
+<span class="source-line" id="L164"><a class="line-number" href="#L164" aria-label="Line 164">164</a><code>  readonly ruleReads: Map&lt;string, readonly string[]&gt;;</code></span>
+<span class="source-line" id="L165"><a class="line-number" href="#L165" aria-label="Line 165">165</a><code>  readonly constants: Map&lt;string, number&gt;;</code></span>
+<span class="source-line" id="L166"><a class="line-number" href="#L166" aria-label="Line 166">166</a><code>  readonly declared: Map&lt;string, { readonly verb: string; readonly loc: Loc }&gt;;</code></span>
+<span class="source-line" id="L167"><a class="line-number" href="#L167" aria-label="Line 167">167</a><code>  readonly failed: Set&lt;string&gt;;</code></span>
+<span class="source-line" id="L168"><a class="line-number" href="#L168" aria-label="Line 168">168</a><code>  readonly forms: Map&lt;string, Form&gt;;</code></span>
+<span class="source-line" id="L169"><a class="line-number" href="#L169" aria-label="Line 169">169</a><code>  readonly params: Map&lt;string, Param&gt;;</code></span>
+<span class="source-line" id="L170"><a class="line-number" href="#L170" aria-label="Line 170">170</a><code>  readonly diagnostics: Diagnostic[];</code></span>
+<span class="source-line" id="L171"><a class="line-number" href="#L171" aria-label="Line 171">171</a><code>}</code></span>
+<span class="source-line" id="L172"><a class="line-number" href="#L172" aria-label="Line 172">172</a><code> </code></span>
+<span class="source-line" id="L173"><a class="line-number" href="#L173" aria-label="Line 173">173</a><code>const declaredAs = (context: Context, node: SExpr, verb: string, label = verb): string =&gt; {</code></span>
+<span class="source-line" id="L174"><a class="line-number" href="#L174" aria-label="Line 174">174</a><code>  const value = symbol(node, `a ${label} name`);</code></span>
+<span class="source-line" id="L175"><a class="line-number" href="#L175" aria-label="Line 175">175</a><code>  const found = context.declared.get(value);</code></span>
+<span class="source-line" id="L176"><a class="line-number" href="#L176" aria-label="Line 176">176</a><code>  if (found?.verb === verb) return value;</code></span>
+<span class="source-line" id="L177"><a class="line-number" href="#L177" aria-label="Line 177">177</a><code>  const candidates = [...context.declared].filter(([, item]) =&gt; item.verb === verb).map(([key]) =&gt; key);</code></span>
+<span class="source-line" id="L178"><a class="line-number" href="#L178" aria-label="Line 178">178</a><code>  return fail(node, found</code></span>
+<span class="source-line" id="L179"><a class="line-number" href="#L179" aria-label="Line 179">179</a><code>    ? `${value} is a ${found.verb}, not a ${label}`</code></span>
+<span class="source-line" id="L180"><a class="line-number" href="#L180" aria-label="Line 180">180</a><code>    : `Unknown ${label} ${value}.${suggest(value, candidates)}`);</code></span>
+<span class="source-line" id="L181"><a class="line-number" href="#L181" aria-label="Line 181">181</a><code>};</code></span>
+<span class="source-line" id="L182"><a class="line-number" href="#L182" aria-label="Line 182">182</a><code> </code></span>
+<span class="source-line" id="L183"><a class="line-number" href="#L183" aria-label="Line 183">183</a><code>const attributeAt = (context: Context, node: SExpr, scope: Scope): Attribute =&gt; {</code></span>
+<span class="source-line" id="L184"><a class="line-number" href="#L184" aria-label="Line 184">184</a><code>  if (!isWord(node) || !node.name.includes(&quot;.&quot;)) return fail(node, `Expected an attribute path such as placement.weekly-hours, got ${show(node)}`);</code></span>
+<span class="source-line" id="L185"><a class="line-number" href="#L185" aria-label="Line 185">185</a><code>  const attribute = context.attributes.get(node.name);</code></span>
+<span class="source-line" id="L186"><a class="line-number" href="#L186" aria-label="Line 186">186</a><code>  if (!attribute) {</code></span>
+<span class="source-line" id="L187"><a class="line-number" href="#L187" aria-label="Line 187">187</a><code>    const entity = node.name.slice(0, node.name.indexOf(&quot;.&quot;));</code></span>
+<span class="source-line" id="L188"><a class="line-number" href="#L188" aria-label="Line 188">188</a><code>    const known = [...context.attributes.keys()];</code></span>
+<span class="source-line" id="L189"><a class="line-number" href="#L189" aria-label="Line 189">189</a><code>    return fail(node, known.some((path) =&gt; path.startsWith(`${entity}.`))</code></span>
+<span class="source-line" id="L190"><a class="line-number" href="#L190" aria-label="Line 190">190</a><code>      ? `Unknown attribute ${node.name}.${suggest(node.name, known)}`</code></span>
+<span class="source-line" id="L191"><a class="line-number" href="#L191" aria-label="Line 191">191</a><code>      : `Unknown entity ${entity}.${suggest(entity, [...extendable, &quot;task&quot;])}`);</code></span>
+<span class="source-line" id="L192"><a class="line-number" href="#L192" aria-label="Line 192">192</a><code>  }</code></span>
+<span class="source-line" id="L193"><a class="line-number" href="#L193" aria-label="Line 193">193</a><code>  const problem = scope.allows(attribute);</code></span>
+<span class="source-line" id="L194"><a class="line-number" href="#L194" aria-label="Line 194">194</a><code>  return problem ? fail(node, problem) : attribute;</code></span>
+<span class="source-line" id="L195"><a class="line-number" href="#L195" aria-label="Line 195">195</a><code>};</code></span>
+<span class="source-line" id="L196"><a class="line-number" href="#L196" aria-label="Line 196">196</a><code> </code></span>
+<span class="source-line" id="L197"><a class="line-number" href="#L197" aria-label="Line 197">197</a><code>const literal = (node: SExpr, attribute: Attribute): Value =&gt; {</code></span>
+<span class="source-line" id="L198"><a class="line-number" href="#L198" aria-label="Line 198">198</a><code>  const { type } = attribute;</code></span>
+<span class="source-line" id="L199"><a class="line-number" href="#L199" aria-label="Line 199">199</a><code>  if (type.kind === &quot;enum&quot;) {</code></span>
+<span class="source-line" id="L200"><a class="line-number" href="#L200" aria-label="Line 200">200</a><code>    const value = keywordOf(node);</code></span>
+<span class="source-line" id="L201"><a class="line-number" href="#L201" aria-label="Line 201">201</a><code>    if (value === undefined) return fail(node, `${attribute.path} is a choice; use one of ${type.options.map((o) =&gt; `:${o.value}`).join(&quot; &quot;)}`);</code></span>
+<span class="source-line" id="L202"><a class="line-number" href="#L202" aria-label="Line 202">202</a><code>    const values = type.options.map((option) =&gt; option.value);</code></span>
+<span class="source-line" id="L203"><a class="line-number" href="#L203" aria-label="Line 203">203</a><code>    return values.includes(value)</code></span>
+<span class="source-line" id="L204"><a class="line-number" href="#L204" aria-label="Line 204">204</a><code>      ? value</code></span>
+<span class="source-line" id="L205"><a class="line-number" href="#L205" aria-label="Line 205">205</a><code>      : fail(node, `:${value} is not an option of ${attribute.path}.${suggest(value, values, &quot;:&quot;)}`);</code></span>
+<span class="source-line" id="L206"><a class="line-number" href="#L206" aria-label="Line 206">206</a><code>  }</code></span>
+<span class="source-line" id="L207"><a class="line-number" href="#L207" aria-label="Line 207">207</a><code>  if (type.kind === &quot;boolean&quot;) return node._tag === &quot;Bool&quot; ? node.value : fail(node, `${attribute.path} is a boolean; use true or false`);</code></span>
+<span class="source-line" id="L208"><a class="line-number" href="#L208" aria-label="Line 208">208</a><code>  if (type.kind === &quot;integer&quot; || type.kind === &quot;decimal&quot;) {</code></span>
+<span class="source-line" id="L209"><a class="line-number" href="#L209" aria-label="Line 209">209</a><code>    if (node._tag !== &quot;Num&quot;) return fail(node, `${attribute.path} is ${type.kind === &quot;integer&quot; ? &quot;an integer&quot; : &quot;a decimal&quot;}; use a number`);</code></span>
+<span class="source-line" id="L210"><a class="line-number" href="#L210" aria-label="Line 210">210</a><code>    return type.kind === &quot;integer&quot; &amp;&amp; !Number.isInteger(node.value) ? fail(node, `${attribute.path} is an integer`) : node.value;</code></span>
+<span class="source-line" id="L211"><a class="line-number" href="#L211" aria-label="Line 211">211</a><code>  }</code></span>
+<span class="source-line" id="L212"><a class="line-number" href="#L212" aria-label="Line 212">212</a><code>  if (type.kind === &quot;date&quot; || type.kind === &quot;datetime&quot;) {</code></span>
+<span class="source-line" id="L213"><a class="line-number" href="#L213" aria-label="Line 213">213</a><code>    return node._tag === &quot;Str&quot; &amp;&amp; /^\d{4}-\d{2}-\d{2}/.test(node.value)</code></span>
+<span class="source-line" id="L214"><a class="line-number" href="#L214" aria-label="Line 214">214</a><code>      ? node.value : fail(node, `${attribute.path} is a ${type.kind}; use an ISO date string`);</code></span>
+<span class="source-line" id="L215"><a class="line-number" href="#L215" aria-label="Line 215">215</a><code>  }</code></span>
+<span class="source-line" id="L216"><a class="line-number" href="#L216" aria-label="Line 216">216</a><code>  if (type.kind === &quot;string&quot;) return node._tag === &quot;Str&quot; ? node.value : fail(node, `${attribute.path} is a string`);</code></span>
+<span class="source-line" id="L217"><a class="line-number" href="#L217" aria-label="Line 217">217</a><code>  return fail(node, `${attribute.path} is an address and cannot be compared`);</code></span>
+<span class="source-line" id="L218"><a class="line-number" href="#L218" aria-label="Line 218">218</a><code>};</code></span>
+<span class="source-line" id="L219"><a class="line-number" href="#L219" aria-label="Line 219">219</a><code> </code></span>
+<span class="source-line" id="L220"><a class="line-number" href="#L220" aria-label="Line 220">220</a><code>const comparisons: ReadonlySet&lt;string&gt; = new Set([&quot;=&quot;, &quot;not=&quot;, &quot;&gt;&quot;, &quot;&gt;=&quot;, &quot;&lt;&quot;, &quot;&lt;=&quot;]);</code></span>
+<span class="source-line" id="L221"><a class="line-number" href="#L221" aria-label="Line 221">221</a><code> </code></span>
+<span class="source-line" id="L222"><a class="line-number" href="#L222" aria-label="Line 222">222</a><code>/** Attribute paths a rule reads, following named rules. */</code></span>
+<span class="source-line" id="L223"><a class="line-number" href="#L223" aria-label="Line 223">223</a><code>const ruleReads = (context: Context, rule: Rule): string[] =&gt; {</code></span>
+<span class="source-line" id="L224"><a class="line-number" href="#L224" aria-label="Line 224">224</a><code>  switch (rule.op) {</code></span>
+<span class="source-line" id="L225"><a class="line-number" href="#L225" aria-label="Line 225">225</a><code>    case &quot;and&quot;: case &quot;or&quot;: return [...new Set(rule.args.flatMap((arg) =&gt; ruleReads(context, arg)))];</code></span>
+<span class="source-line" id="L226"><a class="line-number" href="#L226" aria-label="Line 226">226</a><code>    case &quot;not&quot;: return ruleReads(context, rule.arg);</code></span>
+<span class="source-line" id="L227"><a class="line-number" href="#L227" aria-label="Line 227">227</a><code>    case &quot;rule&quot;: return [...(context.ruleReads.get(rule.name) ?? [])];</code></span>
+<span class="source-line" id="L228"><a class="line-number" href="#L228" aria-label="Line 228">228</a><code>    case &quot;answer&quot;: return [];</code></span>
+<span class="source-line" id="L229"><a class="line-number" href="#L229" aria-label="Line 229">229</a><code>    default: return [rule.path];</code></span>
+<span class="source-line" id="L230"><a class="line-number" href="#L230" aria-label="Line 230">230</a><code>  }</code></span>
+<span class="source-line" id="L231"><a class="line-number" href="#L231" aria-label="Line 231">231</a><code>};</code></span>
+<span class="source-line" id="L232"><a class="line-number" href="#L232" aria-label="Line 232">232</a><code> </code></span>
+<span class="source-line" id="L233"><a class="line-number" href="#L233" aria-label="Line 233">233</a><code>const elaborateRule = (context: Context, node: SExpr, scope: Scope): Rule =&gt; {</code></span>
+<span class="source-line" id="L234"><a class="line-number" href="#L234" aria-label="Line 234">234</a><code>  if (isWord(node)) {</code></span>
+<span class="source-line" id="L235"><a class="line-number" href="#L235" aria-label="Line 235">235</a><code>    if (isPath(node)) {</code></span>
+<span class="source-line" id="L236"><a class="line-number" href="#L236" aria-label="Line 236">236</a><code>      const attribute = attributeAt(context, node, scope);</code></span>
+<span class="source-line" id="L237"><a class="line-number" href="#L237" aria-label="Line 237">237</a><code>      return attribute.type.kind === &quot;boolean&quot;</code></span>
+<span class="source-line" id="L238"><a class="line-number" href="#L238" aria-label="Line 238">238</a><code>        ? { op: &quot;is-true&quot;, path: attribute.path }</code></span>
+<span class="source-line" id="L239"><a class="line-number" href="#L239" aria-label="Line 239">239</a><code>        : fail(node, `${attribute.path} is a ${typeName(attribute.type)}, not a boolean; compare it with a value`);</code></span>
+<span class="source-line" id="L240"><a class="line-number" href="#L240" aria-label="Line 240">240</a><code>    }</code></span>
+<span class="source-line" id="L241"><a class="line-number" href="#L241" aria-label="Line 241">241</a><code>    const answer = scope.answers?.get(node.name);</code></span>
+<span class="source-line" id="L242"><a class="line-number" href="#L242" aria-label="Line 242">242</a><code>    if (answer) {</code></span>
+<span class="source-line" id="L243"><a class="line-number" href="#L243" aria-label="Line 243">243</a><code>      return answer.kind === &quot;boolean&quot; ? { op: &quot;answer&quot;, name: node.name } : fail(node, `${node.name} is not a yes/no answer`);</code></span>
+<span class="source-line" id="L244"><a class="line-number" href="#L244" aria-label="Line 244">244</a><code>    }</code></span>
+<span class="source-line" id="L245"><a class="line-number" href="#L245" aria-label="Line 245">245</a><code>    if (context.rules.has(node.name)) {</code></span>
+<span class="source-line" id="L246"><a class="line-number" href="#L246" aria-label="Line 246">246</a><code>      for (const path of context.ruleReads.get(node.name) ?? []) {</code></span>
+<span class="source-line" id="L247"><a class="line-number" href="#L247" aria-label="Line 247">247</a><code>        const problem = scope.allows(context.attributes.get(path)!);</code></span>
+<span class="source-line" id="L248"><a class="line-number" href="#L248" aria-label="Line 248">248</a><code>        if (problem) fail(node, `${problem} (through rule ${node.name})`);</code></span>
+<span class="source-line" id="L249"><a class="line-number" href="#L249" aria-label="Line 249">249</a><code>      }</code></span>
+<span class="source-line" id="L250"><a class="line-number" href="#L250" aria-label="Line 250">250</a><code>      return { op: &quot;rule&quot;, name: node.name };</code></span>
+<span class="source-line" id="L251"><a class="line-number" href="#L251" aria-label="Line 251">251</a><code>    }</code></span>
+<span class="source-line" id="L252"><a class="line-number" href="#L252" aria-label="Line 252">252</a><code>    const declared = context.declared.get(node.name);</code></span>
+<span class="source-line" id="L253"><a class="line-number" href="#L253" aria-label="Line 253">253</a><code>    if (context.failed.has(node.name)) throw new Cascade(node.name);</code></span>
+<span class="source-line" id="L254"><a class="line-number" href="#L254" aria-label="Line 254">254</a><code>    return fail(node, declared?.verb === &quot;rule&quot;</code></span>
+<span class="source-line" id="L255"><a class="line-number" href="#L255" aria-label="Line 255">255</a><code>      ? `Rule ${node.name} is used before it is defined`</code></span>
+<span class="source-line" id="L256"><a class="line-number" href="#L256" aria-label="Line 256">256</a><code>      : `Unknown rule ${node.name}.${suggest(node.name, [...context.rules.keys(), ...(scope.answers?.keys() ?? [])])}`);</code></span>
+<span class="source-line" id="L257"><a class="line-number" href="#L257" aria-label="Line 257">257</a><code>  }</code></span>
+<span class="source-line" id="L258"><a class="line-number" href="#L258" aria-label="Line 258">258</a><code>  if (node._tag !== &quot;List&quot; || !isSym(node.items[0])) return fail(node, `Expected a rule, got ${show(node)}`);</code></span>
+<span class="source-line" id="L259"><a class="line-number" href="#L259" aria-label="Line 259">259</a><code>  const op = node.items[0].name;</code></span>
+<span class="source-line" id="L260"><a class="line-number" href="#L260" aria-label="Line 260">260</a><code>  const args = node.items.slice(1);</code></span>
+<span class="source-line" id="L261"><a class="line-number" href="#L261" aria-label="Line 261">261</a><code>  if (op === &quot;and&quot; || op === &quot;or&quot;) {</code></span>
+<span class="source-line" id="L262"><a class="line-number" href="#L262" aria-label="Line 262">262</a><code>    if (args.length === 0) fail(node, `(${op}) needs at least one rule`);</code></span>
+<span class="source-line" id="L263"><a class="line-number" href="#L263" aria-label="Line 263">263</a><code>    return { op, args: args.map((arg) =&gt; elaborateRule(context, arg, scope)) };</code></span>
+<span class="source-line" id="L264"><a class="line-number" href="#L264" aria-label="Line 264">264</a><code>  }</code></span>
+<span class="source-line" id="L265"><a class="line-number" href="#L265" aria-label="Line 265">265</a><code>  if (op === &quot;not&quot;) {</code></span>
+<span class="source-line" id="L266"><a class="line-number" href="#L266" aria-label="Line 266">266</a><code>    if (args.length !== 1) fail(node, &quot;(not rule) takes one rule&quot;);</code></span>
+<span class="source-line" id="L267"><a class="line-number" href="#L267" aria-label="Line 267">267</a><code>    return { op, arg: elaborateRule(context, args[0]!, scope) };</code></span>
+<span class="source-line" id="L268"><a class="line-number" href="#L268" aria-label="Line 268">268</a><code>  }</code></span>
+<span class="source-line" id="L269"><a class="line-number" href="#L269" aria-label="Line 269">269</a><code>  if (op === &quot;missing?&quot;) {</code></span>
+<span class="source-line" id="L270"><a class="line-number" href="#L270" aria-label="Line 270">270</a><code>    if (args.length !== 1) fail(node, &quot;(missing? path) takes one attribute&quot;);</code></span>
+<span class="source-line" id="L271"><a class="line-number" href="#L271" aria-label="Line 271">271</a><code>    return { op: &quot;missing&quot;, path: attributeAt(context, args[0]!, scope).path };</code></span>
+<span class="source-line" id="L272"><a class="line-number" href="#L272" aria-label="Line 272">272</a><code>  }</code></span>
+<span class="source-line" id="L273"><a class="line-number" href="#L273" aria-label="Line 273">273</a><code>  if (op === &quot;in&quot;) {</code></span>
+<span class="source-line" id="L274"><a class="line-number" href="#L274" aria-label="Line 274">274</a><code>    if (args.length !== 2) fail(node, &quot;(in path [values]) takes an attribute and a vector&quot;);</code></span>
+<span class="source-line" id="L275"><a class="line-number" href="#L275" aria-label="Line 275">275</a><code>    const attribute = attributeAt(context, args[0]!, scope);</code></span>
+<span class="source-line" id="L276"><a class="line-number" href="#L276" aria-label="Line 276">276</a><code>    return { op, path: attribute.path, values: items(args[1], &quot;values&quot;).map((value) =&gt; literal(value, attribute)) };</code></span>
+<span class="source-line" id="L277"><a class="line-number" href="#L277" aria-label="Line 277">277</a><code>  }</code></span>
+<span class="source-line" id="L278"><a class="line-number" href="#L278" aria-label="Line 278">278</a><code>  if (comparisons.has(op)) {</code></span>
+<span class="source-line" id="L279"><a class="line-number" href="#L279" aria-label="Line 279">279</a><code>    if (args.length !== 2) fail(node, `(${op} path value) takes an attribute and a value`);</code></span>
+<span class="source-line" id="L280"><a class="line-number" href="#L280" aria-label="Line 280">280</a><code>    const attribute = attributeAt(context, args[0]!, scope);</code></span>
+<span class="source-line" id="L281"><a class="line-number" href="#L281" aria-label="Line 281">281</a><code>    const ordered = op !== &quot;=&quot; &amp;&amp; op !== &quot;not=&quot;;</code></span>
+<span class="source-line" id="L282"><a class="line-number" href="#L282" aria-label="Line 282">282</a><code>    if (ordered &amp;&amp; ![&quot;integer&quot;, &quot;decimal&quot;, &quot;date&quot;, &quot;datetime&quot;].includes(attribute.type.kind)) {</code></span>
+<span class="source-line" id="L283"><a class="line-number" href="#L283" aria-label="Line 283">283</a><code>      fail(args[0], `${attribute.path} is a ${typeName(attribute.type)}; ${op} needs a number or date`);</code></span>
+<span class="source-line" id="L284"><a class="line-number" href="#L284" aria-label="Line 284">284</a><code>    }</code></span>
+<span class="source-line" id="L285"><a class="line-number" href="#L285" aria-label="Line 285">285</a><code>    return { op: &quot;compare&quot;, cmp: op as Comparison, path: attribute.path, value: literal(args[1]!, attribute) };</code></span>
+<span class="source-line" id="L286"><a class="line-number" href="#L286" aria-label="Line 286">286</a><code>  }</code></span>
+<span class="source-line" id="L287"><a class="line-number" href="#L287" aria-label="Line 287">287</a><code>  return fail(node.items[0], `Unknown rule operator ${op}.${suggest(op, [&quot;and&quot;, &quot;or&quot;, &quot;not&quot;, &quot;in&quot;, &quot;missing?&quot;, ...comparisons])}`);</code></span>
+<span class="source-line" id="L288"><a class="line-number" href="#L288" aria-label="Line 288">288</a><code>};</code></span>
+<span class="source-line" id="L289"><a class="line-number" href="#L289" aria-label="Line 289">289</a><code> </code></span>
+<span class="source-line" id="L290"><a class="line-number" href="#L290" aria-label="Line 290">290</a><code>const elaborateAttributes = (context: Context, node: Extract&lt;SExpr, { _tag: &quot;List&quot; }&gt;): void =&gt; {</code></span>
+<span class="source-line" id="L291"><a class="line-number" href="#L291" aria-label="Line 291">291</a><code>  const entity = symbol(node.items[1], &quot;an entity&quot;, node.loc);</code></span>
+<span class="source-line" id="L292"><a class="line-number" href="#L292" aria-label="Line 292">292</a><code>  if (!extendable.has(entity)) fail(node.items[1], `Cannot extend ${entity}; extend one of ${[...extendable].join(&quot;, &quot;)}`);</code></span>
+<span class="source-line" id="L293"><a class="line-number" href="#L293" aria-label="Line 293">293</a><code>  for (const item of node.items.slice(2)) {</code></span>
+<span class="source-line" id="L294"><a class="line-number" href="#L294" aria-label="Line 294">294</a><code>    if (item._tag !== &quot;List&quot;) fail(item, &quot;Expected (name type \&quot;Label\&quot; options...)&quot;);</code></span>
+<span class="source-line" id="L295"><a class="line-number" href="#L295" aria-label="Line 295">295</a><code>    const list = item as Extract&lt;SExpr, { _tag: &quot;List&quot; }&gt;;</code></span>
+<span class="source-line" id="L296"><a class="line-number" href="#L296" aria-label="Line 296">296</a><code>    const attribute = name(list.items[0], &quot;an attribute name&quot;, list.loc);</code></span>
+<span class="source-line" id="L297"><a class="line-number" href="#L297" aria-label="Line 297">297</a><code>    const path = `${entity}.${attribute}`;</code></span>
+<span class="source-line" id="L298"><a class="line-number" href="#L298" aria-label="Line 298">298</a><code>    const existing = context.attributes.get(path);</code></span>
+<span class="source-line" id="L299"><a class="line-number" href="#L299" aria-label="Line 299">299</a><code>    if (existing) fail(list.items[0], existing.builtin ? `${path} is a built-in attribute` : `${path} is already declared`);</code></span>
+<span class="source-line" id="L300"><a class="line-number" href="#L300" aria-label="Line 300">300</a><code>    const typeNode = list.items[1];</code></span>
+<span class="source-line" id="L301"><a class="line-number" href="#L301" aria-label="Line 301">301</a><code>    let type: AttributeType;</code></span>
+<span class="source-line" id="L302"><a class="line-number" href="#L302" aria-label="Line 302">302</a><code>    if (headOf(typeNode) === &quot;one-of&quot;) {</code></span>
+<span class="source-line" id="L303"><a class="line-number" href="#L303" aria-label="Line 303">303</a><code>      const choices = (typeNode as Extract&lt;SExpr, { _tag: &quot;List&quot; }&gt;).items.slice(1);</code></span>
+<span class="source-line" id="L304"><a class="line-number" href="#L304" aria-label="Line 304">304</a><code>      if (choices.length === 0 || choices.length % 2 !== 0) fail(typeNode, &quot;(one-of :value \&quot;Label\&quot; ...) pairs each option with a label&quot;);</code></span>
+<span class="source-line" id="L305"><a class="line-number" href="#L305" aria-label="Line 305">305</a><code>      const optionList: Array&lt;{ value: string; label: string }&gt; = [];</code></span>
+<span class="source-line" id="L306"><a class="line-number" href="#L306" aria-label="Line 306">306</a><code>      for (let i = 0; i &lt; choices.length; i += 2) {</code></span>
+<span class="source-line" id="L307"><a class="line-number" href="#L307" aria-label="Line 307">307</a><code>        const key = choices[i];</code></span>
+<span class="source-line" id="L308"><a class="line-number" href="#L308" aria-label="Line 308">308</a><code>        const value = keywordOf(key) ?? fail(key, &quot;Choice options are keywords such as :warehouse&quot;);</code></span>
+<span class="source-line" id="L309"><a class="line-number" href="#L309" aria-label="Line 309">309</a><code>        if (optionList.some((option) =&gt; option.value === value)) fail(key, `Duplicate option :${value}`);</code></span>
+<span class="source-line" id="L310"><a class="line-number" href="#L310" aria-label="Line 310">310</a><code>        const label = string(choices[i + 1], `the label for :${value}`).trim();</code></span>
+<span class="source-line" id="L311"><a class="line-number" href="#L311" aria-label="Line 311">311</a><code>        if (!label) fail(choices[i + 1], &quot;Option labels must not be empty&quot;);</code></span>
+<span class="source-line" id="L312"><a class="line-number" href="#L312" aria-label="Line 312">312</a><code>        optionList.push({ value, label });</code></span>
+<span class="source-line" id="L313"><a class="line-number" href="#L313" aria-label="Line 313">313</a><code>      }</code></span>
+<span class="source-line" id="L314"><a class="line-number" href="#L314" aria-label="Line 314">314</a><code>      type = { kind: &quot;enum&quot;, options: optionList };</code></span>
+<span class="source-line" id="L315"><a class="line-number" href="#L315" aria-label="Line 315">315</a><code>    } else {</code></span>
+<span class="source-line" id="L316"><a class="line-number" href="#L316" aria-label="Line 316">316</a><code>      const scalar = symbol(typeNode, &quot;a type&quot;, list.loc);</code></span>
+<span class="source-line" id="L317"><a class="line-number" href="#L317" aria-label="Line 317">317</a><code>      if (!scalarNames.has(scalar)) fail(typeNode, `Unknown type ${scalar}.${suggest(scalar, [...scalarNames, &quot;one-of&quot;])}`);</code></span>
+<span class="source-line" id="L318"><a class="line-number" href="#L318" aria-label="Line 318">318</a><code>      type = { kind: scalar as Scalar };</code></span>
+<span class="source-line" id="L319"><a class="line-number" href="#L319" aria-label="Line 319">319</a><code>    }</code></span>
+<span class="source-line" id="L320"><a class="line-number" href="#L320" aria-label="Line 320">320</a><code>    const label = string(list.items[2], `a label for ${path}`, list.loc).trim();</code></span>
+<span class="source-line" id="L321"><a class="line-number" href="#L321" aria-label="Line 321">321</a><code>    if (!label) fail(list.items[2], &quot;Labels must not be empty&quot;);</code></span>
+<span class="source-line" id="L322"><a class="line-number" href="#L322" aria-label="Line 322">322</a><code>    const opts = options(list.items.slice(3), new Set([&quot;searchable&quot;, &quot;sensitive&quot;, &quot;scope&quot;]), new Set([&quot;pattern&quot;, &quot;deprecated&quot;]));</code></span>
+<span class="source-line" id="L323"><a class="line-number" href="#L323" aria-label="Line 323">323</a><code>    if (opts.positional.length) fail(opts.positional[0], `Unexpected ${show(opts.positional[0]!)}`);</code></span>
+<span class="source-line" id="L324"><a class="line-number" href="#L324" aria-label="Line 324">324</a><code>    const flagged = (flag: string) =&gt; opts.flags.has(flag);</code></span>
+<span class="source-line" id="L325"><a class="line-number" href="#L325" aria-label="Line 325">325</a><code>    if (flagged(&quot;sensitive&quot;) &amp;&amp; (flagged(&quot;searchable&quot;) || flagged(&quot;scope&quot;))) {</code></span>
+<span class="source-line" id="L326"><a class="line-number" href="#L326" aria-label="Line 326">326</a><code>      fail(list, `${path} is :sensitive, so it cannot be :searchable or :scope`);</code></span>
+<span class="source-line" id="L327"><a class="line-number" href="#L327" aria-label="Line 327">327</a><code>    }</code></span>
+<span class="source-line" id="L328"><a class="line-number" href="#L328" aria-label="Line 328">328</a><code>    if (type.kind === &quot;address&quot; &amp;&amp; opts.flags.size &gt; 0) fail(list, &quot;Address attributes cannot be :searchable, :sensitive, or :scope&quot;);</code></span>
+<span class="source-line" id="L329"><a class="line-number" href="#L329" aria-label="Line 329">329</a><code>    const pattern = opts.values.get(&quot;pattern&quot;);</code></span>
+<span class="source-line" id="L330"><a class="line-number" href="#L330" aria-label="Line 330">330</a><code>    if (pattern) {</code></span>
+<span class="source-line" id="L331"><a class="line-number" href="#L331" aria-label="Line 331">331</a><code>      if (type.kind !== &quot;string&quot;) fail(pattern, &quot;:pattern applies only to string attributes&quot;);</code></span>
+<span class="source-line" id="L332"><a class="line-number" href="#L332" aria-label="Line 332">332</a><code>      try {</code></span>
+<span class="source-line" id="L333"><a class="line-number" href="#L333" aria-label="Line 333">333</a><code>        new RegExp(string(pattern, &quot;a pattern&quot;));</code></span>
+<span class="source-line" id="L334"><a class="line-number" href="#L334" aria-label="Line 334">334</a><code>      } catch {</code></span>
+<span class="source-line" id="L335"><a class="line-number" href="#L335" aria-label="Line 335">335</a><code>        fail(pattern, &quot;Invalid regular expression&quot;);</code></span>
+<span class="source-line" id="L336"><a class="line-number" href="#L336" aria-label="Line 336">336</a><code>      }</code></span>
+<span class="source-line" id="L337"><a class="line-number" href="#L337" aria-label="Line 337">337</a><code>    }</code></span>
+<span class="source-line" id="L338"><a class="line-number" href="#L338" aria-label="Line 338">338</a><code>    const deprecated = opts.values.get(&quot;deprecated&quot;);</code></span>
+<span class="source-line" id="L339"><a class="line-number" href="#L339" aria-label="Line 339">339</a><code>    context.attributes.set(path, {</code></span>
+<span class="source-line" id="L340"><a class="line-number" href="#L340" aria-label="Line 340">340</a><code>      entity: entity as Entity, name: attribute, path, type, label, builtin: false,</code></span>
+<span class="source-line" id="L341"><a class="line-number" href="#L341" aria-label="Line 341">341</a><code>      searchable: flagged(&quot;searchable&quot;), sensitive: flagged(&quot;sensitive&quot;), scope: flagged(&quot;scope&quot;),</code></span>
+<span class="source-line" id="L342"><a class="line-number" href="#L342" aria-label="Line 342">342</a><code>      ...(pattern ? { pattern: string(pattern, &quot;a pattern&quot;) } : {}),</code></span>
+<span class="source-line" id="L343"><a class="line-number" href="#L343" aria-label="Line 343">343</a><code>      ...(deprecated ? { deprecated: string(deprecated, &quot;a deprecation reason&quot;) } : {}),</code></span>
+<span class="source-line" id="L344"><a class="line-number" href="#L344" aria-label="Line 344">344</a><code>      loc: list.items[0]!.loc,</code></span>
+<span class="source-line" id="L345"><a class="line-number" href="#L345" aria-label="Line 345">345</a><code>    });</code></span>
+<span class="source-line" id="L346"><a class="line-number" href="#L346" aria-label="Line 346">346</a><code>  }</code></span>
+<span class="source-line" id="L347"><a class="line-number" href="#L347" aria-label="Line 347">347</a><code>};</code></span>
+<span class="source-line" id="L348"><a class="line-number" href="#L348" aria-label="Line 348">348</a><code> </code></span>
+<span class="source-line" id="L349"><a class="line-number" href="#L349" aria-label="Line 349">349</a><code>const elaborateHeader = (context: Context, node: Extract&lt;SExpr, { _tag: &quot;List&quot; }&gt;): Account =&gt; {</code></span>
+<span class="source-line" id="L350"><a class="line-number" href="#L350" aria-label="Line 350">350</a><code>  const accountName = name(node.items[1], &quot;an account name&quot;, node.loc);</code></span>
+<span class="source-line" id="L351"><a class="line-number" href="#L351" aria-label="Line 351">351</a><code>  const title = string(node.items[2], &quot;an account title&quot;, node.loc);</code></span>
+<span class="source-line" id="L352"><a class="line-number" href="#L352" aria-label="Line 352">352</a><code>  const opts = options(node.items.slice(3), new Set(), new Set([&quot;languages&quot;, &quot;sender&quot;, &quot;support&quot;, &quot;dedupe&quot;]));</code></span>
+<span class="source-line" id="L353"><a class="line-number" href="#L353" aria-label="Line 353">353</a><code>  if (opts.positional.length) fail(opts.positional[0], `Unexpected ${show(opts.positional[0]!)}`);</code></span>
+<span class="source-line" id="L354"><a class="line-number" href="#L354" aria-label="Line 354">354</a><code>  const languageNodes = opts.values.has(&quot;languages&quot;) ? items(opts.values.get(&quot;languages&quot;), &quot;languages&quot;) : [];</code></span>
+<span class="source-line" id="L355"><a class="line-number" href="#L355" aria-label="Line 355">355</a><code>  const languages = languageNodes.map((language) =&gt; keywordOf(language) ?? fail(language, &quot;Languages are keywords such as :en&quot;));</code></span>
+<span class="source-line" id="L356"><a class="line-number" href="#L356" aria-label="Line 356">356</a><code>  return {</code></span>
+<span class="source-line" id="L357"><a class="line-number" href="#L357" aria-label="Line 357">357</a><code>    name: accountName, title, languages: languages.length ? languages : [&quot;en&quot;],</code></span>
+<span class="source-line" id="L358"><a class="line-number" href="#L358" aria-label="Line 358">358</a><code>    ...(opts.values.has(&quot;sender&quot;) ? { sender: string(opts.values.get(&quot;sender&quot;), &quot;a sender email&quot;) } : {}),</code></span>
+<span class="source-line" id="L359"><a class="line-number" href="#L359" aria-label="Line 359">359</a><code>    ...(opts.values.has(&quot;support&quot;) ? { support: string(opts.values.get(&quot;support&quot;), &quot;a support email&quot;) } : {}),</code></span>
+<span class="source-line" id="L360"><a class="line-number" href="#L360" aria-label="Line 360">360</a><code>    dedupe: opts.values.has(&quot;dedupe&quot;)</code></span>
+<span class="source-line" id="L361"><a class="line-number" href="#L361" aria-label="Line 361">361</a><code>      ? items(opts.values.get(&quot;dedupe&quot;), &quot;dedupe paths&quot;).map((path) =&gt; attributeAt(context, path, placementScope(&quot;Deduplication criteria&quot;)).path)</code></span>
+<span class="source-line" id="L362"><a class="line-number" href="#L362" aria-label="Line 362">362</a><code>      : [],</code></span>
+<span class="source-line" id="L363"><a class="line-number" href="#L363" aria-label="Line 363">363</a><code>  };</code></span>
+<span class="source-line" id="L364"><a class="line-number" href="#L364" aria-label="Line 364">364</a><code>};</code></span>
+<span class="source-line" id="L365"><a class="line-number" href="#L365" aria-label="Line 365">365</a><code> </code></span>
+<span class="source-line" id="L366"><a class="line-number" href="#L366" aria-label="Line 366">366</a><code>const formulaFns: ReadonlySet&lt;string&gt; = new Set([&quot;+&quot;, &quot;-&quot;, &quot;*&quot;, &quot;/&quot;, &quot;round&quot;]);</code></span>
+<span class="source-line" id="L367"><a class="line-number" href="#L367" aria-label="Line 367">367</a><code> </code></span>
+<span class="source-line" id="L368"><a class="line-number" href="#L368" aria-label="Line 368">368</a><code>/** Build-time arithmetic folds to a number; runtime formulas keep attribute and answer references. */</code></span>
+<span class="source-line" id="L369"><a class="line-number" href="#L369" aria-label="Line 369">369</a><code>const elaborateFormula = (context: Context, node: SExpr, scope: Scope): Formula =&gt; {</code></span>
+<span class="source-line" id="L370"><a class="line-number" href="#L370" aria-label="Line 370">370</a><code>  if (node._tag === &quot;Num&quot;) return { op: &quot;number&quot;, value: node.value };</code></span>
+<span class="source-line" id="L371"><a class="line-number" href="#L371" aria-label="Line 371">371</a><code>  if (isPath(node)) {</code></span>
+<span class="source-line" id="L372"><a class="line-number" href="#L372" aria-label="Line 372">372</a><code>    const attribute = attributeAt(context, node, scope);</code></span>
+<span class="source-line" id="L373"><a class="line-number" href="#L373" aria-label="Line 373">373</a><code>    return attribute.type.kind === &quot;integer&quot; || attribute.type.kind === &quot;decimal&quot;</code></span>
+<span class="source-line" id="L374"><a class="line-number" href="#L374" aria-label="Line 374">374</a><code>      ? { op: &quot;path&quot;, path: attribute.path } : fail(node, `${attribute.path} is not a number`);</code></span>
+<span class="source-line" id="L375"><a class="line-number" href="#L375" aria-label="Line 375">375</a><code>  }</code></span>
+<span class="source-line" id="L376"><a class="line-number" href="#L376" aria-label="Line 376">376</a><code>  if (isWord(node)) {</code></span>
+<span class="source-line" id="L377"><a class="line-number" href="#L377" aria-label="Line 377">377</a><code>    const constant = context.constants.get(node.name);</code></span>
+<span class="source-line" id="L378"><a class="line-number" href="#L378" aria-label="Line 378">378</a><code>    if (constant !== undefined) return { op: &quot;number&quot;, value: constant };</code></span>
+<span class="source-line" id="L379"><a class="line-number" href="#L379" aria-label="Line 379">379</a><code>    const answer = scope.answers?.get(node.name);</code></span>
+<span class="source-line" id="L380"><a class="line-number" href="#L380" aria-label="Line 380">380</a><code>    if (answer?.kind === &quot;integer&quot; || answer?.kind === &quot;decimal&quot;) return { op: &quot;answer&quot;, name: node.name };</code></span>
+<span class="source-line" id="L381"><a class="line-number" href="#L381" aria-label="Line 381">381</a><code>    return fail(node, `Unknown number ${node.name}.${suggest(node.name, context.constants.keys())}`);</code></span>
+<span class="source-line" id="L382"><a class="line-number" href="#L382" aria-label="Line 382">382</a><code>  }</code></span>
+<span class="source-line" id="L383"><a class="line-number" href="#L383" aria-label="Line 383">383</a><code>  const fn = headOf(node);</code></span>
+<span class="source-line" id="L384"><a class="line-number" href="#L384" aria-label="Line 384">384</a><code>  if (!fn || !formulaFns.has(fn)) return fail(node, `Formulas use numbers, attributes, ${[...formulaFns].join(&quot; &quot;)}`);</code></span>
+<span class="source-line" id="L385"><a class="line-number" href="#L385" aria-label="Line 385">385</a><code>  const args = (node as Extract&lt;SExpr, { _tag: &quot;List&quot; }&gt;).items.slice(1).map((arg) =&gt; elaborateFormula(context, arg, scope));</code></span>
+<span class="source-line" id="L386"><a class="line-number" href="#L386" aria-label="Line 386">386</a><code>  if (fn === &quot;round&quot; &amp;&amp; args.length !== 2) fail(node, &quot;(round value places) takes two arguments&quot;);</code></span>
+<span class="source-line" id="L387"><a class="line-number" href="#L387" aria-label="Line 387">387</a><code>  if (args.length &lt; 1) fail(node, `(${fn}) needs arguments`);</code></span>
+<span class="source-line" id="L388"><a class="line-number" href="#L388" aria-label="Line 388">388</a><code>  return { op: &quot;call&quot;, fn: fn as &quot;round&quot;, args };</code></span>
+<span class="source-line" id="L389"><a class="line-number" href="#L389" aria-label="Line 389">389</a><code>};</code></span>
+<span class="source-line" id="L390"><a class="line-number" href="#L390" aria-label="Line 390">390</a><code> </code></span>
+<span class="source-line" id="L391"><a class="line-number" href="#L391" aria-label="Line 391">391</a><code>const foldFormula = (formula: Formula): number | undefined =&gt; {</code></span>
+<span class="source-line" id="L392"><a class="line-number" href="#L392" aria-label="Line 392">392</a><code>  if (formula.op === &quot;number&quot;) return formula.value;</code></span>
+<span class="source-line" id="L393"><a class="line-number" href="#L393" aria-label="Line 393">393</a><code>  if (formula.op !== &quot;call&quot;) return undefined;</code></span>
+<span class="source-line" id="L394"><a class="line-number" href="#L394" aria-label="Line 394">394</a><code>  const values = formula.args.map(foldFormula);</code></span>
+<span class="source-line" id="L395"><a class="line-number" href="#L395" aria-label="Line 395">395</a><code>  if (values.some((value) =&gt; value === undefined)) return undefined;</code></span>
+<span class="source-line" id="L396"><a class="line-number" href="#L396" aria-label="Line 396">396</a><code>  const [first, ...rest] = values as number[];</code></span>
+<span class="source-line" id="L397"><a class="line-number" href="#L397" aria-label="Line 397">397</a><code>  switch (formula.fn) {</code></span>
+<span class="source-line" id="L398"><a class="line-number" href="#L398" aria-label="Line 398">398</a><code>    case &quot;+&quot;: return rest.reduce((a, b) =&gt; a + b, first!);</code></span>
+<span class="source-line" id="L399"><a class="line-number" href="#L399" aria-label="Line 399">399</a><code>    case &quot;-&quot;: return rest.length ? rest.reduce((a, b) =&gt; a - b, first!) : -first!;</code></span>
+<span class="source-line" id="L400"><a class="line-number" href="#L400" aria-label="Line 400">400</a><code>    case &quot;*&quot;: return rest.reduce((a, b) =&gt; a * b, first!);</code></span>
+<span class="source-line" id="L401"><a class="line-number" href="#L401" aria-label="Line 401">401</a><code>    case &quot;/&quot;: return rest.reduce((a, b) =&gt; a / b, first!);</code></span>
+<span class="source-line" id="L402"><a class="line-number" href="#L402" aria-label="Line 402">402</a><code>    case &quot;round&quot;: return Number(first!.toFixed(rest[0]));</code></span>
+<span class="source-line" id="L403"><a class="line-number" href="#L403" aria-label="Line 403">403</a><code>  }</code></span>
+<span class="source-line" id="L404"><a class="line-number" href="#L404" aria-label="Line 404">404</a><code>};</code></span>
+<span class="source-line" id="L405"><a class="line-number" href="#L405" aria-label="Line 405">405</a><code> </code></span>
+<span class="source-line" id="L406"><a class="line-number" href="#L406" aria-label="Line 406">406</a><code>const formulaReads = (formula: Formula): string[] =&gt;</code></span>
+<span class="source-line" id="L407"><a class="line-number" href="#L407" aria-label="Line 407">407</a><code>  formula.op === &quot;path&quot; ? [formula.path] : formula.op === &quot;call&quot; ? formula.args.flatMap(formulaReads) : [];</code></span>
+<span class="source-line" id="L408"><a class="line-number" href="#L408" aria-label="Line 408">408</a><code> </code></span>
+<span class="source-line" id="L409"><a class="line-number" href="#L409" aria-label="Line 409">409</a><code>const fieldTypes: Readonly&lt;Record&lt;string, { readonly accepts: (type: AttributeType) =&gt; boolean; readonly answer?: AttributeType; readonly expects: string }&gt;&gt; = {</code></span>
+<span class="source-line" id="L410"><a class="line-number" href="#L410" aria-label="Line 410">410</a><code>  checkbox: { accepts: (type) =&gt; type.kind === &quot;boolean&quot;, answer: { kind: &quot;boolean&quot; }, expects: &quot;boolean&quot; },</code></span>
+<span class="source-line" id="L411"><a class="line-number" href="#L411" aria-label="Line 411">411</a><code>  text: { accepts: (type) =&gt; type.kind === &quot;string&quot;, answer: { kind: &quot;string&quot; }, expects: &quot;string&quot; },</code></span>
+<span class="source-line" id="L412"><a class="line-number" href="#L412" aria-label="Line 412">412</a><code>  number: { accepts: (type) =&gt; type.kind === &quot;integer&quot; || type.kind === &quot;decimal&quot;, answer: { kind: &quot;decimal&quot; }, expects: &quot;integer or decimal&quot; },</code></span>
+<span class="source-line" id="L413"><a class="line-number" href="#L413" aria-label="Line 413">413</a><code>  date: { accepts: (type) =&gt; type.kind === &quot;date&quot;, answer: { kind: &quot;date&quot; }, expects: &quot;date&quot; },</code></span>
+<span class="source-line" id="L414"><a class="line-number" href="#L414" aria-label="Line 414">414</a><code>  address: { accepts: (type) =&gt; type.kind === &quot;address&quot;, answer: { kind: &quot;address&quot; }, expects: &quot;address&quot; },</code></span>
+<span class="source-line" id="L415"><a class="line-number" href="#L415" aria-label="Line 415">415</a><code>  dropdown: { accepts: (type) =&gt; type.kind === &quot;enum&quot;, expects: &quot;choice&quot; },</code></span>
+<span class="source-line" id="L416"><a class="line-number" href="#L416" aria-label="Line 416">416</a><code>};</code></span>
+<span class="source-line" id="L417"><a class="line-number" href="#L417" aria-label="Line 417">417</a><code> </code></span>
+<span class="source-line" id="L418"><a class="line-number" href="#L418" aria-label="Line 418">418</a><code>const elaborateForm = (context: Context, node: Extract&lt;SExpr, { _tag: &quot;List&quot; }&gt;): Form =&gt; {</code></span>
+<span class="source-line" id="L419"><a class="line-number" href="#L419" aria-label="Line 419">419</a><code>  const account = context.account!;</code></span>
+<span class="source-line" id="L420"><a class="line-number" href="#L420" aria-label="Line 420">420</a><code>  const formName = name(node.items[1], &quot;a form name&quot;, node.loc);</code></span>
+<span class="source-line" id="L421"><a class="line-number" href="#L421" aria-label="Line 421">421</a><code>  const hasTitle = node.items[2]?._tag === &quot;Str&quot;;</code></span>
+<span class="source-line" id="L422"><a class="line-number" href="#L422" aria-label="Line 422">422</a><code>  const rest = node.items.slice(hasTitle ? 3 : 2);</code></span>
+<span class="source-line" id="L423"><a class="line-number" href="#L423" aria-label="Line 423">423</a><code>  const opts = options(rest, new Set(), new Set([&quot;key&quot;, &quot;due-in&quot;, &quot;from&quot;]));</code></span>
+<span class="source-line" id="L424"><a class="line-number" href="#L424" aria-label="Line 424">424</a><code>  const keyNode = opts.values.get(&quot;key&quot;);</code></span>
+<span class="source-line" id="L425"><a class="line-number" href="#L425" aria-label="Line 425">425</a><code>  const key = keyNode ? string(keyNode, &quot;a form key&quot;) : `${account.name}.${formName}`;</code></span>
+<span class="source-line" id="L426"><a class="line-number" href="#L426" aria-label="Line 426">426</a><code>  const fromNode = opts.values.get(&quot;from&quot;);</code></span>
+<span class="source-line" id="L427"><a class="line-number" href="#L427" aria-label="Line 427">427</a><code>  if (fromNode) {</code></span>
+<span class="source-line" id="L428"><a class="line-number" href="#L428" aria-label="Line 428">428</a><code>    if (!keyNode) fail(node, &quot;A form :from another package needs its :key&quot;);</code></span>
+<span class="source-line" id="L429"><a class="line-number" href="#L429" aria-label="Line 429">429</a><code>    if (key.startsWith(`${account.name}.`)) fail(keyNode, `${key} is in this account's namespace; a :from form belongs to another package`);</code></span>
+<span class="source-line" id="L430"><a class="line-number" href="#L430" aria-label="Line 430">430</a><code>    if (hasTitle || opts.positional.length || opts.values.has(&quot;due-in&quot;)) fail(node, &quot;A :from form is a reference; it has no title, pages, or :due-in&quot;);</code></span>
+<span class="source-line" id="L431"><a class="line-number" href="#L431" aria-label="Line 431">431</a><code>    return { name: formName, key, from: string(fromNode, &quot;a package name&quot;), pages: [], reads: [], writes: [], loc: node.loc };</code></span>
+<span class="source-line" id="L432"><a class="line-number" href="#L432" aria-label="Line 432">432</a><code>  }</code></span>
+<span class="source-line" id="L433"><a class="line-number" href="#L433" aria-label="Line 433">433</a><code>  if (!hasTitle) fail(node, `(form ${formName} &quot;Title&quot; pages...) needs a title`, node.loc);</code></span>
+<span class="source-line" id="L434"><a class="line-number" href="#L434" aria-label="Line 434">434</a><code>  if (keyNode &amp;&amp; !key.startsWith(`${account.name}.`)) fail(keyNode, `Form keys must start with ${account.name}.`);</code></span>
+<span class="source-line" id="L435"><a class="line-number" href="#L435" aria-label="Line 435">435</a><code>  const dueNode = opts.values.get(&quot;due-in&quot;);</code></span>
+<span class="source-line" id="L436"><a class="line-number" href="#L436" aria-label="Line 436">436</a><code>  const dueIn = dueNode ? number(dueNode, &quot;days&quot;) : undefined;</code></span>
+<span class="source-line" id="L437"><a class="line-number" href="#L437" aria-label="Line 437">437</a><code>  if (dueIn !== undefined &amp;&amp; (!Number.isInteger(dueIn) || dueIn &lt;= 0)) fail(dueNode, &quot;:due-in is a positive number of days&quot;);</code></span>
+<span class="source-line" id="L438"><a class="line-number" href="#L438" aria-label="Line 438">438</a><code> </code></span>
+<span class="source-line" id="L439"><a class="line-number" href="#L439" aria-label="Line 439">439</a><code>  const answers = new Map&lt;string, AttributeType&gt;();</code></span>
+<span class="source-line" id="L440"><a class="line-number" href="#L440" aria-label="Line 440">440</a><code>  const scope: Scope = { ...placementScope(&quot;Forms&quot;), answers };</code></span>
+<span class="source-line" id="L441"><a class="line-number" href="#L441" aria-label="Line 441">441</a><code>  const reads: string[] = [];</code></span>
+<span class="source-line" id="L442"><a class="line-number" href="#L442" aria-label="Line 442">442</a><code>  const writes: string[] = [];</code></span>
+<span class="source-line" id="L443"><a class="line-number" href="#L443" aria-label="Line 443">443</a><code>  const read = (paths: readonly string[]) =&gt; reads.push(...paths.filter((path) =&gt; !reads.includes(path)));</code></span>
+<span class="source-line" id="L444"><a class="line-number" href="#L444" aria-label="Line 444">444</a><code>  const translationKeys = new Set(account.languages.slice(1));</code></span>
+<span class="source-line" id="L445"><a class="line-number" href="#L445" aria-label="Line 445">445</a><code>  const defineAnswer = (node: SExpr, type: AttributeType): FieldTarget =&gt; {</code></span>
+<span class="source-line" id="L446"><a class="line-number" href="#L446" aria-label="Line 446">446</a><code>    const answer = name(node, &quot;an answer name&quot;);</code></span>
+<span class="source-line" id="L447"><a class="line-number" href="#L447" aria-label="Line 447">447</a><code>    if (answers.has(answer)) fail(node, `${answer} is already an answer in ${formName}`);</code></span>
+<span class="source-line" id="L448"><a class="line-number" href="#L448" aria-label="Line 448">448</a><code>    answers.set(answer, type);</code></span>
+<span class="source-line" id="L449"><a class="line-number" href="#L449" aria-label="Line 449">449</a><code>    return { answer };</code></span>
+<span class="source-line" id="L450"><a class="line-number" href="#L450" aria-label="Line 450">450</a><code>  };</code></span>
+<span class="source-line" id="L451"><a class="line-number" href="#L451" aria-label="Line 451">451</a><code>  const targetRef = (node: SExpr): FieldTarget =&gt; {</code></span>
+<span class="source-line" id="L452"><a class="line-number" href="#L452" aria-label="Line 452">452</a><code>    if (isPath(node)) {</code></span>
+<span class="source-line" id="L453"><a class="line-number" href="#L453" aria-label="Line 453">453</a><code>      const path = attributeAt(context, node, scope).path;</code></span>
+<span class="source-line" id="L454"><a class="line-number" href="#L454" aria-label="Line 454">454</a><code>      read([path]);</code></span>
+<span class="source-line" id="L455"><a class="line-number" href="#L455" aria-label="Line 455">455</a><code>      return { path };</code></span>
+<span class="source-line" id="L456"><a class="line-number" href="#L456" aria-label="Line 456">456</a><code>    }</code></span>
+<span class="source-line" id="L457"><a class="line-number" href="#L457" aria-label="Line 457">457</a><code>    const answer = symbol(node, &quot;an attribute or answer&quot;);</code></span>
+<span class="source-line" id="L458"><a class="line-number" href="#L458" aria-label="Line 458">458</a><code>    return answers.has(answer) ? { answer } : fail(node, `Unknown answer ${answer}.${suggest(answer, answers.keys())}`);</code></span>
+<span class="source-line" id="L459"><a class="line-number" href="#L459" aria-label="Line 459">459</a><code>  };</code></span>
+<span class="source-line" id="L460"><a class="line-number" href="#L460" aria-label="Line 460">460</a><code> </code></span>
+<span class="source-line" id="L461"><a class="line-number" href="#L461" aria-label="Line 461">461</a><code>  const pages: Page[] = opts.positional.map((pageNode): Page =&gt; {</code></span>
+<span class="source-line" id="L462"><a class="line-number" href="#L462" aria-label="Line 462">462</a><code>    if (headOf(pageNode) !== &quot;page&quot;) return fail(pageNode, `Expected (page &quot;Title&quot; :employee fields...)`);</code></span>
+<span class="source-line" id="L463"><a class="line-number" href="#L463" aria-label="Line 463">463</a><code>    const pageItems = (pageNode as Extract&lt;SExpr, { _tag: &quot;List&quot; }&gt;).items;</code></span>
+<span class="source-line" id="L464"><a class="line-number" href="#L464" aria-label="Line 464">464</a><code>    const title = string(pageItems[1], &quot;a page title&quot;, pageNode.loc);</code></span>
+<span class="source-line" id="L465"><a class="line-number" href="#L465" aria-label="Line 465">465</a><code>    const assigneeNode = pageItems[2];</code></span>
+<span class="source-line" id="L466"><a class="line-number" href="#L466" aria-label="Line 466">466</a><code>    const assignee = keywordOf(assigneeNode) ?? &quot;&quot;;</code></span>
+<span class="source-line" id="L467"><a class="line-number" href="#L467" aria-label="Line 467">467</a><code>    if (assignee !== &quot;employee&quot; &amp;&amp; assignee !== &quot;employer&quot;) fail(assigneeNode ?? pageNode, &quot;Pages are assigned to :employee or :employer&quot;);</code></span>
+<span class="source-line" id="L468"><a class="line-number" href="#L468" aria-label="Line 468">468</a><code>    const fields = pageItems.slice(3).map((fieldNode): Field =&gt; {</code></span>
+<span class="source-line" id="L469"><a class="line-number" href="#L469" aria-label="Line 469">469</a><code>      const kind = headOf(fieldNode);</code></span>
+<span class="source-line" id="L470"><a class="line-number" href="#L470" aria-label="Line 470">470</a><code>      const args = fieldNode._tag === &quot;List&quot; ? fieldNode.items.slice(1) : [];</code></span>
+<span class="source-line" id="L471"><a class="line-number" href="#L471" aria-label="Line 471">471</a><code>      if (kind === &quot;signature&quot;) {</code></span>
+<span class="source-line" id="L472"><a class="line-number" href="#L472" aria-label="Line 472">472</a><code>        return { kind, target: defineAnswer(args[0]!, { kind: &quot;string&quot; }), label: &quot;Signature&quot;, required: true, translations: {} };</code></span>
+<span class="source-line" id="L473"><a class="line-number" href="#L473" aria-label="Line 473">473</a><code>      }</code></span>
+<span class="source-line" id="L474"><a class="line-number" href="#L474" aria-label="Line 474">474</a><code>      if (kind === &quot;content&quot;) return { kind, text: string(args[0], &quot;content text&quot;, fieldNode.loc), required: false, translations: {} };</code></span>
+<span class="source-line" id="L475"><a class="line-number" href="#L475" aria-label="Line 475">475</a><code>      if (kind === &quot;review&quot;) {</code></span>
+<span class="source-line" id="L476"><a class="line-number" href="#L476" aria-label="Line 476">476</a><code>        return { kind, label: &quot;Review&quot;, rows: items(args[0], &quot;review rows&quot;, fieldNode.loc).map(targetRef), required: false, translations: {} };</code></span>
+<span class="source-line" id="L477"><a class="line-number" href="#L477" aria-label="Line 477">477</a><code>      }</code></span>
+<span class="source-line" id="L478"><a class="line-number" href="#L478" aria-label="Line 478">478</a><code>      if (kind === &quot;formula&quot;) {</code></span>
+<span class="source-line" id="L479"><a class="line-number" href="#L479" aria-label="Line 479">479</a><code>        const label = string(args[1], &quot;a formula label&quot;, fieldNode.loc);</code></span>
+<span class="source-line" id="L480"><a class="line-number" href="#L480" aria-label="Line 480">480</a><code>        const formula = elaborateFormula(context, args[2] ?? fail(fieldNode, &quot;(formula name \&quot;Label\&quot; expression)&quot;), scope);</code></span>
+<span class="source-line" id="L481"><a class="line-number" href="#L481" aria-label="Line 481">481</a><code>        read(formulaReads(formula));</code></span>
+<span class="source-line" id="L482"><a class="line-number" href="#L482" aria-label="Line 482">482</a><code>        return { kind, target: defineAnswer(args[0]!, { kind: &quot;decimal&quot; }), label, formula, required: false, translations: {} };</code></span>
+<span class="source-line" id="L483"><a class="line-number" href="#L483" aria-label="Line 483">483</a><code>      }</code></span>
+<span class="source-line" id="L484"><a class="line-number" href="#L484" aria-label="Line 484">484</a><code>      const fieldType = kind ? fieldTypes[kind] : undefined;</code></span>
+<span class="source-line" id="L485"><a class="line-number" href="#L485" aria-label="Line 485">485</a><code>      if (!fieldType) {</code></span>
+<span class="source-line" id="L486"><a class="line-number" href="#L486" aria-label="Line 486">486</a><code>        return fail(fieldNode, `Unknown field ${kind ?? show(fieldNode)}.${suggest(kind ?? &quot;&quot;, [...Object.keys(fieldTypes), &quot;signature&quot;, &quot;formula&quot;, &quot;review&quot;, &quot;content&quot;])}`);</code></span>
+<span class="source-line" id="L487"><a class="line-number" href="#L487" aria-label="Line 487">487</a><code>      }</code></span>
+<span class="source-line" id="L488"><a class="line-number" href="#L488" aria-label="Line 488">488</a><code>      const targetNode = args[0] ?? fail(fieldNode, `(${kind} target &quot;Label&quot;) needs a target`);</code></span>
+<span class="source-line" id="L489"><a class="line-number" href="#L489" aria-label="Line 489">489</a><code>      const label = string(args[1], &quot;a field label&quot;, fieldNode.loc);</code></span>
+<span class="source-line" id="L490"><a class="line-number" href="#L490" aria-label="Line 490">490</a><code>      const fieldOpts = options(args.slice(2), new Set([&quot;required&quot;]), new Set([&quot;show-if&quot;, ...translationKeys]));</code></span>
+<span class="source-line" id="L491"><a class="line-number" href="#L491" aria-label="Line 491">491</a><code>      if (fieldOpts.positional.length) fail(fieldOpts.positional[0], `Unexpected ${show(fieldOpts.positional[0]!)}`);</code></span>
+<span class="source-line" id="L492"><a class="line-number" href="#L492" aria-label="Line 492">492</a><code>      let target: FieldTarget;</code></span>
+<span class="source-line" id="L493"><a class="line-number" href="#L493" aria-label="Line 493">493</a><code>      if (isPath(targetNode)) {</code></span>
+<span class="source-line" id="L494"><a class="line-number" href="#L494" aria-label="Line 494">494</a><code>        const attribute = attributeAt(context, targetNode, scope);</code></span>
+<span class="source-line" id="L495"><a class="line-number" href="#L495" aria-label="Line 495">495</a><code>        if (!fieldType.accepts(attribute.type)) {</code></span>
+<span class="source-line" id="L496"><a class="line-number" href="#L496" aria-label="Line 496">496</a><code>          fail(targetNode, `A ${kind} field writes ${fieldType.expects} values; ${attribute.path} is a ${typeName(attribute.type)}`);</code></span>
+<span class="source-line" id="L497"><a class="line-number" href="#L497" aria-label="Line 497">497</a><code>        }</code></span>
+<span class="source-line" id="L498"><a class="line-number" href="#L498" aria-label="Line 498">498</a><code>        if (attribute.deprecated) fail(targetNode, `${attribute.path} is deprecated (${attribute.deprecated}); forms cannot write it`);</code></span>
+<span class="source-line" id="L499"><a class="line-number" href="#L499" aria-label="Line 499">499</a><code>        if (attribute.builtin) fail(targetNode, `${attribute.path} is a built-in attribute; forms write custom attributes`);</code></span>
+<span class="source-line" id="L500"><a class="line-number" href="#L500" aria-label="Line 500">500</a><code>        if (writes.includes(attribute.path)) fail(targetNode, `${formName} already writes ${attribute.path}`);</code></span>
+<span class="source-line" id="L501"><a class="line-number" href="#L501" aria-label="Line 501">501</a><code>        writes.push(attribute.path);</code></span>
+<span class="source-line" id="L502"><a class="line-number" href="#L502" aria-label="Line 502">502</a><code>        target = { path: attribute.path };</code></span>
+<span class="source-line" id="L503"><a class="line-number" href="#L503" aria-label="Line 503">503</a><code>      } else {</code></span>
+<span class="source-line" id="L504"><a class="line-number" href="#L504" aria-label="Line 504">504</a><code>        if (!fieldType.answer) fail(targetNode, `A ${kind} field must bind a choice attribute`);</code></span>
+<span class="source-line" id="L505"><a class="line-number" href="#L505" aria-label="Line 505">505</a><code>        target = defineAnswer(targetNode, fieldType.answer!);</code></span>
+<span class="source-line" id="L506"><a class="line-number" href="#L506" aria-label="Line 506">506</a><code>      }</code></span>
+<span class="source-line" id="L507"><a class="line-number" href="#L507" aria-label="Line 507">507</a><code>      const showIfNode = fieldOpts.values.get(&quot;show-if&quot;);</code></span>
+<span class="source-line" id="L508"><a class="line-number" href="#L508" aria-label="Line 508">508</a><code>      const showIf = showIfNode ? elaborateRule(context, showIfNode, scope) : undefined;</code></span>
+<span class="source-line" id="L509"><a class="line-number" href="#L509" aria-label="Line 509">509</a><code>      if (showIf) read(ruleReads(context, showIf));</code></span>
+<span class="source-line" id="L510"><a class="line-number" href="#L510" aria-label="Line 510">510</a><code>      const translations = Object.fromEntries([...translationKeys].filter((language) =&gt; fieldOpts.values.has(language))</code></span>
+<span class="source-line" id="L511"><a class="line-number" href="#L511" aria-label="Line 511">511</a><code>        .map((language) =&gt; [language, string(fieldOpts.values.get(language), `the ${language} label`)]));</code></span>
+<span class="source-line" id="L512"><a class="line-number" href="#L512" aria-label="Line 512">512</a><code>      return { kind: kind!, target, label, required: fieldOpts.flags.has(&quot;required&quot;), ...(showIf ? { showIf } : {}), translations };</code></span>
+<span class="source-line" id="L513"><a class="line-number" href="#L513" aria-label="Line 513">513</a><code>    });</code></span>
+<span class="source-line" id="L514"><a class="line-number" href="#L514" aria-label="Line 514">514</a><code>    return { title, assignee: assignee as Page[&quot;assignee&quot;], fields };</code></span>
+<span class="source-line" id="L515"><a class="line-number" href="#L515" aria-label="Line 515">515</a><code>  });</code></span>
+<span class="source-line" id="L516"><a class="line-number" href="#L516" aria-label="Line 516">516</a><code>  if (pages.length === 0) fail(node, `${formName} needs at least one page`);</code></span>
+<span class="source-line" id="L517"><a class="line-number" href="#L517" aria-label="Line 517">517</a><code>  return {</code></span>
+<span class="source-line" id="L518"><a class="line-number" href="#L518" aria-label="Line 518">518</a><code>    name: formName, key, title: string(node.items[2], &quot;a title&quot;), ...(dueIn !== undefined ? { dueIn } : {}),</code></span>
+<span class="source-line" id="L519"><a class="line-number" href="#L519" aria-label="Line 519">519</a><code>    pages, reads: reads.filter((path) =&gt; !writes.includes(path)), writes, loc: node.loc,</code></span>
+<span class="source-line" id="L520"><a class="line-number" href="#L520" aria-label="Line 520">520</a><code>  };</code></span>
+<span class="source-line" id="L521"><a class="line-number" href="#L521" aria-label="Line 521">521</a><code>};</code></span>
+<span class="source-line" id="L522"><a class="line-number" href="#L522" aria-label="Line 522">522</a><code> </code></span>
+<span class="source-line" id="L523"><a class="line-number" href="#L523" aria-label="Line 523">523</a><code>const elaboratePolicy = (context: Context, node: Extract&lt;SExpr, { _tag: &quot;List&quot; }&gt;): Policy =&gt; {</code></span>
+<span class="source-line" id="L524"><a class="line-number" href="#L524" aria-label="Line 524">524</a><code>  const policyName = name(node.items[1], &quot;a policy name&quot;, node.loc);</code></span>
+<span class="source-line" id="L525"><a class="line-number" href="#L525" aria-label="Line 525">525</a><code>  const title = string(node.items[2], &quot;a policy title&quot;, node.loc);</code></span>
+<span class="source-line" id="L526"><a class="line-number" href="#L526" aria-label="Line 526">526</a><code>  const opts = options(node.items.slice(3), new Set(), new Set([&quot;when&quot;, &quot;require&quot;]));</code></span>
+<span class="source-line" id="L527"><a class="line-number" href="#L527" aria-label="Line 527">527</a><code>  if (opts.positional.length) fail(opts.positional[0], `Unexpected ${show(opts.positional[0]!)}`);</code></span>
+<span class="source-line" id="L528"><a class="line-number" href="#L528" aria-label="Line 528">528</a><code>  const scope = placementScope(&quot;Policies&quot;);</code></span>
+<span class="source-line" id="L529"><a class="line-number" href="#L529" aria-label="Line 529">529</a><code>  const whenNode = opts.values.get(&quot;when&quot;);</code></span>
+<span class="source-line" id="L530"><a class="line-number" href="#L530" aria-label="Line 530">530</a><code>  const seen = new Set&lt;string&gt;();</code></span>
+<span class="source-line" id="L531"><a class="line-number" href="#L531" aria-label="Line 531">531</a><code>  const require = items(opts.values.get(&quot;require&quot;), &quot;:require forms&quot;, node.loc).map((entry) =&gt; {</code></span>
+<span class="source-line" id="L532"><a class="line-number" href="#L532" aria-label="Line 532">532</a><code>    const formNode = entry._tag === &quot;List&quot; ? entry.items[0] : entry;</code></span>
+<span class="source-line" id="L533"><a class="line-number" href="#L533" aria-label="Line 533">533</a><code>    const form = declaredAs(context, formNode!, &quot;form&quot;);</code></span>
+<span class="source-line" id="L534"><a class="line-number" href="#L534" aria-label="Line 534">534</a><code>    if (seen.has(form)) fail(formNode, `${policyName} already requires ${form}`);</code></span>
+<span class="source-line" id="L535"><a class="line-number" href="#L535" aria-label="Line 535">535</a><code>    seen.add(form);</code></span>
+<span class="source-line" id="L536"><a class="line-number" href="#L536" aria-label="Line 536">536</a><code>    if (entry._tag !== &quot;List&quot;) return { form };</code></span>
+<span class="source-line" id="L537"><a class="line-number" href="#L537" aria-label="Line 537">537</a><code>    const entryOpts = options(entry.items.slice(1), new Set(), new Set([&quot;when&quot;]));</code></span>
+<span class="source-line" id="L538"><a class="line-number" href="#L538" aria-label="Line 538">538</a><code>    const when = entryOpts.values.get(&quot;when&quot;);</code></span>
+<span class="source-line" id="L539"><a class="line-number" href="#L539" aria-label="Line 539">539</a><code>    return { form, ...(when ? { when: elaborateRule(context, when, scope) } : {}) };</code></span>
+<span class="source-line" id="L540"><a class="line-number" href="#L540" aria-label="Line 540">540</a><code>  });</code></span>
+<span class="source-line" id="L541"><a class="line-number" href="#L541" aria-label="Line 541">541</a><code>  return {</code></span>
+<span class="source-line" id="L542"><a class="line-number" href="#L542" aria-label="Line 542">542</a><code>    name: policyName, key: `${context.account!.name}.${policyName}`, title,</code></span>
+<span class="source-line" id="L543"><a class="line-number" href="#L543" aria-label="Line 543">543</a><code>    ...(whenNode ? { when: elaborateRule(context, whenNode, scope) } : {}), require, loc: node.loc,</code></span>
+<span class="source-line" id="L544"><a class="line-number" href="#L544" aria-label="Line 544">544</a><code>  };</code></span>
+<span class="source-line" id="L545"><a class="line-number" href="#L545" aria-label="Line 545">545</a><code>};</code></span>
+<span class="source-line" id="L546"><a class="line-number" href="#L546" aria-label="Line 546">546</a><code> </code></span>
+<span class="source-line" id="L547"><a class="line-number" href="#L547" aria-label="Line 547">547</a><code>const elaborateAutomation = (context: Context, node: Extract&lt;SExpr, { _tag: &quot;List&quot; }&gt;): Automation =&gt; {</code></span>
+<span class="source-line" id="L548"><a class="line-number" href="#L548" aria-label="Line 548">548</a><code>  const automationName = name(node.items[1], &quot;an automation name&quot;, node.loc);</code></span>
+<span class="source-line" id="L549"><a class="line-number" href="#L549" aria-label="Line 549">549</a><code>  const title = string(node.items[2], &quot;an automation title&quot;, node.loc);</code></span>
+<span class="source-line" id="L550"><a class="line-number" href="#L550" aria-label="Line 550">550</a><code>  const opts = options(node.items.slice(3), new Set(), new Set([&quot;on&quot;]));</code></span>
+<span class="source-line" id="L551"><a class="line-number" href="#L551" aria-label="Line 551">551</a><code>  const triggerNode = opts.values.get(&quot;on&quot;) ?? fail(node, `${automationName} needs a trigger, such as :on (task-created form)`);</code></span>
+<span class="source-line" id="L552"><a class="line-number" href="#L552" aria-label="Line 552">552</a><code>  const triggerKind = headOf(triggerNode);</code></span>
+<span class="source-line" id="L553"><a class="line-number" href="#L553" aria-label="Line 553">553</a><code>  let trigger: Trigger;</code></span>
+<span class="source-line" id="L554"><a class="line-number" href="#L554" aria-label="Line 554">554</a><code>  if (triggerKind === &quot;task-created&quot; || triggerKind === &quot;task-completed&quot;) {</code></span>
+<span class="source-line" id="L555"><a class="line-number" href="#L555" aria-label="Line 555">555</a><code>    trigger = { kind: triggerKind, form: declaredAs(context, (triggerNode as Extract&lt;SExpr, { _tag: &quot;List&quot; }&gt;).items[1] ?? triggerNode, &quot;form&quot;) };</code></span>
+<span class="source-line" id="L556"><a class="line-number" href="#L556" aria-label="Line 556">556</a><code>  } else if (triggerKind === &quot;placement-created&quot;) {</code></span>
+<span class="source-line" id="L557"><a class="line-number" href="#L557" aria-label="Line 557">557</a><code>    trigger = { kind: triggerKind };</code></span>
+<span class="source-line" id="L558"><a class="line-number" href="#L558" aria-label="Line 558">558</a><code>  } else {</code></span>
+<span class="source-line" id="L559"><a class="line-number" href="#L559" aria-label="Line 559">559</a><code>    return fail(triggerNode, `Unknown trigger ${triggerKind ?? show(triggerNode)}.${suggest(triggerKind ?? &quot;&quot;, [&quot;task-created&quot;, &quot;task-completed&quot;, &quot;placement-created&quot;])}`);</code></span>
+<span class="source-line" id="L560"><a class="line-number" href="#L560" aria-label="Line 560">560</a><code>  }</code></span>
+<span class="source-line" id="L561"><a class="line-number" href="#L561" aria-label="Line 561">561</a><code>  const scope = trigger.kind === &quot;placement-created&quot; ? placementScope(&quot;Placement triggers&quot;) : taskScope;</code></span>
+<span class="source-line" id="L562"><a class="line-number" href="#L562" aria-label="Line 562">562</a><code>  const counts = new Map&lt;string, number&gt;();</code></span>
+<span class="source-line" id="L563"><a class="line-number" href="#L563" aria-label="Line 563">563</a><code>  const id = (kind: string) =&gt; {</code></span>
+<span class="source-line" id="L564"><a class="line-number" href="#L564" aria-label="Line 564">564</a><code>    const count = (counts.get(kind) ?? 0) + 1;</code></span>
+<span class="source-line" id="L565"><a class="line-number" href="#L565" aria-label="Line 565">565</a><code>    counts.set(kind, count);</code></span>
+<span class="source-line" id="L566"><a class="line-number" href="#L566" aria-label="Line 566">566</a><code>    return count === 1 ? kind : `${kind}-${count}`;</code></span>
+<span class="source-line" id="L567"><a class="line-number" href="#L567" aria-label="Line 567">567</a><code>  };</code></span>
+<span class="source-line" id="L568"><a class="line-number" href="#L568" aria-label="Line 568">568</a><code>  const steps = (nodes: readonly SExpr[]): Step[] =&gt; nodes.map((stepNode): Step =&gt; {</code></span>
+<span class="source-line" id="L569"><a class="line-number" href="#L569" aria-label="Line 569">569</a><code>    const kind = headOf(stepNode);</code></span>
+<span class="source-line" id="L570"><a class="line-number" href="#L570" aria-label="Line 570">570</a><code>    const args = stepNode._tag === &quot;List&quot; ? stepNode.items.slice(1) : [];</code></span>
+<span class="source-line" id="L571"><a class="line-number" href="#L571" aria-label="Line 571">571</a><code>    if (kind === &quot;wait&quot;) {</code></span>
+<span class="source-line" id="L572"><a class="line-number" href="#L572" aria-label="Line 572">572</a><code>      const days = number(args[0], &quot;a number of days&quot;, stepNode.loc);</code></span>
+<span class="source-line" id="L573"><a class="line-number" href="#L573" aria-label="Line 573">573</a><code>      const waitOpts = options(args.slice(1), new Set([&quot;days&quot;]), new Set([&quot;after&quot;]));</code></span>
+<span class="source-line" id="L574"><a class="line-number" href="#L574" aria-label="Line 574">574</a><code>      if (!waitOpts.flags.has(&quot;days&quot;)) fail(stepNode, &quot;(wait n :days) names its unit&quot;);</code></span>
+<span class="source-line" id="L575"><a class="line-number" href="#L575" aria-label="Line 575">575</a><code>      const afterNode = waitOpts.values.get(&quot;after&quot;);</code></span>
+<span class="source-line" id="L576"><a class="line-number" href="#L576" aria-label="Line 576">576</a><code>      if (!afterNode) return { kind, id: id(kind), days };</code></span>
+<span class="source-line" id="L577"><a class="line-number" href="#L577" aria-label="Line 577">577</a><code>      const after = attributeAt(context, afterNode, scope);</code></span>
+<span class="source-line" id="L578"><a class="line-number" href="#L578" aria-label="Line 578">578</a><code>      if (after.type.kind !== &quot;date&quot; &amp;&amp; after.type.kind !== &quot;datetime&quot;) fail(afterNode, `${after.path} is not a date`);</code></span>
+<span class="source-line" id="L579"><a class="line-number" href="#L579" aria-label="Line 579">579</a><code>      if (after.path === &quot;task.due-at&quot; &amp;&amp; trigger.kind !== &quot;placement-created&quot;) {</code></span>
+<span class="source-line" id="L580"><a class="line-number" href="#L580" aria-label="Line 580">580</a><code>        const form = context.forms.get(trigger.form);</code></span>
+<span class="source-line" id="L581"><a class="line-number" href="#L581" aria-label="Line 581">581</a><code>        if (form &amp;&amp; !form.from &amp;&amp; form.dueIn === undefined) {</code></span>
+<span class="source-line" id="L582"><a class="line-number" href="#L582" aria-label="Line 582">582</a><code>          fail(afterNode, `${automationName} waits after task.due-at, but ${form.name} sets no :due-in`);</code></span>
+<span class="source-line" id="L583"><a class="line-number" href="#L583" aria-label="Line 583">583</a><code>        }</code></span>
+<span class="source-line" id="L584"><a class="line-number" href="#L584" aria-label="Line 584">584</a><code>      }</code></span>
+<span class="source-line" id="L585"><a class="line-number" href="#L585" aria-label="Line 585">585</a><code>      return { kind, id: id(kind), days, after: after.path };</code></span>
+<span class="source-line" id="L586"><a class="line-number" href="#L586" aria-label="Line 586">586</a><code>    }</code></span>
+<span class="source-line" id="L587"><a class="line-number" href="#L587" aria-label="Line 587">587</a><code>    if (kind === &quot;when&quot;) {</code></span>
+<span class="source-line" id="L588"><a class="line-number" href="#L588" aria-label="Line 588">588</a><code>      const stepId = id(kind);</code></span>
+<span class="source-line" id="L589"><a class="line-number" href="#L589" aria-label="Line 589">589</a><code>      return { kind, id: stepId, rule: elaborateRule(context, args[0] ?? fail(stepNode, &quot;(when rule steps...)&quot;), scope), then: steps(args.slice(1)) };</code></span>
+<span class="source-line" id="L590"><a class="line-number" href="#L590" aria-label="Line 590">590</a><code>    }</code></span>
+<span class="source-line" id="L591"><a class="line-number" href="#L591" aria-label="Line 591">591</a><code>    if (kind === &quot;email&quot;) {</code></span>
+<span class="source-line" id="L592"><a class="line-number" href="#L592" aria-label="Line 592">592</a><code>      const to = keywordOf(args[0]) ?? &quot;&quot;;</code></span>
+<span class="source-line" id="L593"><a class="line-number" href="#L593" aria-label="Line 593">593</a><code>      if (to !== &quot;employee&quot; &amp;&amp; to !== &quot;employer&quot;) fail(args[0] ?? stepNode, &quot;Email :employee or :employer&quot;);</code></span>
+<span class="source-line" id="L594"><a class="line-number" href="#L594" aria-label="Line 594">594</a><code>      const template = declaredAs(context, args[1] ?? stepNode, &quot;param&quot;);</code></span>
+<span class="source-line" id="L595"><a class="line-number" href="#L595" aria-label="Line 595">595</a><code>      const param = context.params.get(template);</code></span>
+<span class="source-line" id="L596"><a class="line-number" href="#L596" aria-label="Line 596">596</a><code>      if (param &amp;&amp; param.type !== &quot;sendgrid-template&quot;) fail(args[1], `${template} is a ${param.type}, not a :sendgrid-template`);</code></span>
+<span class="source-line" id="L597"><a class="line-number" href="#L597" aria-label="Line 597">597</a><code>      const subject = string(args[2], &quot;an email subject&quot;, stepNode.loc);</code></span>
+<span class="source-line" id="L598"><a class="line-number" href="#L598" aria-label="Line 598">598</a><code>      const body = string(args[3], &quot;an email body&quot;, stepNode.loc);</code></span>
+<span class="source-line" id="L599"><a class="line-number" href="#L599" aria-label="Line 599">599</a><code>      for (const match of body.matchAll(/\{\{\s*([a-z_]+)\.([a-z_]+)\s*\}\}/g)) {</code></span>
+<span class="source-line" id="L600"><a class="line-number" href="#L600" aria-label="Line 600">600</a><code>        const path = `${match[1]}.${match[2]!.replaceAll(&quot;_&quot;, &quot;-&quot;)}`;</code></span>
+<span class="source-line" id="L601"><a class="line-number" href="#L601" aria-label="Line 601">601</a><code>        const attribute = context.attributes.get(path);</code></span>
+<span class="source-line" id="L602"><a class="line-number" href="#L602" aria-label="Line 602">602</a><code>        if (!attribute) fail(args[3], `The body renders unknown attribute ${match[1]}.${match[2]}`);</code></span>
+<span class="source-line" id="L603"><a class="line-number" href="#L603" aria-label="Line 603">603</a><code>        const problem = scope.allows(attribute!);</code></span>
+<span class="source-line" id="L604"><a class="line-number" href="#L604" aria-label="Line 604">604</a><code>        if (problem) fail(args[3], problem);</code></span>
+<span class="source-line" id="L605"><a class="line-number" href="#L605" aria-label="Line 605">605</a><code>        if (attribute!.sensitive) {</code></span>
+<span class="source-line" id="L606"><a class="line-number" href="#L606" aria-label="Line 606">606</a><code>          context.diagnostics.push({ severity: &quot;warning&quot;, message: `The email renders sensitive attribute ${path}`, loc: args[3]!.loc });</code></span>
+<span class="source-line" id="L607"><a class="line-number" href="#L607" aria-label="Line 607">607</a><code>        }</code></span>
+<span class="source-line" id="L608"><a class="line-number" href="#L608" aria-label="Line 608">608</a><code>      }</code></span>
+<span class="source-line" id="L609"><a class="line-number" href="#L609" aria-label="Line 609">609</a><code>      return { kind, id: id(kind), to: to as &quot;employee&quot;, template, subject, body };</code></span>
+<span class="source-line" id="L610"><a class="line-number" href="#L610" aria-label="Line 610">610</a><code>    }</code></span>
+<span class="source-line" id="L611"><a class="line-number" href="#L611" aria-label="Line 611">611</a><code>    if (kind === &quot;assign&quot;) return { kind, id: id(kind), form: declaredAs(context, args[0] ?? stepNode, &quot;form&quot;) };</code></span>
+<span class="source-line" id="L612"><a class="line-number" href="#L612" aria-label="Line 612">612</a><code>    return fail(stepNode, `Unknown step ${kind ?? show(stepNode)}.${suggest(kind ?? &quot;&quot;, [&quot;wait&quot;, &quot;when&quot;, &quot;email&quot;, &quot;assign&quot;])}`);</code></span>
+<span class="source-line" id="L613"><a class="line-number" href="#L613" aria-label="Line 613">613</a><code>  });</code></span>
+<span class="source-line" id="L614"><a class="line-number" href="#L614" aria-label="Line 614">614</a><code>  const body = steps(opts.positional);</code></span>
+<span class="source-line" id="L615"><a class="line-number" href="#L615" aria-label="Line 615">615</a><code>  if (body.length === 0) fail(node, `${automationName} has no steps`);</code></span>
+<span class="source-line" id="L616"><a class="line-number" href="#L616" aria-label="Line 616">616</a><code>  return { name: automationName, key: `${context.account!.name}.${automationName}`, title, trigger, steps: body, loc: node.loc };</code></span>
+<span class="source-line" id="L617"><a class="line-number" href="#L617" aria-label="Line 617">617</a><code>};</code></span>
+<span class="source-line" id="L618"><a class="line-number" href="#L618" aria-label="Line 618">618</a><code> </code></span>
+<span class="source-line" id="L619"><a class="line-number" href="#L619" aria-label="Line 619">619</a><code>const elaborateGroup = (context: Context, node: Extract&lt;SExpr, { _tag: &quot;List&quot; }&gt;): Group =&gt; {</code></span>
+<span class="source-line" id="L620"><a class="line-number" href="#L620" aria-label="Line 620">620</a><code>  const groupName = name(node.items[1], &quot;a group name&quot;, node.loc);</code></span>
+<span class="source-line" id="L621"><a class="line-number" href="#L621" aria-label="Line 621">621</a><code>  const title = string(node.items[2], &quot;a group title&quot;, node.loc);</code></span>
+<span class="source-line" id="L622"><a class="line-number" href="#L622" aria-label="Line 622">622</a><code>  const opts = options(node.items.slice(3), new Set(), new Set([&quot;can&quot;, &quot;sees&quot;]));</code></span>
+<span class="source-line" id="L623"><a class="line-number" href="#L623" aria-label="Line 623">623</a><code>  const granted = items(opts.values.get(&quot;can&quot;), &quot;:can permissions&quot;, node.loc).map((permission) =&gt; {</code></span>
+<span class="source-line" id="L624"><a class="line-number" href="#L624" aria-label="Line 624">624</a><code>    const value = keywordOf(permission) ?? fail(permission, &quot;Permissions are keywords such as :task/read&quot;);</code></span>
+<span class="source-line" id="L625"><a class="line-number" href="#L625" aria-label="Line 625">625</a><code>    return permissions.has(value) ? value : fail(permission, `Unknown permission :${value}.${suggest(value, permissions, &quot;:&quot;)}`);</code></span>
+<span class="source-line" id="L626"><a class="line-number" href="#L626" aria-label="Line 626">626</a><code>  });</code></span>
+<span class="source-line" id="L627"><a class="line-number" href="#L627" aria-label="Line 627">627</a><code>  const sees = opts.values.get(&quot;sees&quot;);</code></span>
+<span class="source-line" id="L628"><a class="line-number" href="#L628" aria-label="Line 628">628</a><code>  return { name: groupName, title, permissions: granted, ...(sees ? { sees: elaborateRule(context, sees, accessScope) } : {}), loc: node.loc };</code></span>
+<span class="source-line" id="L629"><a class="line-number" href="#L629" aria-label="Line 629">629</a><code>};</code></span>
+<span class="source-line" id="L630"><a class="line-number" href="#L630" aria-label="Line 630">630</a><code> </code></span>
+<span class="source-line" id="L631"><a class="line-number" href="#L631" aria-label="Line 631">631</a><code>const settingValue = (node: SExpr): Value =&gt; {</code></span>
+<span class="source-line" id="L632"><a class="line-number" href="#L632" aria-label="Line 632">632</a><code>  if (node._tag === &quot;Str&quot; || node._tag === &quot;Num&quot; || node._tag === &quot;Bool&quot;) return node.value;</code></span>
+<span class="source-line" id="L633"><a class="line-number" href="#L633" aria-label="Line 633">633</a><code>  return keywordOf(node) ?? fail(node, &quot;Settings are strings, numbers, booleans, or keywords&quot;);</code></span>
+<span class="source-line" id="L634"><a class="line-number" href="#L634" aria-label="Line 634">634</a><code>};</code></span>
+<span class="source-line" id="L635"><a class="line-number" href="#L635" aria-label="Line 635">635</a><code> </code></span>
+<span class="source-line" id="L636"><a class="line-number" href="#L636" aria-label="Line 636">636</a><code>const elaborateIntegration = (_context: Context, node: Extract&lt;SExpr, { _tag: &quot;List&quot; }&gt;): Integration =&gt; {</code></span>
+<span class="source-line" id="L637"><a class="line-number" href="#L637" aria-label="Line 637">637</a><code>  const integrationName = name(node.items[1], &quot;an integration name&quot;, node.loc);</code></span>
+<span class="source-line" id="L638"><a class="line-number" href="#L638" aria-label="Line 638">638</a><code>  const providerNode = node.items[2];</code></span>
+<span class="source-line" id="L639"><a class="line-number" href="#L639" aria-label="Line 639">639</a><code>  const provider = string(providerNode, &quot;a provider@revision&quot;, node.loc);</code></span>
+<span class="source-line" id="L640"><a class="line-number" href="#L640" aria-label="Line 640">640</a><code>  const at = provider.lastIndexOf(&quot;@&quot;);</code></span>
+<span class="source-line" id="L641"><a class="line-number" href="#L641" aria-label="Line 641">641</a><code>  if (at &lt;= 0) fail(providerNode, &quot;Pin the provider revision, as in \&quot;@scope/provider@1.4.0\&quot;&quot;);</code></span>
+<span class="source-line" id="L642"><a class="line-number" href="#L642" aria-label="Line 642">642</a><code>  const settings: Record&lt;string, Value&gt; = {};</code></span>
+<span class="source-line" id="L643"><a class="line-number" href="#L643" aria-label="Line 643">643</a><code>  let connection: string | undefined;</code></span>
+<span class="source-line" id="L644"><a class="line-number" href="#L644" aria-label="Line 644">644</a><code>  const rest = node.items.slice(3);</code></span>
+<span class="source-line" id="L645"><a class="line-number" href="#L645" aria-label="Line 645">645</a><code>  for (let i = 0; i &lt; rest.length; i += 2) {</code></span>
+<span class="source-line" id="L646"><a class="line-number" href="#L646" aria-label="Line 646">646</a><code>    const key = rest[i]!;</code></span>
+<span class="source-line" id="L647"><a class="line-number" href="#L647" aria-label="Line 647">647</a><code>    const setting = keywordOf(key);</code></span>
+<span class="source-line" id="L648"><a class="line-number" href="#L648" aria-label="Line 648">648</a><code>    if (setting === undefined || i + 1 &gt;= rest.length) fail(key, &quot;Integration settings are :key value pairs&quot;);</code></span>
+<span class="source-line" id="L649"><a class="line-number" href="#L649" aria-label="Line 649">649</a><code>    if (setting === &quot;connection&quot;) connection = string(rest[i + 1], &quot;a connection reference&quot;);</code></span>
+<span class="source-line" id="L650"><a class="line-number" href="#L650" aria-label="Line 650">650</a><code>    else settings[setting] = settingValue(rest[i + 1]!);</code></span>
+<span class="source-line" id="L651"><a class="line-number" href="#L651" aria-label="Line 651">651</a><code>  }</code></span>
+<span class="source-line" id="L652"><a class="line-number" href="#L652" aria-label="Line 652">652</a><code>  return {</code></span>
+<span class="source-line" id="L653"><a class="line-number" href="#L653" aria-label="Line 653">653</a><code>    name: integrationName, provider: provider.slice(0, at), revision: provider.slice(at + 1),</code></span>
+<span class="source-line" id="L654"><a class="line-number" href="#L654" aria-label="Line 654">654</a><code>    connection: connection ?? fail(node, &quot;An integration names its :connection; credentials stay with the target account&quot;),</code></span>
+<span class="source-line" id="L655"><a class="line-number" href="#L655" aria-label="Line 655">655</a><code>    settings, loc: node.loc,</code></span>
+<span class="source-line" id="L656"><a class="line-number" href="#L656" aria-label="Line 656">656</a><code>  };</code></span>
+<span class="source-line" id="L657"><a class="line-number" href="#L657" aria-label="Line 657">657</a><code>};</code></span>
+<span class="source-line" id="L658"><a class="line-number" href="#L658" aria-label="Line 658">658</a><code> </code></span>
+<span class="source-line" id="L659"><a class="line-number" href="#L659" aria-label="Line 659">659</a><code>const elaborateParam = (_context: Context, node: Extract&lt;SExpr, { _tag: &quot;List&quot; }&gt;): Param =&gt; {</code></span>
+<span class="source-line" id="L660"><a class="line-number" href="#L660" aria-label="Line 660">660</a><code>  const paramName = name(node.items[1], &quot;a parameter name&quot;, node.loc);</code></span>
+<span class="source-line" id="L661"><a class="line-number" href="#L661" aria-label="Line 661">661</a><code>  const typeNode = node.items[2];</code></span>
+<span class="source-line" id="L662"><a class="line-number" href="#L662" aria-label="Line 662">662</a><code>  const type = keywordOf(typeNode) ?? &quot;&quot;;</code></span>
+<span class="source-line" id="L663"><a class="line-number" href="#L663" aria-label="Line 663">663</a><code>  if (![&quot;sendgrid-template&quot;, &quot;string&quot;].includes(type)) fail(typeNode ?? node, &quot;Parameter types are :sendgrid-template or :string&quot;);</code></span>
+<span class="source-line" id="L664"><a class="line-number" href="#L664" aria-label="Line 664">664</a><code>  const doc = node.items[3];</code></span>
+<span class="source-line" id="L665"><a class="line-number" href="#L665" aria-label="Line 665">665</a><code>  return { name: paramName, type, ...(doc ? { doc: string(doc, &quot;a description&quot;) } : {}), loc: node.loc };</code></span>
+<span class="source-line" id="L666"><a class="line-number" href="#L666" aria-label="Line 666">666</a><code>};</code></span>
+<span class="source-line" id="L667"><a class="line-number" href="#L667" aria-label="Line 667">667</a><code> </code></span>
+<span class="source-line" id="L668"><a class="line-number" href="#L668" aria-label="Line 668">668</a><code>const elaborateScenario = (context: Context, node: Extract&lt;SExpr, { _tag: &quot;List&quot; }&gt;): Scenario =&gt; {</code></span>
+<span class="source-line" id="L669"><a class="line-number" href="#L669" aria-label="Line 669">669</a><code>  const title = string(node.items[1], &quot;a scenario title&quot;, node.loc);</code></span>
+<span class="source-line" id="L670"><a class="line-number" href="#L670" aria-label="Line 670">670</a><code>  const givenNode = node.items[2];</code></span>
+<span class="source-line" id="L671"><a class="line-number" href="#L671" aria-label="Line 671">671</a><code>  if (givenNode?._tag !== &quot;Map&quot;) return fail(givenNode ?? node, &quot;A scenario starts with its facts: {path value ...}&quot;);</code></span>
+<span class="source-line" id="L672"><a class="line-number" href="#L672" aria-label="Line 672">672</a><code>  const factScope: Scope = {</code></span>
+<span class="source-line" id="L673"><a class="line-number" href="#L673" aria-label="Line 673">673</a><code>    allows: (attribute) =&gt; attribute.entity === &quot;task&quot; ? &quot;Scenarios give placement facts; task facts come from the simulation&quot; : undefined,</code></span>
+<span class="source-line" id="L674"><a class="line-number" href="#L674" aria-label="Line 674">674</a><code>  };</code></span>
+<span class="source-line" id="L675"><a class="line-number" href="#L675" aria-label="Line 675">675</a><code>  const facts = (pairs: readonly (readonly [SExpr, SExpr])[]): Map&lt;string, Value&gt; =&gt;</code></span>
+<span class="source-line" id="L676"><a class="line-number" href="#L676" aria-label="Line 676">676</a><code>    new Map(pairs.map(([key, value]) =&gt; {</code></span>
+<span class="source-line" id="L677"><a class="line-number" href="#L677" aria-label="Line 677">677</a><code>      const attribute = attributeAt(context, key, factScope);</code></span>
+<span class="source-line" id="L678"><a class="line-number" href="#L678" aria-label="Line 678">678</a><code>      return [attribute.path, literal(value, attribute)];</code></span>
+<span class="source-line" id="L679"><a class="line-number" href="#L679" aria-label="Line 679">679</a><code>    }));</code></span>
+<span class="source-line" id="L680"><a class="line-number" href="#L680" aria-label="Line 680">680</a><code>  const given = facts(givenNode.pairs);</code></span>
+<span class="source-line" id="L681"><a class="line-number" href="#L681" aria-label="Line 681">681</a><code>  const names = (node: SExpr | undefined, verb: string): string[] =&gt;</code></span>
+<span class="source-line" id="L682"><a class="line-number" href="#L682" aria-label="Line 682">682</a><code>    items(node, `${verb} names`).map((item) =&gt; declaredAs(context, item, verb));</code></span>
+<span class="source-line" id="L683"><a class="line-number" href="#L683" aria-label="Line 683">683</a><code>  const expectation = (args: readonly SExpr[]): Expectation =&gt; {</code></span>
+<span class="source-line" id="L684"><a class="line-number" href="#L684" aria-label="Line 684">684</a><code>    const opts = options(args, new Set(), new Set([&quot;policies&quot;, &quot;forms&quot;, &quot;unknown&quot;, &quot;tasks&quot;, &quot;open&quot;, &quot;emails&quot;]));</code></span>
+<span class="source-line" id="L685"><a class="line-number" href="#L685" aria-label="Line 685">685</a><code>    if (opts.positional.length) fail(opts.positional[0], `Unexpected ${show(opts.positional[0]!)}`);</code></span>
+<span class="source-line" id="L686"><a class="line-number" href="#L686" aria-label="Line 686">686</a><code>    const expect: Record&lt;string, unknown&gt; = {};</code></span>
+<span class="source-line" id="L687"><a class="line-number" href="#L687" aria-label="Line 687">687</a><code>    if (opts.values.has(&quot;policies&quot;)) expect.policies = names(opts.values.get(&quot;policies&quot;), &quot;policy&quot;);</code></span>
+<span class="source-line" id="L688"><a class="line-number" href="#L688" aria-label="Line 688">688</a><code>    for (const key of [&quot;forms&quot;, &quot;tasks&quot;, &quot;open&quot;]) if (opts.values.has(key)) expect[key] = names(opts.values.get(key), &quot;form&quot;);</code></span>
+<span class="source-line" id="L689"><a class="line-number" href="#L689" aria-label="Line 689">689</a><code>    const unknown = opts.values.get(&quot;unknown&quot;);</code></span>
+<span class="source-line" id="L690"><a class="line-number" href="#L690" aria-label="Line 690">690</a><code>    if (unknown) {</code></span>
+<span class="source-line" id="L691"><a class="line-number" href="#L691" aria-label="Line 691">691</a><code>      if (unknown._tag !== &quot;Map&quot;) fail(unknown, &quot;:unknown maps a policy or form to the facts it waits for&quot;);</code></span>
+<span class="source-line" id="L692"><a class="line-number" href="#L692" aria-label="Line 692">692</a><code>      expect.unknown = Object.fromEntries((unknown as Extract&lt;SExpr, { _tag: &quot;Map&quot; }&gt;).pairs.map(([key, paths]) =&gt; {</code></span>
+<span class="source-line" id="L693"><a class="line-number" href="#L693" aria-label="Line 693">693</a><code>        const subject = symbol(key, &quot;a policy or form&quot;);</code></span>
+<span class="source-line" id="L694"><a class="line-number" href="#L694" aria-label="Line 694">694</a><code>        const verb = context.declared.get(subject)?.verb;</code></span>
+<span class="source-line" id="L695"><a class="line-number" href="#L695" aria-label="Line 695">695</a><code>        if (verb !== &quot;policy&quot; &amp;&amp; verb !== &quot;form&quot;) fail(key, `Unknown policy or form ${subject}`);</code></span>
+<span class="source-line" id="L696"><a class="line-number" href="#L696" aria-label="Line 696">696</a><code>        return [subject, items(paths, &quot;attribute paths&quot;).map((path) =&gt; attributeAt(context, path, anyScope).path)];</code></span>
+<span class="source-line" id="L697"><a class="line-number" href="#L697" aria-label="Line 697">697</a><code>      }));</code></span>
+<span class="source-line" id="L698"><a class="line-number" href="#L698" aria-label="Line 698">698</a><code>    }</code></span>
+<span class="source-line" id="L699"><a class="line-number" href="#L699" aria-label="Line 699">699</a><code>    const emails = opts.values.get(&quot;emails&quot;);</code></span>
+<span class="source-line" id="L700"><a class="line-number" href="#L700" aria-label="Line 700">700</a><code>    if (emails) {</code></span>
+<span class="source-line" id="L701"><a class="line-number" href="#L701" aria-label="Line 701">701</a><code>      expect.emails = items(emails, &quot;emails&quot;).map((email): EmailExpectation =&gt; {</code></span>
+<span class="source-line" id="L702"><a class="line-number" href="#L702" aria-label="Line 702">702</a><code>        if (email._tag === &quot;Str&quot;) return { subject: email.value };</code></span>
+<span class="source-line" id="L703"><a class="line-number" href="#L703" aria-label="Line 703">703</a><code>        if (email._tag !== &quot;Map&quot;) return fail(email, &quot;An expected email is a subject or {:to :subject :body}&quot;);</code></span>
+<span class="source-line" id="L704"><a class="line-number" href="#L704" aria-label="Line 704">704</a><code>        return Object.fromEntries(email.pairs.map(([key, value]) =&gt; {</code></span>
+<span class="source-line" id="L705"><a class="line-number" href="#L705" aria-label="Line 705">705</a><code>          const field = keywordOf(key) ?? &quot;&quot;;</code></span>
+<span class="source-line" id="L706"><a class="line-number" href="#L706" aria-label="Line 706">706</a><code>          if (![&quot;to&quot;, &quot;subject&quot;, &quot;body&quot;].includes(field)) fail(key, &quot;Expected email keys are :to, :subject, and :body&quot;);</code></span>
+<span class="source-line" id="L707"><a class="line-number" href="#L707" aria-label="Line 707">707</a><code>          return [field, field === &quot;to&quot; ? settingValue(value) : string(value, field)];</code></span>
+<span class="source-line" id="L708"><a class="line-number" href="#L708" aria-label="Line 708">708</a><code>        }));</code></span>
+<span class="source-line" id="L709"><a class="line-number" href="#L709" aria-label="Line 709">709</a><code>      });</code></span>
+<span class="source-line" id="L710"><a class="line-number" href="#L710" aria-label="Line 710">710</a><code>    }</code></span>
+<span class="source-line" id="L711"><a class="line-number" href="#L711" aria-label="Line 711">711</a><code>    return expect as Expectation;</code></span>
+<span class="source-line" id="L712"><a class="line-number" href="#L712" aria-label="Line 712">712</a><code>  };</code></span>
+<span class="source-line" id="L713"><a class="line-number" href="#L713" aria-label="Line 713">713</a><code>  const action = (actionNode: SExpr): ScenarioAction =&gt; {</code></span>
+<span class="source-line" id="L714"><a class="line-number" href="#L714" aria-label="Line 714">714</a><code>    const kind = headOf(actionNode);</code></span>
+<span class="source-line" id="L715"><a class="line-number" href="#L715" aria-label="Line 715">715</a><code>    const args = actionNode._tag === &quot;List&quot; ? actionNode.items.slice(1) : [];</code></span>
+<span class="source-line" id="L716"><a class="line-number" href="#L716" aria-label="Line 716">716</a><code>    if (kind === &quot;expect&quot;) return { kind, expect: expectation(args), loc: actionNode.loc };</code></span>
+<span class="source-line" id="L717"><a class="line-number" href="#L717" aria-label="Line 717">717</a><code>    if (kind === &quot;record&quot;) {</code></span>
+<span class="source-line" id="L718"><a class="line-number" href="#L718" aria-label="Line 718">718</a><code>      const attribute = attributeAt(context, args[0] ?? actionNode, factScope);</code></span>
+<span class="source-line" id="L719"><a class="line-number" href="#L719" aria-label="Line 719">719</a><code>      return { kind, path: attribute.path, value: literal(args[1] ?? fail(actionNode, &quot;(record path value)&quot;), attribute), loc: actionNode.loc };</code></span>
+<span class="source-line" id="L720"><a class="line-number" href="#L720" aria-label="Line 720">720</a><code>    }</code></span>
+<span class="source-line" id="L721"><a class="line-number" href="#L721" aria-label="Line 721">721</a><code>    if (kind === &quot;complete&quot;) {</code></span>
+<span class="source-line" id="L722"><a class="line-number" href="#L722" aria-label="Line 722">722</a><code>      const form = declaredAs(context, args[0] ?? actionNode, &quot;form&quot;);</code></span>
+<span class="source-line" id="L723"><a class="line-number" href="#L723" aria-label="Line 723">723</a><code>      const writesNode = args[1];</code></span>
+<span class="source-line" id="L724"><a class="line-number" href="#L724" aria-label="Line 724">724</a><code>      if (writesNode &amp;&amp; writesNode._tag !== &quot;Map&quot;) fail(writesNode, &quot;(complete form {path value ...})&quot;);</code></span>
+<span class="source-line" id="L725"><a class="line-number" href="#L725" aria-label="Line 725">725</a><code>      const writes = writesNode ? facts((writesNode as Extract&lt;SExpr, { _tag: &quot;Map&quot; }&gt;).pairs) : new Map&lt;string, Value&gt;();</code></span>
+<span class="source-line" id="L726"><a class="line-number" href="#L726" aria-label="Line 726">726</a><code>      const declared = context.forms.get(form)?.writes ?? [];</code></span>
+<span class="source-line" id="L727"><a class="line-number" href="#L727" aria-label="Line 727">727</a><code>      for (const [path] of writes) if (!declared.includes(path)) fail(writesNode, `${form} does not write ${path}`);</code></span>
+<span class="source-line" id="L728"><a class="line-number" href="#L728" aria-label="Line 728">728</a><code>      return { kind, form, writes, loc: actionNode.loc };</code></span>
+<span class="source-line" id="L729"><a class="line-number" href="#L729" aria-label="Line 729">729</a><code>    }</code></span>
+<span class="source-line" id="L730"><a class="line-number" href="#L730" aria-label="Line 730">730</a><code>    return fail(actionNode, `Unknown scenario step ${kind ?? show(actionNode)}.${suggest(kind ?? &quot;&quot;, [&quot;expect&quot;, &quot;record&quot;, &quot;complete&quot;, &quot;day&quot;])}`);</code></span>
+<span class="source-line" id="L731"><a class="line-number" href="#L731" aria-label="Line 731">731</a><code>  };</code></span>
+<span class="source-line" id="L732"><a class="line-number" href="#L732" aria-label="Line 732">732</a><code>  const days: Array&lt;{ day: number; actions: ScenarioAction[] }&gt; = [{ day: 0, actions: [] }];</code></span>
+<span class="source-line" id="L733"><a class="line-number" href="#L733" aria-label="Line 733">733</a><code>  for (const step of node.items.slice(3)) {</code></span>
+<span class="source-line" id="L734"><a class="line-number" href="#L734" aria-label="Line 734">734</a><code>    if (headOf(step) === &quot;day&quot;) {</code></span>
+<span class="source-line" id="L735"><a class="line-number" href="#L735" aria-label="Line 735">735</a><code>      const dayItems = (step as Extract&lt;SExpr, { _tag: &quot;List&quot; }&gt;).items;</code></span>
+<span class="source-line" id="L736"><a class="line-number" href="#L736" aria-label="Line 736">736</a><code>      const day = number(dayItems[1], &quot;a day number&quot;, step.loc);</code></span>
+<span class="source-line" id="L737"><a class="line-number" href="#L737" aria-label="Line 737">737</a><code>      if (!Number.isInteger(day) || day &lt;= days[days.length - 1]!.day) fail(dayItems[1], &quot;Scenario days must be whole numbers that increase&quot;);</code></span>
+<span class="source-line" id="L738"><a class="line-number" href="#L738" aria-label="Line 738">738</a><code>      days.push({ day, actions: dayItems.slice(2).map(action) });</code></span>
+<span class="source-line" id="L739"><a class="line-number" href="#L739" aria-label="Line 739">739</a><code>    } else {</code></span>
+<span class="source-line" id="L740"><a class="line-number" href="#L740" aria-label="Line 740">740</a><code>      if (days.length &gt; 1) fail(step, &quot;Steps after a (day n ...) belong inside a day&quot;);</code></span>
+<span class="source-line" id="L741"><a class="line-number" href="#L741" aria-label="Line 741">741</a><code>      days[0]!.actions.push(action(step));</code></span>
+<span class="source-line" id="L742"><a class="line-number" href="#L742" aria-label="Line 742">742</a><code>    }</code></span>
+<span class="source-line" id="L743"><a class="line-number" href="#L743" aria-label="Line 743">743</a><code>  }</code></span>
+<span class="source-line" id="L744"><a class="line-number" href="#L744" aria-label="Line 744">744</a><code>  return { title, given, days, loc: node.loc };</code></span>
+<span class="source-line" id="L745"><a class="line-number" href="#L745" aria-label="Line 745">745</a><code>};</code></span>
+<span class="source-line" id="L746"><a class="line-number" href="#L746" aria-label="Line 746">746</a><code> </code></span>
+<span class="source-line" id="L747"><a class="line-number" href="#L747" aria-label="Line 747">747</a><code>const namedVerbs: ReadonlySet&lt;string&gt; = new Set([&quot;rule&quot;, &quot;def&quot;, &quot;form&quot;, &quot;policy&quot;, &quot;param&quot;, &quot;automation&quot;, &quot;group&quot;, &quot;integration&quot;]);</code></span>
+<span class="source-line" id="L748"><a class="line-number" href="#L748" aria-label="Line 748">748</a><code>const verbs: ReadonlySet&lt;string&gt; = new Set([&quot;account&quot;, &quot;attributes&quot;, &quot;scenario&quot;, ...namedVerbs]);</code></span>
+<span class="source-line" id="L749"><a class="line-number" href="#L749" aria-label="Line 749">749</a><code>const order = [&quot;account&quot;, &quot;attributes&quot;, &quot;definitions&quot;, &quot;form&quot;, &quot;param&quot;, &quot;policy&quot;, &quot;automation&quot;, &quot;group&quot;, &quot;integration&quot;, &quot;scenario&quot;];</code></span>
+<span class="source-line" id="L750"><a class="line-number" href="#L750" aria-label="Line 750">750</a><code>const phase = (verb: string) =&gt; verb === &quot;rule&quot; || verb === &quot;def&quot; ? &quot;definitions&quot; : verb;</code></span>
+<span class="source-line" id="L751"><a class="line-number" href="#L751" aria-label="Line 751">751</a><code> </code></span>
+<span class="source-line" id="L752"><a class="line-number" href="#L752" aria-label="Line 752">752</a><code>export interface ElaborationResult {</code></span>
+<span class="source-line" id="L753"><a class="line-number" href="#L753" aria-label="Line 753">753</a><code>  readonly program?: AccountProgram;</code></span>
+<span class="source-line" id="L754"><a class="line-number" href="#L754" aria-label="Line 754">754</a><code>  readonly diagnostics: readonly Diagnostic[];</code></span>
+<span class="source-line" id="L755"><a class="line-number" href="#L755" aria-label="Line 755">755</a><code>}</code></span>
+<span class="source-line" id="L756"><a class="line-number" href="#L756" aria-label="Line 756">756</a><code> </code></span>
+<span class="source-line" id="L757"><a class="line-number" href="#L757" aria-label="Line 757">757</a><code>const lineAt = (source: string, offset: number): number =&gt; {</code></span>
+<span class="source-line" id="L758"><a class="line-number" href="#L758" aria-label="Line 758">758</a><code>  let line = 1;</code></span>
+<span class="source-line" id="L759"><a class="line-number" href="#L759" aria-label="Line 759">759</a><code>  for (let i = 0; i &lt; offset &amp;&amp; i &lt; source.length; i++) if (source[i] === &quot;\n&quot;) line++;</code></span>
+<span class="source-line" id="L760"><a class="line-number" href="#L760" aria-label="Line 760">760</a><code>  return line;</code></span>
+<span class="source-line" id="L761"><a class="line-number" href="#L761" aria-label="Line 761">761</a><code>};</code></span>
+<span class="source-line" id="L762"><a class="line-number" href="#L762" aria-label="Line 762">762</a><code> </code></span>
+<span class="source-line" id="L763"><a class="line-number" href="#L763" aria-label="Line 763">763</a><code>/** Elaborate one account source. Every problem becomes a located diagnostic; there are no partial programs. */</code></span>
+<span class="source-line" id="L764"><a class="line-number" href="#L764" aria-label="Line 764">764</a><code>export const elaborateAccount = (source: string): ElaborationResult =&gt; {</code></span>
+<span class="source-line" id="L765"><a class="line-number" href="#L765" aria-label="Line 765">765</a><code>  let expressions: readonly SExpr[];</code></span>
+<span class="source-line" id="L766"><a class="line-number" href="#L766" aria-label="Line 766">766</a><code>  try {</code></span>
+<span class="source-line" id="L767"><a class="line-number" href="#L767" aria-label="Line 767">767</a><code>    const parsed = parse(source);</code></span>
+<span class="source-line" id="L768"><a class="line-number" href="#L768" aria-label="Line 768">768</a><code>    if (parsed.errors.length) {</code></span>
+<span class="source-line" id="L769"><a class="line-number" href="#L769" aria-label="Line 769">769</a><code>      const error = parsed.errors[0]!;</code></span>
+<span class="source-line" id="L770"><a class="line-number" href="#L770" aria-label="Line 770">770</a><code>      return { diagnostics: [{ severity: &quot;error&quot;, message: error.message, ...(error.loc ? { loc: error.loc } : {}) }] };</code></span>
+<span class="source-line" id="L771"><a class="line-number" href="#L771" aria-label="Line 771">771</a><code>    }</code></span>
+<span class="source-line" id="L772"><a class="line-number" href="#L772" aria-label="Line 772">772</a><code>    expressions = toSExprMany(parsed.redTree);</code></span>
+<span class="source-line" id="L773"><a class="line-number" href="#L773" aria-label="Line 773">773</a><code>  } catch (error) {</code></span>
+<span class="source-line" id="L774"><a class="line-number" href="#L774" aria-label="Line 774">774</a><code>    const loc = (error as { loc?: Loc }).loc;</code></span>
+<span class="source-line" id="L775"><a class="line-number" href="#L775" aria-label="Line 775">775</a><code>    return { diagnostics: [{ severity: &quot;error&quot;, message: (error as Error).message, ...(loc ? { loc } : {}) }] };</code></span>
+<span class="source-line" id="L776"><a class="line-number" href="#L776" aria-label="Line 776">776</a><code>  }</code></span>
+<span class="source-line" id="L777"><a class="line-number" href="#L777" aria-label="Line 777">777</a><code> </code></span>
+<span class="source-line" id="L778"><a class="line-number" href="#L778" aria-label="Line 778">778</a><code>  const context: Context = {</code></span>
+<span class="source-line" id="L779"><a class="line-number" href="#L779" aria-label="Line 779">779</a><code>    attributes: new Map(builtinAttributes.map((attribute) =&gt; [attribute.path, attribute])),</code></span>
+<span class="source-line" id="L780"><a class="line-number" href="#L780" aria-label="Line 780">780</a><code>    rules: new Map(), ruleReads: new Map(), constants: new Map(), declared: new Map(), failed: new Set(),</code></span>
+<span class="source-line" id="L781"><a class="line-number" href="#L781" aria-label="Line 781">781</a><code>    forms: new Map(), params: new Map(), diagnostics: [],</code></span>
+<span class="source-line" id="L782"><a class="line-number" href="#L782" aria-label="Line 782">782</a><code>  };</code></span>
+<span class="source-line" id="L783"><a class="line-number" href="#L783" aria-label="Line 783">783</a><code>  const report = (error: unknown) =&gt; {</code></span>
+<span class="source-line" id="L784"><a class="line-number" href="#L784" aria-label="Line 784">784</a><code>    if (!(error instanceof AccountError)) throw error;</code></span>
+<span class="source-line" id="L785"><a class="line-number" href="#L785" aria-label="Line 785">785</a><code>    if (error instanceof Cascade) return;</code></span>
+<span class="source-line" id="L786"><a class="line-number" href="#L786" aria-label="Line 786">786</a><code>    context.diagnostics.push({ severity: &quot;error&quot;, message: error.message, ...(error.loc ? { loc: error.loc } : {}) });</code></span>
+<span class="source-line" id="L787"><a class="line-number" href="#L787" aria-label="Line 787">787</a><code>  };</code></span>
+<span class="source-line" id="L788"><a class="line-number" href="#L788" aria-label="Line 788">788</a><code> </code></span>
+<span class="source-line" id="L789"><a class="line-number" href="#L789" aria-label="Line 789">789</a><code>  const declarations: Declaration[] = [];</code></span>
+<span class="source-line" id="L790"><a class="line-number" href="#L790" aria-label="Line 790">790</a><code>  const lists: Array&lt;Extract&lt;SExpr, { _tag: &quot;List&quot; }&gt;&gt; = [];</code></span>
+<span class="source-line" id="L791"><a class="line-number" href="#L791" aria-label="Line 791">791</a><code>  for (const expression of expressions) {</code></span>
+<span class="source-line" id="L792"><a class="line-number" href="#L792" aria-label="Line 792">792</a><code>    try {</code></span>
+<span class="source-line" id="L793"><a class="line-number" href="#L793" aria-label="Line 793">793</a><code>      const verb = headOf(expression);</code></span>
+<span class="source-line" id="L794"><a class="line-number" href="#L794" aria-label="Line 794">794</a><code>      if (!verb || !verbs.has(verb)) {</code></span>
+<span class="source-line" id="L795"><a class="line-number" href="#L795" aria-label="Line 795">795</a><code>        fail(expression._tag === &quot;List&quot; ? expression.items[0] ?? expression : expression,</code></span>
+<span class="source-line" id="L796"><a class="line-number" href="#L796" aria-label="Line 796">796</a><code>          `Unknown declaration ${verb ?? show(expression)}.${suggest(verb ?? &quot;&quot;, verbs)}`);</code></span>
+<span class="source-line" id="L797"><a class="line-number" href="#L797" aria-label="Line 797">797</a><code>      }</code></span>
+<span class="source-line" id="L798"><a class="line-number" href="#L798" aria-label="Line 798">798</a><code>      const list = expression as Extract&lt;SExpr, { _tag: &quot;List&quot; }&gt;;</code></span>
+<span class="source-line" id="L799"><a class="line-number" href="#L799" aria-label="Line 799">799</a><code>      const label = verb === &quot;scenario&quot; ? string(list.items[1], &quot;a scenario title&quot;, list.loc)</code></span>
+<span class="source-line" id="L800"><a class="line-number" href="#L800" aria-label="Line 800">800</a><code>        : verb === &quot;attributes&quot; ? symbol(list.items[1], &quot;an entity&quot;, list.loc)</code></span>
+<span class="source-line" id="L801"><a class="line-number" href="#L801" aria-label="Line 801">801</a><code>        : name(list.items[1], `a ${verb} name`, list.loc);</code></span>
+<span class="source-line" id="L802"><a class="line-number" href="#L802" aria-label="Line 802">802</a><code>      if (namedVerbs.has(verb!)) {</code></span>
+<span class="source-line" id="L803"><a class="line-number" href="#L803" aria-label="Line 803">803</a><code>        const previous = context.declared.get(label);</code></span>
+<span class="source-line" id="L804"><a class="line-number" href="#L804" aria-label="Line 804">804</a><code>        if (previous) fail(list.items[1], `${label} is already declared on line ${previous.loc.line}`);</code></span>
+<span class="source-line" id="L805"><a class="line-number" href="#L805" aria-label="Line 805">805</a><code>        context.declared.set(label, { verb: verb!, loc: list.loc });</code></span>
+<span class="source-line" id="L806"><a class="line-number" href="#L806" aria-label="Line 806">806</a><code>      }</code></span>
+<span class="source-line" id="L807"><a class="line-number" href="#L807" aria-label="Line 807">807</a><code>      declarations.push({ verb: verb!, name: label, startLine: list.loc.line, endLine: lineAt(source, list.loc.end - 1) });</code></span>
+<span class="source-line" id="L808"><a class="line-number" href="#L808" aria-label="Line 808">808</a><code>      lists.push(list);</code></span>
+<span class="source-line" id="L809"><a class="line-number" href="#L809" aria-label="Line 809">809</a><code>    } catch (error) {</code></span>
+<span class="source-line" id="L810"><a class="line-number" href="#L810" aria-label="Line 810">810</a><code>      report(error);</code></span>
+<span class="source-line" id="L811"><a class="line-number" href="#L811" aria-label="Line 811">811</a><code>    }</code></span>
+<span class="source-line" id="L812"><a class="line-number" href="#L812" aria-label="Line 812">812</a><code>  }</code></span>
+<span class="source-line" id="L813"><a class="line-number" href="#L813" aria-label="Line 813">813</a><code>  const accounts = lists.filter((list) =&gt; headOf(list) === &quot;account&quot;);</code></span>
+<span class="source-line" id="L814"><a class="line-number" href="#L814" aria-label="Line 814">814</a><code>  if (accounts.length !== 1 || lists[0] !== accounts[0]) {</code></span>
+<span class="source-line" id="L815"><a class="line-number" href="#L815" aria-label="Line 815">815</a><code>    context.diagnostics.push({</code></span>
+<span class="source-line" id="L816"><a class="line-number" href="#L816" aria-label="Line 816">816</a><code>      severity: &quot;error&quot;, message: &quot;An account file starts with exactly one (account name \&quot;Title\&quot; ...)&quot;,</code></span>
+<span class="source-line" id="L817"><a class="line-number" href="#L817" aria-label="Line 817">817</a><code>      loc: (accounts[1] ?? lists[0])?.loc ?? { line: 1, col: 1, start: 0, end: 0 },</code></span>
+<span class="source-line" id="L818"><a class="line-number" href="#L818" aria-label="Line 818">818</a><code>    });</code></span>
+<span class="source-line" id="L819"><a class="line-number" href="#L819" aria-label="Line 819">819</a><code>    return { diagnostics: context.diagnostics };</code></span>
+<span class="source-line" id="L820"><a class="line-number" href="#L820" aria-label="Line 820">820</a><code>  }</code></span>
+<span class="source-line" id="L821"><a class="line-number" href="#L821" aria-label="Line 821">821</a><code> </code></span>
+<span class="source-line" id="L822"><a class="line-number" href="#L822" aria-label="Line 822">822</a><code>  const policies: Policy[] = [];</code></span>
+<span class="source-line" id="L823"><a class="line-number" href="#L823" aria-label="Line 823">823</a><code>  const automations: Automation[] = [];</code></span>
+<span class="source-line" id="L824"><a class="line-number" href="#L824" aria-label="Line 824">824</a><code>  const groups: Group[] = [];</code></span>
+<span class="source-line" id="L825"><a class="line-number" href="#L825" aria-label="Line 825">825</a><code>  const integrations: Integration[] = [];</code></span>
+<span class="source-line" id="L826"><a class="line-number" href="#L826" aria-label="Line 826">826</a><code>  const scenarios: Scenario[] = [];</code></span>
+<span class="source-line" id="L827"><a class="line-number" href="#L827" aria-label="Line 827">827</a><code>  for (const current of order) {</code></span>
+<span class="source-line" id="L828"><a class="line-number" href="#L828" aria-label="Line 828">828</a><code>    for (const list of lists.filter((item) =&gt; phase(headOf(item)!) === current)) {</code></span>
+<span class="source-line" id="L829"><a class="line-number" href="#L829" aria-label="Line 829">829</a><code>      try {</code></span>
+<span class="source-line" id="L830"><a class="line-number" href="#L830" aria-label="Line 830">830</a><code>        const verb = headOf(list)!;</code></span>
+<span class="source-line" id="L831"><a class="line-number" href="#L831" aria-label="Line 831">831</a><code>        if (verb === &quot;account&quot;) context.account = elaborateHeader(context, list);</code></span>
+<span class="source-line" id="L832"><a class="line-number" href="#L832" aria-label="Line 832">832</a><code>        else if (verb === &quot;attributes&quot;) elaborateAttributes(context, list);</code></span>
+<span class="source-line" id="L833"><a class="line-number" href="#L833" aria-label="Line 833">833</a><code>        else if (verb === &quot;def&quot;) {</code></span>
+<span class="source-line" id="L834"><a class="line-number" href="#L834" aria-label="Line 834">834</a><code>          const constant = foldFormula(elaborateFormula(context, list.items[2] ?? fail(list, &quot;(def name expression)&quot;), anyScope));</code></span>
+<span class="source-line" id="L835"><a class="line-number" href="#L835" aria-label="Line 835">835</a><code>          if (constant === undefined) fail(list.items[2], &quot;A def is evaluated at build time; use numbers and other defs&quot;);</code></span>
+<span class="source-line" id="L836"><a class="line-number" href="#L836" aria-label="Line 836">836</a><code>          context.constants.set(symbol(list.items[1], &quot;a name&quot;), constant!);</code></span>
+<span class="source-line" id="L837"><a class="line-number" href="#L837" aria-label="Line 837">837</a><code>        } else if (verb === &quot;rule&quot;) {</code></span>
+<span class="source-line" id="L838"><a class="line-number" href="#L838" aria-label="Line 838">838</a><code>          const ruleName = symbol(list.items[1], &quot;a rule name&quot;);</code></span>
+<span class="source-line" id="L839"><a class="line-number" href="#L839" aria-label="Line 839">839</a><code>          if (list.items.length !== 3) fail(list, &quot;(rule name expression)&quot;);</code></span>
+<span class="source-line" id="L840"><a class="line-number" href="#L840" aria-label="Line 840">840</a><code>          const rule = elaborateRule(context, list.items[2]!, anyScope);</code></span>
+<span class="source-line" id="L841"><a class="line-number" href="#L841" aria-label="Line 841">841</a><code>          context.rules.set(ruleName, rule);</code></span>
+<span class="source-line" id="L842"><a class="line-number" href="#L842" aria-label="Line 842">842</a><code>          context.ruleReads.set(ruleName, ruleReads(context, rule));</code></span>
+<span class="source-line" id="L843"><a class="line-number" href="#L843" aria-label="Line 843">843</a><code>        } else if (verb === &quot;form&quot;) {</code></span>
+<span class="source-line" id="L844"><a class="line-number" href="#L844" aria-label="Line 844">844</a><code>          const form = elaborateForm(context, list);</code></span>
+<span class="source-line" id="L845"><a class="line-number" href="#L845" aria-label="Line 845">845</a><code>          context.forms.set(form.name, form);</code></span>
+<span class="source-line" id="L846"><a class="line-number" href="#L846" aria-label="Line 846">846</a><code>        } else if (verb === &quot;param&quot;) {</code></span>
+<span class="source-line" id="L847"><a class="line-number" href="#L847" aria-label="Line 847">847</a><code>          const param = elaborateParam(context, list);</code></span>
+<span class="source-line" id="L848"><a class="line-number" href="#L848" aria-label="Line 848">848</a><code>          context.params.set(param.name, param);</code></span>
+<span class="source-line" id="L849"><a class="line-number" href="#L849" aria-label="Line 849">849</a><code>        } else if (verb === &quot;policy&quot;) policies.push(elaboratePolicy(context, list));</code></span>
+<span class="source-line" id="L850"><a class="line-number" href="#L850" aria-label="Line 850">850</a><code>        else if (verb === &quot;automation&quot;) automations.push(elaborateAutomation(context, list));</code></span>
+<span class="source-line" id="L851"><a class="line-number" href="#L851" aria-label="Line 851">851</a><code>        else if (verb === &quot;group&quot;) groups.push(elaborateGroup(context, list));</code></span>
+<span class="source-line" id="L852"><a class="line-number" href="#L852" aria-label="Line 852">852</a><code>        else if (verb === &quot;integration&quot;) integrations.push(elaborateIntegration(context, list));</code></span>
+<span class="source-line" id="L853"><a class="line-number" href="#L853" aria-label="Line 853">853</a><code>        else scenarios.push(elaborateScenario(context, list));</code></span>
+<span class="source-line" id="L854"><a class="line-number" href="#L854" aria-label="Line 854">854</a><code>      } catch (error) {</code></span>
+<span class="source-line" id="L855"><a class="line-number" href="#L855" aria-label="Line 855">855</a><code>        if (isWord(list.items[1])) context.failed.add(list.items[1].name);</code></span>
+<span class="source-line" id="L856"><a class="line-number" href="#L856" aria-label="Line 856">856</a><code>        report(error);</code></span>
+<span class="source-line" id="L857"><a class="line-number" href="#L857" aria-label="Line 857">857</a><code>      }</code></span>
+<span class="source-line" id="L858"><a class="line-number" href="#L858" aria-label="Line 858">858</a><code>      if (current === &quot;account&quot; &amp;&amp; !context.account) return { diagnostics: context.diagnostics };</code></span>
+<span class="source-line" id="L859"><a class="line-number" href="#L859" aria-label="Line 859">859</a><code>    }</code></span>
+<span class="source-line" id="L860"><a class="line-number" href="#L860" aria-label="Line 860">860</a><code>  }</code></span>
+<span class="source-line" id="L861"><a class="line-number" href="#L861" aria-label="Line 861">861</a><code>  context.diagnostics.sort((a, b) =&gt; (a.loc?.start ?? 0) - (b.loc?.start ?? 0));</code></span>
+<span class="source-line" id="L862"><a class="line-number" href="#L862" aria-label="Line 862">862</a><code>  if (context.diagnostics.some((diagnostic) =&gt; diagnostic.severity === &quot;error&quot;)) return { diagnostics: context.diagnostics };</code></span>
+<span class="source-line" id="L863"><a class="line-number" href="#L863" aria-label="Line 863">863</a><code>  const forms = new Set([...policies.flatMap((policy) =&gt; policy.require.map((entry) =&gt; entry.form)),</code></span>
+<span class="source-line" id="L864"><a class="line-number" href="#L864" aria-label="Line 864">864</a><code>    ...automations.flatMap((automation) =&gt; {</code></span>
+<span class="source-line" id="L865"><a class="line-number" href="#L865" aria-label="Line 865">865</a><code>      const assigned = (steps: readonly Step[]): string[] =&gt; steps.flatMap((step) =&gt;</code></span>
+<span class="source-line" id="L866"><a class="line-number" href="#L866" aria-label="Line 866">866</a><code>        step.kind === &quot;assign&quot; ? [step.form] : step.kind === &quot;when&quot; ? assigned(step.then) : []);</code></span>
+<span class="source-line" id="L867"><a class="line-number" href="#L867" aria-label="Line 867">867</a><code>      return [...assigned(automation.steps), ...(&quot;form&quot; in automation.trigger ? [automation.trigger.form] : [])];</code></span>
+<span class="source-line" id="L868"><a class="line-number" href="#L868" aria-label="Line 868">868</a><code>    })]);</code></span>
+<span class="source-line" id="L869"><a class="line-number" href="#L869" aria-label="Line 869">869</a><code>  for (const form of context.forms.values()) {</code></span>
+<span class="source-line" id="L870"><a class="line-number" href="#L870" aria-label="Line 870">870</a><code>    if (!forms.has(form.name)) {</code></span>
+<span class="source-line" id="L871"><a class="line-number" href="#L871" aria-label="Line 871">871</a><code>      context.diagnostics.push({ severity: &quot;warning&quot;, message: `No policy or automation uses ${form.name}`, loc: form.loc });</code></span>
+<span class="source-line" id="L872"><a class="line-number" href="#L872" aria-label="Line 872">872</a><code>    }</code></span>
+<span class="source-line" id="L873"><a class="line-number" href="#L873" aria-label="Line 873">873</a><code>  }</code></span>
+<span class="source-line" id="L874"><a class="line-number" href="#L874" aria-label="Line 874">874</a><code>  context.diagnostics.sort((a, b) =&gt; (a.loc?.start ?? 0) - (b.loc?.start ?? 0));</code></span>
+<span class="source-line" id="L875"><a class="line-number" href="#L875" aria-label="Line 875">875</a><code>  return {</code></span>
+<span class="source-line" id="L876"><a class="line-number" href="#L876" aria-label="Line 876">876</a><code>    program: {</code></span>
+<span class="source-line" id="L877"><a class="line-number" href="#L877" aria-label="Line 877">877</a><code>      account: context.account!, attributes: context.attributes, rules: context.rules, constants: context.constants,</code></span>
+<span class="source-line" id="L878"><a class="line-number" href="#L878" aria-label="Line 878">878</a><code>      forms: context.forms, policies, params: context.params, automations, groups, integrations, scenarios, declarations,</code></span>
+<span class="source-line" id="L879"><a class="line-number" href="#L879" aria-label="Line 879">879</a><code>    },</code></span>
+<span class="source-line" id="L880"><a class="line-number" href="#L880" aria-label="Line 880">880</a><code>    diagnostics: context.diagnostics,</code></span>
+<span class="source-line" id="L881"><a class="line-number" href="#L881" aria-label="Line 881">881</a><code>  };</code></span>
+<span class="source-line" id="L882"><a class="line-number" href="#L882" aria-label="Line 882">882</a><code>};</code></span></pre></main><footer>Experimental v0.1 · Local in-memory runtime. <a href="/explorations/">All explorations</a></footer></body></html>

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>examples/field-service/model.ts · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css">
+<link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index"></head>
+<body class="explore"><a class="skip" href="#main">Skip to content</a><header class="explore-nav"><a href="/">Open Ontology</a><nav aria-label="Main navigation"><a href="/explorations/">Explorations</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main"><p class="eyebrow">Full source · ts</p><h1 class="source-title">examples/field-service/model.ts</h1>
+<p><a href="/explorations/raw/examples/field-service/model.ts">Raw source</a> · <a href="https://github.com/bjacobso/open-ontology/blob/main/examples/field-service/model.ts">View on GitHub ↗</a></p>
+<p>Click a line number to copy its location from your address bar.</p><pre class="source-code" tabindex="0"><span class="source-line" id="L1"><a class="line-number" href="#L1" aria-label="Line 1">1</a><code>import { Schema } from &quot;effect&quot;;</code></span>
+<span class="source-line" id="L2"><a class="line-number" href="#L2" aria-label="Line 2">2</a><code>import { Change, Datalog, Input, Ontology, Property, defineOntology } from &quot;../../src/index.js&quot;;</code></span>
+<span class="source-line" id="L3"><a class="line-number" href="#L3" aria-label="Line 3">3</a><code> </code></span>
+<span class="source-line" id="L4"><a class="line-number" href="#L4" aria-label="Line 4">4</a><code>const Technician = Ontology.ObjectType(&quot;Technician&quot;, {</code></span>
+<span class="source-line" id="L5"><a class="line-number" href="#L5" aria-label="Line 5">5</a><code>  properties: { name: Property.make(&quot;:technician/name&quot;, Schema.String).required() },</code></span>
+<span class="source-line" id="L6"><a class="line-number" href="#L6" aria-label="Line 6">6</a><code>});</code></span>
+<span class="source-line" id="L7"><a class="line-number" href="#L7" aria-label="Line 7">7</a><code> </code></span>
+<span class="source-line" id="L8"><a class="line-number" href="#L8" aria-label="Line 8">8</a><code>const WorkOrder = Ontology.ObjectType(&quot;WorkOrder&quot;, {</code></span>
+<span class="source-line" id="L9"><a class="line-number" href="#L9" aria-label="Line 9">9</a><code>  properties: {</code></span>
+<span class="source-line" id="L10"><a class="line-number" href="#L10" aria-label="Line 10">10</a><code>    title: Property.make(&quot;:work-order/title&quot;, Schema.String).required(),</code></span>
+<span class="source-line" id="L11"><a class="line-number" href="#L11" aria-label="Line 11">11</a><code>    status: Property.make(&quot;:work-order/status&quot;, Schema.String).required(),</code></span>
+<span class="source-line" id="L12"><a class="line-number" href="#L12" aria-label="Line 12">12</a><code>  },</code></span>
+<span class="source-line" id="L13"><a class="line-number" href="#L13" aria-label="Line 13">13</a><code>});</code></span>
+<span class="source-line" id="L14"><a class="line-number" href="#L14" aria-label="Line 14">14</a><code> </code></span>
+<span class="source-line" id="L15"><a class="line-number" href="#L15" aria-label="Line 15">15</a><code>const AssignedTo = Ontology.LinkType(&quot;assigned-to&quot;, {</code></span>
+<span class="source-line" id="L16"><a class="line-number" href="#L16" aria-label="Line 16">16</a><code>  from: WorkOrder,</code></span>
+<span class="source-line" id="L17"><a class="line-number" href="#L17" aria-label="Line 17">17</a><code>  to: Technician,</code></span>
+<span class="source-line" id="L18"><a class="line-number" href="#L18" aria-label="Line 18">18</a><code>  properties: { assignedAt: Property.instant(&quot;:assigned-to/assigned-at&quot;).required() },</code></span>
+<span class="source-line" id="L19"><a class="line-number" href="#L19" aria-label="Line 19">19</a><code>});</code></span>
+<span class="source-line" id="L20"><a class="line-number" href="#L20" aria-label="Line 20">20</a><code> </code></span>
+<span class="source-line" id="L21"><a class="line-number" href="#L21" aria-label="Line 21">21</a><code>const AssignWorkOrder = Ontology.ActionType(&quot;assign-work-order&quot;, {</code></span>
+<span class="source-line" id="L22"><a class="line-number" href="#L22" aria-label="Line 22">22</a><code>  input: Schema.Struct({ workOrder: Schema.String, technician: Schema.String }),</code></span>
+<span class="source-line" id="L23"><a class="line-number" href="#L23" aria-label="Line 23">23</a><code>  changes: [</code></span>
+<span class="source-line" id="L24"><a class="line-number" href="#L24" aria-label="Line 24">24</a><code>    Change.clear(Input.value(&quot;workOrder&quot;), WorkOrder.properties.status),</code></span>
+<span class="source-line" id="L25"><a class="line-number" href="#L25" aria-label="Line 25">25</a><code>    Change.set(Input.value(&quot;workOrder&quot;), WorkOrder.properties.status, &quot;assigned&quot;),</code></span>
+<span class="source-line" id="L26"><a class="line-number" href="#L26" aria-label="Line 26">26</a><code>    Change.link(AssignedTo, Input.value(&quot;workOrder&quot;), Input.value(&quot;technician&quot;), {</code></span>
+<span class="source-line" id="L27"><a class="line-number" href="#L27" aria-label="Line 27">27</a><code>      &quot;:assigned-to/assigned-at&quot;: Input.now,</code></span>
+<span class="source-line" id="L28"><a class="line-number" href="#L28" aria-label="Line 28">28</a><code>    }),</code></span>
+<span class="source-line" id="L29"><a class="line-number" href="#L29" aria-label="Line 29">29</a><code>  ],</code></span>
+<span class="source-line" id="L30"><a class="line-number" href="#L30" aria-label="Line 30">30</a><code>});</code></span>
+<span class="source-line" id="L31"><a class="line-number" href="#L31" aria-label="Line 31">31</a><code> </code></span>
+<span class="source-line" id="L32"><a class="line-number" href="#L32" aria-label="Line 32">32</a><code>const v = Datalog.variables({</code></span>
+<span class="source-line" id="L33"><a class="line-number" href="#L33" aria-label="Line 33">33</a><code>  work: WorkOrder.entity,</code></span>
+<span class="source-line" id="L34"><a class="line-number" href="#L34" aria-label="Line 34">34</a><code>  title: Schema.String,</code></span>
+<span class="source-line" id="L35"><a class="line-number" href="#L35" aria-label="Line 35">35</a><code>  status: Schema.String,</code></span>
+<span class="source-line" id="L36"><a class="line-number" href="#L36" aria-label="Line 36">36</a><code>  assignment: AssignedTo.entity,</code></span>
+<span class="source-line" id="L37"><a class="line-number" href="#L37" aria-label="Line 37">37</a><code>  person: Technician.entity,</code></span>
+<span class="source-line" id="L38"><a class="line-number" href="#L38" aria-label="Line 38">38</a><code>  technician: Schema.String,</code></span>
+<span class="source-line" id="L39"><a class="line-number" href="#L39" aria-label="Line 39">39</a><code>  assignedAt: Schema.Date,</code></span>
+<span class="source-line" id="L40"><a class="line-number" href="#L40" aria-label="Line 40">40</a><code>});</code></span>
+<span class="source-line" id="L41"><a class="line-number" href="#L41" aria-label="Line 41">41</a><code> </code></span>
+<span class="source-line" id="L42"><a class="line-number" href="#L42" aria-label="Line 42">42</a><code>const AssignedWork = Ontology.QueryType(&quot;assigned-work&quot;, {</code></span>
+<span class="source-line" id="L43"><a class="line-number" href="#L43" aria-label="Line 43">43</a><code>  query: Datalog.query({</code></span>
+<span class="source-line" id="L44"><a class="line-number" href="#L44" aria-label="Line 44">44</a><code>    find: [v.title, v.technician],</code></span>
+<span class="source-line" id="L45"><a class="line-number" href="#L45" aria-label="Line 45">45</a><code>    where: [</code></span>
+<span class="source-line" id="L46"><a class="line-number" href="#L46" aria-label="Line 46">46</a><code>      Datalog.match(v.work, WorkOrder.properties.title, v.title),</code></span>
+<span class="source-line" id="L47"><a class="line-number" href="#L47" aria-label="Line 47">47</a><code>      Datalog.match(v.work, WorkOrder.properties.status, v.status),</code></span>
+<span class="source-line" id="L48"><a class="line-number" href="#L48" aria-label="Line 48">48</a><code>      Datalog.predicate(&quot;!=&quot;, v.status, &quot;cancelled&quot;),</code></span>
+<span class="source-line" id="L49"><a class="line-number" href="#L49" aria-label="Line 49">49</a><code>      Datalog.not(Datalog.match(v.work, WorkOrder.properties.status, &quot;archived&quot;)),</code></span>
+<span class="source-line" id="L50"><a class="line-number" href="#L50" aria-label="Line 50">50</a><code>      Datalog.match(v.assignment, AssignedTo.endpoints.from, v.work),</code></span>
+<span class="source-line" id="L51"><a class="line-number" href="#L51" aria-label="Line 51">51</a><code>      Datalog.match(v.assignment, AssignedTo.endpoints.to, v.person),</code></span>
+<span class="source-line" id="L52"><a class="line-number" href="#L52" aria-label="Line 52">52</a><code>      Datalog.match(v.assignment, AssignedTo.properties.assignedAt, v.assignedAt),</code></span>
+<span class="source-line" id="L53"><a class="line-number" href="#L53" aria-label="Line 53">53</a><code>      Datalog.match(v.person, Technician.properties.name, v.technician),</code></span>
+<span class="source-line" id="L54"><a class="line-number" href="#L54" aria-label="Line 54">54</a><code>    ],</code></span>
+<span class="source-line" id="L55"><a class="line-number" href="#L55" aria-label="Line 55">55</a><code>  }),</code></span>
+<span class="source-line" id="L56"><a class="line-number" href="#L56" aria-label="Line 56">56</a><code>});</code></span>
+<span class="source-line" id="L57"><a class="line-number" href="#L57" aria-label="Line 57">57</a><code> </code></span>
+<span class="source-line" id="L58"><a class="line-number" href="#L58" aria-label="Line 58">58</a><code>export const fieldService = defineOntology({ name: &quot;field-service&quot;, version: &quot;1&quot; }, [</code></span>
+<span class="source-line" id="L59"><a class="line-number" href="#L59" aria-label="Line 59">59</a><code>  Technician, WorkOrder, AssignedTo, AssignWorkOrder, AssignedWork,</code></span>
+<span class="source-line" id="L60"><a class="line-number" href="#L60" aria-label="Line 60">60</a><code>]);</code></span></pre></main><footer>Experimental v0.1 · Local in-memory runtime. <a href="/explorations/">All explorations</a></footer></body></html>

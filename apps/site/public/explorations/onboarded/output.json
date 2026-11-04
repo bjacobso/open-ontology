@@ -1,0 +1,44 @@
+{
+  "forms": [
+    {
+      "?lineageName": "Example onboarding form",
+      "?formName": "Example form v1",
+      "?status": "published"
+    }
+  ],
+  "before": {
+    "tasks": [
+      {
+        "?employeeName": "Ada Example",
+        "?formName": "Example form v1",
+        "?status": "requires_action",
+        "?nextAction": "employee-input"
+      }
+    ],
+    "queue": []
+  },
+  "after": {
+    "tasks": [
+      {
+        "?employeeName": "Ada Example",
+        "?formName": "Example form v1",
+        "?status": "requires_action",
+        "?nextAction": "employer-review"
+      }
+    ],
+    "queue": [
+      {
+        "?employeeName": "Ada Example",
+        "?assigneeEmail": "grace@example.invalid"
+      }
+    ]
+  },
+  "reassigned": {
+    "queue": [
+      {
+        "?employeeName": "Ada Example",
+        "?assigneeEmail": "lee@example.invalid"
+      }
+    ]
+  }
+}

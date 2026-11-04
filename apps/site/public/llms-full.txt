@@ -464,7 +464,17 @@ Next checkpoint, in order: SQLite persistence, policy authorization, and a versi
 - Forma adapter: https://github.com/bjacobso/open-ontology/blob/main/src/forma.ts
 - Runtime: https://github.com/bjacobso/open-ontology/blob/main/src/runtime.ts
 - Checker: https://github.com/bjacobso/open-ontology/blob/main/scripts/check-model.ts
+- Exploration catalog (sources, rendered README and runnable notebooks): https://open-ontology.com/explorations/
+- Add a domain or exploration: https://raw.githubusercontent.com/bjacobso/open-ontology/main/docs/adding-domains.md
+- Catalog manifest: https://raw.githubusercontent.com/bjacobso/open-ontology/main/examples/catalog.json
+- Onto external-language example: https://open-ontology.com/explorations/onto/
+- Raw Onto prelude: https://open-ontology.com/explorations/raw/examples/onto/onto.lisp
+- Onto prelude with line links: https://open-ontology.com/explorations/source/examples/onto/onto.lisp.html#L1
 - Field-service example: https://github.com/bjacobso/open-ontology/tree/main/examples/field-service
 - Support-desk example: https://github.com/bjacobso/open-ontology/tree/main/examples/support-desk
 - Architecture: https://github.com/bjacobso/open-ontology/blob/main/docs/architecture.md
 - Community Discord: https://discord.gg/cjW4gxsdXK
+
+The catalog distinguishes runnable local domains from platform sketches, open PRs and upstream explorations (Stripe, Salesforce, Palantir, Foldkit, Elm, Effect and others). Register new work in examples/catalog.json and follow docs/adding-domains.md. Static notebooks show README Markdown, raw and line-linked source, the model and output regenerated from its command. Run pnpm site:export-explorations to update artifacts; pnpm site:check reruns the examples and rejects stale artifacts.
+
+Onto is an example-only external language, loaded with its own Forma prelude and explicit lowering, not accepted by the generic model:check command. Run pnpm example:onto. Its host interpreter checks requires and final states and forwards Triplex EntityState preconditions through a scoped service wrapper, without changing src/. Guarded writes reject concurrent changes to observed entities, including linked records and absent creation targets. Direct raw writes bypass these guards. The date-order rule has a named satisfaction query but no enforcement; the clock-dependent rule and Invoice.total are checked but not executed; the run prints its complete not-lowered list. Read the example README for bounded-view, fixed-business-clock and sparse-sum semantics. The existing package Forma dependency stays unchanged; an isolated pinned upstream package supplies the newer descriptor API to this example only.

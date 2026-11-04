@@ -1,0 +1,79 @@
+{
+  "github-repositories": [
+    {
+      "?repository": "ada/ontology",
+      "?owner": "ada",
+      "?url": "https://github.com/ada/ontology"
+    },
+    {
+      "?repository": "example-org/ontology",
+      "?owner": "example-org",
+      "?url": "https://github.com/example-org/ontology"
+    }
+  ],
+  "github-forks": [
+    {
+      "?fork": "ada/ontology",
+      "?upstream": "example-org/ontology"
+    }
+  ],
+  "git-repository-dependencies": [
+    {
+      "?repository": "ontology",
+      "?dependency": "forma"
+    }
+  ],
+  "git-branch-tips": [
+    {
+      "?repository": "ontology-fork",
+      "?branch": "imports",
+      "?oid": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    {
+      "?repository": "ontology-fork",
+      "?branch": "main",
+      "?oid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "?repository": "ontology",
+      "?branch": "main",
+      "?oid": "cccccccccccccccccccccccccccccccccccccccc"
+    }
+  ],
+  "github-open-pull-requests": [
+    {
+      "?repository": "example-org/ontology",
+      "?number": 2,
+      "?author": "ada",
+      "?base": "main",
+      "?headRepository": "ada/ontology",
+      "?head": "imports"
+    }
+  ],
+  "github-pull-request-issues": [
+    {
+      "?repository": "example-org/ontology",
+      "?pullRequest": 2,
+      "?issueRepository": "example-org/ontology",
+      "?issue": 1,
+      "?title": "Reusable Git vocabulary"
+    }
+  ],
+  "merge-parents": [
+    {
+      "?oid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "?position": 0
+    },
+    {
+      "?oid": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "?position": 1
+    }
+  ],
+  "collaborators": [
+    {
+      "?login": "ada",
+      "?permission": "write",
+      "?role": "member"
+    }
+  ]
+}

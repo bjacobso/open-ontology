@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Git / GitHub · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css">
+<link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index"></head>
+<body class="explore"><a class="skip" href="#main">Skip to content</a><header class="explore-nav"><a href="/">Open Ontology</a><nav aria-label="Main navigation"><a href="/explorations/">Explorations</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main"><a class="back" href="/explorations/">← All explorations</a>
+<p class="eyebrow">domain <span class="status runnable">Runs locally</span></p>
+<h1>Git / GitHub</h1><p class="lead">Bundled Git and GitHub vocabularies: repositories, forks, branches, PRs, issues and local graph queries.</p>
+<nav class="page-nav" aria-label="Notebook sections"><a href="#readme">Readme</a><a href="#sources">Sources</a><a href="#run">Run example</a></nav>
+<div class="notebook"><aside><p class="eyebrow">In this exploration</p><a href="#sources">Language &amp; source</a><a href="#readme">Documentation</a><a href="#run">Model &amp; results</a><a href="/explorations/#adding">Add an exploration ↗</a></aside><div class="notebook-body">
+<section id="sources"><h2>Language &amp; source</h2><ul class="source-list"><li><span>prelude</span><a href="/explorations/source/preludes/ontology.lisp.html#L1">preludes/ontology.lisp</a><a class="raw-link" href="/explorations/raw/preludes/ontology.lisp">raw ↗</a></li><li><span>library</span><a href="/explorations/source/libraries/std/git.lisp.html#L1">libraries/std/git.lisp</a><a class="raw-link" href="/explorations/raw/libraries/std/git.lisp">raw ↗</a></li><li><span>library</span><a href="/explorations/source/libraries/github.lisp.html#L1">libraries/github.lisp</a><a class="raw-link" href="/explorations/raw/libraries/github.lisp">raw ↗</a></li><li><span>model</span><a href="/explorations/source/examples/github/model.lisp.html#L1">examples/github/model.lisp</a><a class="raw-link" href="/explorations/raw/examples/github/model.lisp">raw ↗</a></li><li><span>runner</span><a href="/explorations/source/examples/github/run.ts.html#L1">examples/github/run.ts</a><a class="raw-link" href="/explorations/raw/examples/github/run.ts">raw ↗</a></li></ul></section>
+<section id="readme" class="markdown"><p class="eyebrow">Documentation <a href="/explorations/raw/examples/github/README.md">Raw Markdown ↗</a></p><h1>Git and GitHub</h1>
+<p>A reusable provider-neutral Git vocabulary and GitHub hosting vocabulary,
+loaded as bundled Forma libraries. These are declarations in the existing
+ontology language, not a new language or live provider integration.</p>
+<h2>Read and run</h2>
+<ul>
+<li>Language: <a href="/explorations/source/preludes/ontology.lisp.html">ontology.lisp</a>.</li>
+<li>Libraries: <a href="/explorations/source/libraries/std/git.lisp.html">std/git.lisp</a> and <a href="/explorations/source/libraries/github.lisp.html">github.lisp</a>.</li>
+<li>Model: <a href="/explorations/source/examples/github/model.lisp.html">model.lisp</a>.</li>
+<li>Operations: <a href="https://github.com/bjacobso/open-ontology/blob/main/examples/github/scenario.ts">scenario.ts</a> and <a href="/explorations/source/examples/github/run.ts.html">run.ts</a>.</li>
+<li>Vocabulary and extension conventions: <a href="https://github.com/bjacobso/open-ontology/blob/main/docs/git-libraries.md">Git libraries guide</a>.</li>
+<li>Run: <code>pnpm example:github</code>.</li>
+<li>Check: <code>pnpm model:check examples/github/model.lisp</code>.</li>
+<li>Coverage: <a href="https://github.com/bjacobso/open-ontology/blob/main/test/forma-libraries.test.ts">forma-libraries.test.ts</a>.</li>
+</ul>
+<p>The scenario models synthetic forks, dependencies, merge parents, a cross-fork
+pull request and issue references. It runs on local in-memory Triplex, with no
+GitHub API synchronization, configuration deployment or permission enforcement.</p>
+</section>
+<section id="run"><p class="eyebrow">Executable notebook</p><h2>Run the example</h2><p>Run in a clone with Node 24 and pnpm 10.11.0. Each run starts a fresh in-memory Triplex host.</p>
+<pre><code>pnpm install --frozen-lockfile
+pnpm example:github</code></pre>
+<h3>The model</h3><p><a href="/explorations/source/examples/github/model.lisp.html#L1">Full model with line links</a> · <a href="/explorations/raw/examples/github/model.lisp">Raw</a></p><pre tabindex="0"><code>(import &quot;/github&quot;)
+
+; Join the hosting layer to the shared Git graph, including cross-fork PRs.
+(define-datalog-query github-open-pull-requests
+  (:query
+    {:find [&quot;?repository&quot; &quot;?number&quot; &quot;?author&quot; &quot;?base&quot; &quot;?headRepository&quot; &quot;?head&quot;]
+     :where [[&quot;?pr&quot; &quot;:github-pull-request/state&quot; &quot;open&quot;]
+             [&quot;?pr&quot; &quot;:github-pull-request/repository&quot; &quot;?hosting&quot;]
+             [&quot;?hosting&quot; &quot;:github-repository/full-name&quot; &quot;?repository&quot;]
+             [&quot;?pr&quot; &quot;:github-pull-request/number&quot; &quot;?number&quot;]
+             [&quot;?pr&quot; &quot;:github-pull-request/author&quot; &quot;?account&quot;]
+             [&quot;?account&quot; &quot;:github-account/login&quot; &quot;?author&quot;]
+             [&quot;?pr&quot; &quot;:github-pull-request/base&quot; &quot;?baseBranch&quot;]
+             [&quot;?baseBranch&quot; &quot;:git-branch/name&quot; &quot;?base&quot;]
+             [&quot;?pr&quot; &quot;:github-pull-request/head&quot; &quot;?headBranch&quot;]
+             [&quot;?headBranch&quot; &quot;:git-branch/name&quot; &quot;?head&quot;]
+             [&quot;?headBranch&quot; &quot;:git-branch/repository&quot; &quot;?headRepo&quot;]
+             [&quot;?headHosting&quot; &quot;:github-repository/repository&quot; &quot;?headRepo&quot;]
+             [&quot;?headHosting&quot; &quot;:github-repository/full-name&quot; &quot;?headRepository&quot;]]}))
+</code></pre>
+<h3>Checked output</h3><p>This output is regenerated by running the example during site checks. Run the command locally to execute it; this static page does not run code in your browser. <a href="/explorations/github/output.json">Output as JSON</a></p>
+<pre tabindex="0"><code>{
+  &quot;github-repositories&quot;: [
+    {
+      &quot;?repository&quot;: &quot;ada/ontology&quot;,
+      &quot;?owner&quot;: &quot;ada&quot;,
+      &quot;?url&quot;: &quot;https://github.com/ada/ontology&quot;
+    },
+    {
+      &quot;?repository&quot;: &quot;example-org/ontology&quot;,
+      &quot;?owner&quot;: &quot;example-org&quot;,
+      &quot;?url&quot;: &quot;https://github.com/example-org/ontology&quot;
+    }
+  ],
+  &quot;github-forks&quot;: [
+    {
+      &quot;?fork&quot;: &quot;ada/ontology&quot;,
+      &quot;?upstream&quot;: &quot;example-org/ontology&quot;
+    }
+  ],
+  &quot;git-repository-dependencies&quot;: [
+    {
+      &quot;?repository&quot;: &quot;ontology&quot;,
+      &quot;?dependency&quot;: &quot;forma&quot;
+    }
+  ],
+  &quot;git-branch-tips&quot;: [
+    {
+      &quot;?repository&quot;: &quot;ontology-fork&quot;,
+      &quot;?branch&quot;: &quot;imports&quot;,
+      &quot;?oid&quot;: &quot;bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb&quot;
+    },
+    {
+      &quot;?repository&quot;: &quot;ontology-fork&quot;,
+      &quot;?branch&quot;: &quot;main&quot;,
+      &quot;?oid&quot;: &quot;aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&quot;
+    },
+    {
+      &quot;?repository&quot;: &quot;ontology&quot;,
+      &quot;?branch&quot;: &quot;main&quot;,
+      &quot;?oid&quot;: &quot;cccccccccccccccccccccccccccccccccccccccc&quot;
+    }
+  ],
+  &quot;github-open-pull-requests&quot;: [
+    {
+      &quot;?repository&quot;: &quot;example-org/ontology&quot;,
+      &quot;?number&quot;: 2,
+      &quot;?author&quot;: &quot;ada&quot;,
+      &quot;?base&quot;: &quot;main&quot;,
+      &quot;?headRepository&quot;: &quot;ada/ontology&quot;,
+      &quot;?head&quot;: &quot;imports&quot;
+    }
+  ],
+  &quot;github-pull-request-issues&quot;: [
+    {
+      &quot;?repository&quot;: &quot;example-org/ontology&quot;,
+      &quot;?pullRequest&quot;: 2,
+      &quot;?issueRepository&quot;: &quot;example-org/ontology&quot;,
+      &quot;?issue&quot;: 1,
+      &quot;?title&quot;: &quot;Reusable Git vocabulary&quot;
+    }
+  ],
+  &quot;merge-parents&quot;: [
+    {
+      &quot;?oid&quot;: &quot;aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&quot;,
+      &quot;?position&quot;: 0
+    },
+    {
+      &quot;?oid&quot;: &quot;bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb&quot;,
+      &quot;?position&quot;: 1
+    }
+  ],
+  &quot;collaborators&quot;: [
+    {
+      &quot;?login&quot;: &quot;ada&quot;,
+      &quot;?permission&quot;: &quot;write&quot;,
+      &quot;?role&quot;: &quot;member&quot;
+    }
+  ]
+}
+</code></pre></section>
+</div></div></main><footer>Experimental v0.1 · Local in-memory runtime. <a href="/explorations/">All explorations</a></footer></body></html>

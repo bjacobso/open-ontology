@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>examples/onto/output.json · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css">
+<link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index"></head>
+<body class="explore"><a class="skip" href="#main">Skip to content</a><header class="explore-nav"><a href="/">Open Ontology</a><nav aria-label="Main navigation"><a href="/explorations/">Explorations</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main"><p class="eyebrow">Full source · json</p><h1 class="source-title">examples/onto/output.json</h1>
+<p><a href="/explorations/raw/examples/onto/output.json">Raw source</a> · <a href="https://github.com/bjacobso/open-ontology/blob/main/examples/onto/output.json">View on GitHub ↗</a></p>
+<p>Click a line number to copy its location from your address bar.</p><pre class="source-code" tabindex="0"><span class="source-line" id="L1"><a class="line-number" href="#L1" aria-label="Line 1">1</a><code>{</code></span>
+<span class="source-line" id="L2"><a class="line-number" href="#L2" aria-label="Line 2">2</a><code>  &quot;outcomes&quot;: [</code></span>
+<span class="source-line" id="L3"><a class="line-number" href="#L3" aria-label="Line 3">3</a><code>    {</code></span>
+<span class="source-line" id="L4"><a class="line-number" href="#L4" aria-label="Line 4">4</a><code>      &quot;accepted&quot;: true,</code></span>
+<span class="source-line" id="L5"><a class="line-number" href="#L5" aria-label="Line 5">5</a><code>      &quot;commandId&quot;: &quot;submit:1&quot;</code></span>
+<span class="source-line" id="L6"><a class="line-number" href="#L6" aria-label="Line 6">6</a><code>    },</code></span>
+<span class="source-line" id="L7"><a class="line-number" href="#L7" aria-label="Line 7">7</a><code>    {</code></span>
+<span class="source-line" id="L8"><a class="line-number" href="#L8" aria-label="Line 8">8</a><code>      &quot;accepted&quot;: true,</code></span>
+<span class="source-line" id="L9"><a class="line-number" href="#L9" aria-label="Line 9">9</a><code>      &quot;commandId&quot;: &quot;confirm:1&quot;</code></span>
+<span class="source-line" id="L10"><a class="line-number" href="#L10" aria-label="Line 10">10</a><code>    },</code></span>
+<span class="source-line" id="L11"><a class="line-number" href="#L11" aria-label="Line 11">11</a><code>    {</code></span>
+<span class="source-line" id="L12"><a class="line-number" href="#L12" aria-label="Line 12">12</a><code>      &quot;accepted&quot;: false,</code></span>
+<span class="source-line" id="L13"><a class="line-number" href="#L13" aria-label="Line 13">13</a><code>      &quot;reason&quot;: &quot;requires [\&quot;not\&quot;,[\&quot;before?\&quot;,\&quot;now\&quot;,\&quot;reservation.check-in\&quot;]]&quot;,</code></span>
+<span class="source-line" id="L14"><a class="line-number" href="#L14" aria-label="Line 14">14</a><code>      &quot;commandId&quot;: &quot;check-in:early&quot;</code></span>
+<span class="source-line" id="L15"><a class="line-number" href="#L15" aria-label="Line 15">15</a><code>    },</code></span>
+<span class="source-line" id="L16"><a class="line-number" href="#L16" aria-label="Line 16">16</a><code>    {</code></span>
+<span class="source-line" id="L17"><a class="line-number" href="#L17" aria-label="Line 17">17</a><code>      &quot;accepted&quot;: true,</code></span>
+<span class="source-line" id="L18"><a class="line-number" href="#L18" aria-label="Line 18">18</a><code>      &quot;commandId&quot;: &quot;check-in:1&quot;</code></span>
+<span class="source-line" id="L19"><a class="line-number" href="#L19" aria-label="Line 19">19</a><code>    },</code></span>
+<span class="source-line" id="L20"><a class="line-number" href="#L20" aria-label="Line 20">20</a><code>    {</code></span>
+<span class="source-line" id="L21"><a class="line-number" href="#L21" aria-label="Line 21">21</a><code>      &quot;accepted&quot;: true,</code></span>
+<span class="source-line" id="L22"><a class="line-number" href="#L22" aria-label="Line 22">22</a><code>      &quot;commandId&quot;: &quot;request:1&quot;</code></span>
+<span class="source-line" id="L23"><a class="line-number" href="#L23" aria-label="Line 23">23</a><code>    },</code></span>
+<span class="source-line" id="L24"><a class="line-number" href="#L24" aria-label="Line 24">24</a><code>    {</code></span>
+<span class="source-line" id="L25"><a class="line-number" href="#L25" aria-label="Line 25">25</a><code>      &quot;accepted&quot;: true,</code></span>
+<span class="source-line" id="L26"><a class="line-number" href="#L26" aria-label="Line 26">26</a><code>      &quot;commandId&quot;: &quot;fulfil:1&quot;</code></span>
+<span class="source-line" id="L27"><a class="line-number" href="#L27" aria-label="Line 27">27</a><code>    },</code></span>
+<span class="source-line" id="L28"><a class="line-number" href="#L28" aria-label="Line 28">28</a><code>    {</code></span>
+<span class="source-line" id="L29"><a class="line-number" href="#L29" aria-label="Line 29">29</a><code>      &quot;accepted&quot;: false,</code></span>
+<span class="source-line" id="L30"><a class="line-number" href="#L30" aria-label="Line 30">30</a><code>      &quot;reason&quot;: &quot;final Service.status: fulfilled&quot;,</code></span>
+<span class="source-line" id="L31"><a class="line-number" href="#L31" aria-label="Line 31">31</a><code>      &quot;commandId&quot;: &quot;request:revive&quot;</code></span>
+<span class="source-line" id="L32"><a class="line-number" href="#L32" aria-label="Line 32">32</a><code>    }</code></span>
+<span class="source-line" id="L33"><a class="line-number" href="#L33" aria-label="Line 33">33</a><code>  ],</code></span>
+<span class="source-line" id="L34"><a class="line-number" href="#L34" aria-label="Line 34">34</a><code>  &quot;queries&quot;: {</code></span>
+<span class="source-line" id="L35"><a class="line-number" href="#L35" aria-label="Line 35">35</a><code>    &quot;roomClasses&quot;: [</code></span>
+<span class="source-line" id="L36"><a class="line-number" href="#L36" aria-label="Line 36">36</a><code>      {</code></span>
+<span class="source-line" id="L37"><a class="line-number" href="#L37" aria-label="Line 37">37</a><code>        &quot;?name&quot;: &quot;Standard&quot;,</code></span>
+<span class="source-line" id="L38"><a class="line-number" href="#L38" aria-label="Line 38">38</a><code>        &quot;?rate&quot;: 120</code></span>
+<span class="source-line" id="L39"><a class="line-number" href="#L39" aria-label="Line 39">39</a><code>      },</code></span>
+<span class="source-line" id="L40"><a class="line-number" href="#L40" aria-label="Line 40">40</a><code>      {</code></span>
+<span class="source-line" id="L41"><a class="line-number" href="#L41" aria-label="Line 41">41</a><code>        &quot;?name&quot;: &quot;Deluxe&quot;,</code></span>
+<span class="source-line" id="L42"><a class="line-number" href="#L42" aria-label="Line 42">42</a><code>        &quot;?rate&quot;: 200</code></span>
+<span class="source-line" id="L43"><a class="line-number" href="#L43" aria-label="Line 43">43</a><code>      },</code></span>
+<span class="source-line" id="L44"><a class="line-number" href="#L44" aria-label="Line 44">44</a><code>      {</code></span>
+<span class="source-line" id="L45"><a class="line-number" href="#L45" aria-label="Line 45">45</a><code>        &quot;?name&quot;: &quot;Suite&quot;,</code></span>
+<span class="source-line" id="L46"><a class="line-number" href="#L46" aria-label="Line 46">46</a><code>        &quot;?rate&quot;: 450</code></span>
+<span class="source-line" id="L47"><a class="line-number" href="#L47" aria-label="Line 47">47</a><code>      }</code></span>
+<span class="source-line" id="L48"><a class="line-number" href="#L48" aria-label="Line 48">48</a><code>    ],</code></span>
+<span class="source-line" id="L49"><a class="line-number" href="#L49" aria-label="Line 49">49</a><code>    &quot;beforeFulfilment&quot;: [],</code></span>
+<span class="source-line" id="L50"><a class="line-number" href="#L50" aria-label="Line 50">50</a><code>    &quot;service-charges&quot;: [</code></span>
+<span class="source-line" id="L51"><a class="line-number" href="#L51" aria-label="Line 51">51</a><code>      {</code></span>
+<span class="source-line" id="L52"><a class="line-number" href="#L52" aria-label="Line 52">52</a><code>        &quot;?reservation&quot;: &quot;reservation:1&quot;,</code></span>
+<span class="source-line" id="L53"><a class="line-number" href="#L53" aria-label="Line 53">53</a><code>        &quot;?total&quot;: 75</code></span>
+<span class="source-line" id="L54"><a class="line-number" href="#L54" aria-label="Line 54">54</a><code>      }</code></span>
+<span class="source-line" id="L55"><a class="line-number" href="#L55" aria-label="Line 55">55</a><code>    ],</code></span>
+<span class="source-line" id="L56"><a class="line-number" href="#L56" aria-label="Line 56">56</a><code>    &quot;check-out-after-check-in&quot;: [</code></span>
+<span class="source-line" id="L57"><a class="line-number" href="#L57" aria-label="Line 57">57</a><code>      {</code></span>
+<span class="source-line" id="L58"><a class="line-number" href="#L58" aria-label="Line 58">58</a><code>        &quot;?reservation&quot;: &quot;reservation:1&quot;</code></span>
+<span class="source-line" id="L59"><a class="line-number" href="#L59" aria-label="Line 59">59</a><code>      }</code></span>
+<span class="source-line" id="L60"><a class="line-number" href="#L60" aria-label="Line 60">60</a><code>    ]</code></span>
+<span class="source-line" id="L61"><a class="line-number" href="#L61" aria-label="Line 61">61</a><code>  },</code></span>
+<span class="source-line" id="L62"><a class="line-number" href="#L62" aria-label="Line 62">62</a><code>  &quot;journal&quot;: [</code></span>
+<span class="source-line" id="L63"><a class="line-number" href="#L63" aria-label="Line 63">63</a><code>    {</code></span>
+<span class="source-line" id="L64"><a class="line-number" href="#L64" aria-label="Line 64">64</a><code>      &quot;actor&quot;: &quot;system:seed&quot;,</code></span>
+<span class="source-line" id="L65"><a class="line-number" href="#L65" aria-label="Line 65">65</a><code>      &quot;commandId&quot;: &quot;seed:room-classes&quot;</code></span>
+<span class="source-line" id="L66"><a class="line-number" href="#L66" aria-label="Line 66">66</a><code>    },</code></span>
+<span class="source-line" id="L67"><a class="line-number" href="#L67" aria-label="Line 67">67</a><code>    {</code></span>
+<span class="source-line" id="L68"><a class="line-number" href="#L68" aria-label="Line 68">68</a><code>      &quot;actor&quot;: &quot;system:fixture&quot;,</code></span>
+<span class="source-line" id="L69"><a class="line-number" href="#L69" aria-label="Line 69">69</a><code>      &quot;commandId&quot;: &quot;seed:hotel&quot;</code></span>
+<span class="source-line" id="L70"><a class="line-number" href="#L70" aria-label="Line 70">70</a><code>    },</code></span>
+<span class="source-line" id="L71"><a class="line-number" href="#L71" aria-label="Line 71">71</a><code>    {</code></span>
+<span class="source-line" id="L72"><a class="line-number" href="#L72" aria-label="Line 72">72</a><code>      &quot;actor&quot;: &quot;guest:ada&quot;,</code></span>
+<span class="source-line" id="L73"><a class="line-number" href="#L73" aria-label="Line 73">73</a><code>      &quot;commandId&quot;: &quot;submit:1&quot;</code></span>
+<span class="source-line" id="L74"><a class="line-number" href="#L74" aria-label="Line 74">74</a><code>    },</code></span>
+<span class="source-line" id="L75"><a class="line-number" href="#L75" aria-label="Line 75">75</a><code>    {</code></span>
+<span class="source-line" id="L76"><a class="line-number" href="#L76" aria-label="Line 76">76</a><code>      &quot;actor&quot;: &quot;system:booking&quot;,</code></span>
+<span class="source-line" id="L77"><a class="line-number" href="#L77" aria-label="Line 77">77</a><code>      &quot;commandId&quot;: &quot;confirm:1&quot;</code></span>
+<span class="source-line" id="L78"><a class="line-number" href="#L78" aria-label="Line 78">78</a><code>    },</code></span>
+<span class="source-line" id="L79"><a class="line-number" href="#L79" aria-label="Line 79">79</a><code>    {</code></span>
+<span class="source-line" id="L80"><a class="line-number" href="#L80" aria-label="Line 80">80</a><code>      &quot;actor&quot;: &quot;receptionist:lee&quot;,</code></span>
+<span class="source-line" id="L81"><a class="line-number" href="#L81" aria-label="Line 81">81</a><code>      &quot;commandId&quot;: &quot;check-in:1&quot;</code></span>
+<span class="source-line" id="L82"><a class="line-number" href="#L82" aria-label="Line 82">82</a><code>    },</code></span>
+<span class="source-line" id="L83"><a class="line-number" href="#L83" aria-label="Line 83">83</a><code>    {</code></span>
+<span class="source-line" id="L84"><a class="line-number" href="#L84" aria-label="Line 84">84</a><code>      &quot;actor&quot;: &quot;guest:ada&quot;,</code></span>
+<span class="source-line" id="L85"><a class="line-number" href="#L85" aria-label="Line 85">85</a><code>      &quot;commandId&quot;: &quot;request:1&quot;</code></span>
+<span class="source-line" id="L86"><a class="line-number" href="#L86" aria-label="Line 86">86</a><code>    },</code></span>
+<span class="source-line" id="L87"><a class="line-number" href="#L87" aria-label="Line 87">87</a><code>    {</code></span>
+<span class="source-line" id="L88"><a class="line-number" href="#L88" aria-label="Line 88">88</a><code>      &quot;actor&quot;: &quot;system:fixture&quot;,</code></span>
+<span class="source-line" id="L89"><a class="line-number" href="#L89" aria-label="Line 89">89</a><code>      &quot;commandId&quot;: &quot;link:service&quot;</code></span>
+<span class="source-line" id="L90"><a class="line-number" href="#L90" aria-label="Line 90">90</a><code>    },</code></span>
+<span class="source-line" id="L91"><a class="line-number" href="#L91" aria-label="Line 91">91</a><code>    {</code></span>
+<span class="source-line" id="L92"><a class="line-number" href="#L92" aria-label="Line 92">92</a><code>      &quot;actor&quot;: &quot;concierge:sam&quot;,</code></span>
+<span class="source-line" id="L93"><a class="line-number" href="#L93" aria-label="Line 93">93</a><code>      &quot;commandId&quot;: &quot;fulfil:1&quot;</code></span>
+<span class="source-line" id="L94"><a class="line-number" href="#L94" aria-label="Line 94">94</a><code>    }</code></span>
+<span class="source-line" id="L95"><a class="line-number" href="#L95" aria-label="Line 95">95</a><code>  ],</code></span>
+<span class="source-line" id="L96"><a class="line-number" href="#L96" aria-label="Line 96">96</a><code>  &quot;notLowered&quot;: [</code></span>
+<span class="source-line" id="L97"><a class="line-number" href="#L97" aria-label="Line 97">97</a><code>    &quot;rule check-out-after-check-in: satisfaction query only; no invariant enforcement&quot;,</code></span>
+<span class="source-line" id="L98"><a class="line-number" href="#L98" aria-label="Line 98">98</a><code>    &quot;rule past-bookings-are-settled: checked as Bool; no faithful Datalog lowering or invariant enforcement&quot;,</code></span>
+<span class="source-line" id="L99"><a class="line-number" href="#L99" aria-label="Line 99">99</a><code>    &quot;formula Invoice.total: no faithful Datalog lowering for this expression&quot;,</code></span>
+<span class="source-line" id="L100"><a class="line-number" href="#L100" aria-label="Line 100">100</a><code>    &quot;requires and final states: example host guards, absent from ActionTypeIR&quot;,</code></span>
+<span class="source-line" id="L101"><a class="line-number" href="#L101" aria-label="Line 101">101</a><code>    &quot;actor type, joins and counterpart: descriptive only; no identity or authorization enforcement&quot;,</code></span>
+<span class="source-line" id="L102"><a class="line-number" href="#L102" aria-label="Line 102">102</a><code>    &quot;Union members: checked by the prelude; stored as strings without runtime enum constraints&quot;,</code></span>
+<span class="source-line" id="L103"><a class="line-number" href="#L103" aria-label="Line 103">103</a><code>    &quot;Many references: schema retained; membership facts must be transacted explicitly&quot;</code></span>
+<span class="source-line" id="L104"><a class="line-number" href="#L104" aria-label="Line 104">104</a><code>  ]</code></span>
+<span class="source-line" id="L105"><a class="line-number" href="#L105" aria-label="Line 105">105</a><code>}</code></span></pre></main><footer>Experimental v0.1 · Local in-memory runtime. <a href="/explorations/">All explorations</a></footer></body></html>

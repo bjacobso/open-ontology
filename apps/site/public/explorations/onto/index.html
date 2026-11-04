@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Onto / hotel stories · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css">
+<link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index"></head>
+<body class="explore"><a class="skip" href="#main">Skip to content</a><header class="explore-nav"><a href="/">Open Ontology</a><nav aria-label="Main navigation"><a href="/explorations/">Explorations</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
+<main id="main"><a class="back" href="/explorations/">← All explorations</a>
+<p class="eyebrow">language <span class="status runnable">Runs locally</span></p>
+<h1>Onto / hotel stories</h1><p class="lead">An external OntoLang-style prelude: typed hotel records and stories lowered to portable IR and run on Triplex, with atomic observed-state guards.</p>
+<nav class="page-nav" aria-label="Notebook sections"><a href="#readme">Readme</a><a href="#sources">Sources</a><a href="#run">Run example</a></nav>
+<div class="notebook"><aside><p class="eyebrow">In this exploration</p><a href="#sources">Language &amp; source</a><a href="#readme">Documentation</a><a href="#run">Model &amp; results</a><a href="/explorations/#adding">Add an exploration ↗</a></aside><div class="notebook-body">
+<section id="sources"><h2>Language &amp; source</h2><ul class="source-list"><li><span>prelude</span><a href="/explorations/source/examples/onto/onto.lisp.html#L1">examples/onto/onto.lisp</a><a class="raw-link" href="/explorations/raw/examples/onto/onto.lisp">raw ↗</a></li><li><span>model</span><a href="/explorations/source/examples/onto/hotel.forma.html#L1">examples/onto/hotel.forma</a><a class="raw-link" href="/explorations/raw/examples/onto/hotel.forma">raw ↗</a></li><li><span>lowering</span><a href="/explorations/source/examples/onto/lower.ts.html#L1">examples/onto/lower.ts</a><a class="raw-link" href="/explorations/raw/examples/onto/lower.ts">raw ↗</a></li><li><span>guards</span><a href="/explorations/source/examples/onto/guards.ts.html#L1">examples/onto/guards.ts</a><a class="raw-link" href="/explorations/raw/examples/onto/guards.ts">raw ↗</a></li><li><span>operations</span><a href="/explorations/source/examples/onto/scenario.ts.html#L1">examples/onto/scenario.ts</a><a class="raw-link" href="/explorations/raw/examples/onto/scenario.ts">raw ↗</a></li><li><span>runner</span><a href="/explorations/source/examples/onto/run.ts.html#L1">examples/onto/run.ts</a><a class="raw-link" href="/explorations/raw/examples/onto/run.ts">raw ↗</a></li></ul><ul><li><a href="https://onto.space/ontolang">OntoLang inspiration ↗</a></li></ul></section>
+<section id="readme" class="markdown"><p class="eyebrow">Documentation <a href="/explorations/raw/examples/onto/README.md">Raw Markdown ↗</a></p><h1>An OntoLang-style language, running on Triplex</h1>
+<p><a href="https://onto.space/ontolang">OntoLang</a> describes actors, typed business records,
+formulas, rules and stories. This independent example loads an OntoLang-shaped
+language as a Forma prelude, lowers its language IR to Open Ontology&#39;s portable
+<code>OntologyIR</code>, and runs the hotel story on the local in-memory Triplex runtime.
+It is experimental, with no Onto runtime integration, persistence or authorization.</p>
+<h2>Read and run</h2>
+<ol>
+<li>Read the language: <a href="/explorations/source/examples/onto/onto.lisp.html">onto.lisp</a>.</li>
+<li>Read the business model: <a href="/explorations/source/examples/onto/hotel.forma.html">hotel.forma</a>.</li>
+<li>Run the operations: <code>pnpm example:onto</code> from the repository root.</li>
+<li>Compare the complete <a href="/explorations/source/examples/onto/output.json.html">checked output</a> and <a href="https://github.com/bjacobso/open-ontology/blob/main/test/fixtures/onto-hotel.ir.json">lowered IR</a>.</li>
+</ol>
+<p>Use Node 24 and pnpm 10.11.0; install with <code>pnpm install --frozen-lockfile</code>.
+The example&#39;s checker is <code>elaborateHotel()</code> in <a href="/explorations/source/examples/onto/lower.ts.html">lower.ts</a>, exercised by
+<code>pnpm exec vitest run test/onto-example.test.ts</code>. The generic <code>model:check</code>
+command accepts the package&#39;s ontology DSL, not this external language.</p>
+<p>The website&#39;s example notebook presents this README, full source with line
+anchors, model, run command and tested output together. It is a static reading
+notebook; execute the command in a clone. The browser does not host Triplex.</p>
+<h2>Three layers</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Source</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Language</td>
+<td><code>onto.lisp</code></td>
+<td>Syntax, types, scopes, expression inference, diagnostics, language IR</td>
+</tr>
+<tr>
+<td>Business model</td>
+<td><code>hotel.forma</code></td>
+<td>Actors, hotel objects, rules, formulas, stories, seed data</td>
+</tr>
+<tr>
+<td>Operations</td>
+<td><code>lower.ts</code>, <code>guards.ts</code>, <code>scenario.ts</code></td>
+<td>Portable IR, seed transactions, observed facts, guarded commands, queries and journal</td>
+</tr>
+</tbody></table>
+<p>The path is <code>bootstrapFromSources</code> → <code>elaborateSources</code> → <code>lowerOnto</code> →
+<code>toTriplexConfig</code> / <code>makeOntologyRuntime</code> → <code>triples.transact</code>. The prelude stays
+in this example; it is not a bundled package language. <code>lowerOnto</code> is pure;
+seed operations and host guard metadata are separate from the JSON-safe IR.</p>
+<h2>OntoLang to Forma</h2>
+<table>
+<thead>
+<tr>
+<th>OntoLang</th>
+<th>Forma (<code>onto.lisp</code>)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>actor Guest @type person</code></td>
+<td><code>(actor Guest :person &quot;doc&quot; {fields})</code> (+ <code>:joins :sign-up</code>/<code>:invite</code>/<code>:none</code>)</td>
+</tr>
+<tr>
+<td><code>object Reservation</code>, <code>status: a | b @final</code></td>
+<td><code>(object Reservation &quot;doc&quot; :final {:status [...]} {fields})</code>, <code>:status (Union :a :b)</code></td>
+</tr>
+<tr>
+<td><code>guest: Guest</code>, <code>services: Service[]</code></td>
+<td><code>(One Guest)</code>, <code>(Many Service)</code></td>
+</tr>
+<tr>
+<td><code>string</code>/<code>int</code>/<code>timestamp</code></td>
+<td><code>String</code>/<code>Int</code>/<code>Instant</code></td>
+</tr>
+<tr>
+<td><code>@rule …</code></td>
+<td><code>(rule name Object &quot;doc&quot; expr)</code></td>
+</tr>
+<tr>
+<td><code>total: int = …</code></td>
+<td><code>(formula Object field Type &quot;doc&quot; expr)</code></td>
+</tr>
+<tr>
+<td>story sentence + <code>requires</code>/<code>sets</code></td>
+<td><code>(step Actor verb Object :to Actor :requires [...] :sets {...})</code> inside <code>(story …)</code></td>
+</tr>
+<tr>
+<td><code>seed RoomClass</code></td>
+<td><code>(seed RoomClass [{...}])</code></td>
+</tr>
+</tbody></table>
+<h2>What executes</h2>
+<p>All 17 declarations elaborate without diagnostics. Actors and objects become
+nine object types. Links become <code>ref</code> properties, <code>Many</code> preserves cardinality,
+and unions become string properties. Attribute keys are explicit, for example
+<code>:room-class/rate</code> and <code>:reservation/check-in</code>. The five story steps become
+five actions. The runtime requires kebab-case action names, so the check-in
+name is <code>hotel-booking-checks-in</code>. Updating a status clears then sets it.
+<code>:new true</code> produces <code>create-object</code>; the host also rejects an existing id.</p>
+<p>The run seeds three room classes, supplies a guest, room and invoice fixture,
+then submits, confirms, rejects an early check-in, accepts check-in at exactly
+15:00 UTC on November 4, 2026, requests a service and fulfils it. Reusing the
+request sentence on that fulfilled service is rejected because it is final.
+Reservation <code>declined</code> and <code>checked-out</code> are also terminal (tested).</p>
+<p><code>Reservation.service-charges</code> becomes a named Datalog sum query over explicitly
+linked, fulfilled services. It returns 75 after fulfilment. Like a grouped SQL
+sum, the sparse query returns no row when no fulfilled service matches; a
+missing reservation group represents zero. It does not store a derived field.
+The date-order rule also becomes the named <code>check-out-after-check-in</code> query,
+which returns reservations satisfying the comparison; it does not reject writes.
+The run prints both named queries, room classes, story outcomes, and journal
+actor and command ids. Rejected commands have no journal entry.</p>
+<p>Creation inputs supply all single-valued fields that the sentence does not
+set, including reference ids. Collection membership is explicit facts. The
+fixture separately asserts <code>Reservation.services</code>: the language does not
+specify automatic inverse maintenance from <code>Service.reservation</code>.</p>
+<h2>Guards and atomicity</h2>
+<p><a href="/explorations/source/examples/onto/guards.ts.html">guards.ts</a> interprets <code>requires</code> against entity views read from
+Triplex: <code>is?</code>, <code>known?</code>, <code>in?</code>, <code>before?</code>, <code>after?</code>, <code>days-between</code>, <code>sum</code>,
+<code>now</code>, Boolean operators, arithmetic, and the <code>map</code>/<code>filter</code> lambdas used by
+the service formula. <code>known?</code> on a link requires the target to have live facts.
+Dates are UTC epoch milliseconds; <code>days-between</code> counts complete 24-hour days.
+The scenario passes fixed command times. The journal&#39;s commit clock belongs
+to the Triplex host, and is separate from that business clock.</p>
+<p><strong>The example&#39;s guard and write are atomic with respect to observed entity
+facts.</strong> Triplex 0.2.0 exposes <code>TransactionMeta.preconditions</code> with <code>EntityState</code>
+(the complete observed live triple-id set) and <code>TripleLive</code> (compare and
+retract). <code>makeOntologyRuntime.invoke</code> does not forward preconditions. The
+example decorates the scoped <code>Triples</code> service so its actual <code>transact</code> adds
+<code>EntityState</code> preconditions for every entity read, including linked records
+and the absence of a creation target. Triplex compares these inside its write
+transaction; conflicts reject the whole write. No <code>src/</code> changes are needed.
+Tests inject a competing write after evaluation to prove all three cases.</p>
+<p>This is a bounded interpreter over three levels of links and ordinary,
+non-scheduled facts, not a general query guard system. Time is a command input;
+wall-clock passage is not a protected database fact. Direct runtime invocations
+or raw transactions bypass these example guards. There is no backend enum,
+transition or invariant enforcement. Follow-up work belongs in Triplex:
+command configuration nodes with guards and transition constraints, applied to
+all command entry points. <code>ActionTypeIR</code> would also need a portable guard contract.</p>
+<h2>Not lowered</h2>
+<p><code>notLowered()</code> reports these limitations and the run prints them:</p>
+<ul>
+<li>Rule <code>check-out-after-check-in</code>: a named satisfaction query runs, but there is no invariant enforcement.</li>
+<li>Rule <code>past-bookings-are-settled</code>: its Boolean expression is checked; no clock-driven invariant enforcement.</li>
+<li>Formula <code>Invoice.total</code>: checked, but its date arithmetic and derived-field composition have no faithful lowering here. The interpreter&#39;s vocabulary is tested; the run does not compute invoice totals.</li>
+<li><code>requires</code> and final states: example host guards, absent from <code>ActionTypeIR</code>.</li>
+<li>Actor type, joins and counterpart: descriptive data; no identity or authorization enforcement.</li>
+<li>Union members: prelude checks, stored as strings without runtime enum constraints.</li>
+<li>Many references: schema retained, collection membership transacted explicitly.</li>
+</ul>
+<p>Only the exact service-charge and date-order expressions are recognized for query
+lowering. Changing either causes it to be reported rather than silently reusing
+the old query.
+Other unsupported field types throw an error. The rule query is an observation; the business rules do not become write-time
+Datalog constraints or scheduled background jobs.</p>
+<h2>Diagnostics</h2>
+<p>The test creates each broken variant with a string replacement and asserts the
+code, severity and message. Expression inference follows linked record views,
+including <code>invoice.reservation.room-class.rate</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Broken variant in <code>hotel.forma</code></th>
+<th>Diagnostic</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>reservation.check-in</code> → <code>reservation.checkin</code> in a rule</td>
+<td><code>elaborate/hole-type</code>: missing record field</td>
+</tr>
+<tr>
+<td><code>invoice.reservation.room-class.rate</code> → <code>.name</code></td>
+<td><code>elaborate/hole-type</code>: type mismatch</td>
+</tr>
+<tr>
+<td><code>:sets {:status :checked-in}</code> → <code>:checked_in</code></td>
+<td><code>onto/unknown-state</code></td>
+</tr>
+<tr>
+<td><code>(is? reservation.status :confirmed)</code> → <code>:confirmd</code></td>
+<td><code>onto/unknown-state</code>, lists valid states</td>
+</tr>
+<tr>
+<td>Remove <code>:new true</code> from Guest submits Reservation</td>
+<td>Warning <code>onto/unguarded-transition</code></td>
+</tr>
+<tr>
+<td><code>:room (One Room)</code> → <code>(One Suite)</code></td>
+<td><code>onto/unknown-link</code> and <code>elaborate/hole-type</code>: unknown type Suite</td>
+</tr>
+<tr>
+<td><code>(formula Invoice total Int</code> → <code>String</code></td>
+<td><code>elaborate/hole-type</code>: expected String, found Int</td>
+</tr>
+<tr>
+<td><code>(step Concierge fulfils Service</code> → <code>Booking</code></td>
+<td><code>elaborate/hole-type</code>: unknown reference Booking</td>
+</tr>
+<tr>
+<td>Seed <code>:rate 200</code> → <code>:price 200</code></td>
+<td><code>onto/unknown-field</code></td>
+</tr>
+</tbody></table>
+<p>Removing <code>:new true</code> exposes a real ambiguity: a submission sentence with no
+current-state guard could otherwise revive a declined reservation.</p>
+<p>The supplied monomorphic <code>is?</code> workaround stays in the prelude. Forma&#39;s
+keyword inference and missing-hole destructuring issues were addressed upstream
+in <a href="https://github.com/bjacobso/forma/pull/110">Forma PR 110</a>; this example does
+not implement either compiler fix.</p>
+<h2>Forma package provenance</h2>
+<p>The npm 0.3.0 tarball predates the descriptor API used here. This example uses
+an isolated, MIT-licensed, pinned upstream snapshot as the development package
+<code>@open-ontology/onto-forma</code>; the package&#39;s existing <code>@formalang/ts</code> dependency
+stays unchanged. See <a href="https://github.com/bjacobso/open-ontology/blob/main/vendor/README.md">the provenance and rebuild instructions</a>.
+Both APIs are consumed through package exports; no sibling project source is imported.</p>
+</section>
+<section id="run"><p class="eyebrow">Executable notebook</p><h2>Run the example</h2><p>Run in a clone with Node 24 and pnpm 10.11.0. Each run starts a fresh in-memory Triplex host.</p>
+<pre><code>pnpm install --frozen-lockfile
+pnpm example:onto</code></pre>
+<h3>The model</h3><p><a href="/explorations/source/examples/onto/hotel.forma.html#L1">Full model with line links</a> · <a href="/explorations/raw/examples/onto/hotel.forma">Raw</a></p><pre tabindex="0"><code>; hotel.forma: the OntoLang hotel example, as Forma.
+
+(project hotel &quot;A small hotel: bookings, rooms, stays and the services guests ask for.&quot;)
+
+; ── Actors ──
+
+(actor Guest :person
+  &quot;A traveler who books a room and stays at the hotel; the paying customer of the booking.&quot;
+  :joins :sign-up
+  {:name String
+   :reservations (Many Reservation)})
+
+(actor Receptionist :person
+  &quot;Front-desk staff who check guests in and out.&quot;
+  {:name String})
+
+(actor Concierge :person
+  &quot;Arranges and fulfils the services guests request during a stay.&quot;
+  {:name String})
+
+(actor System :system
+  &quot;The hotel booking software that confirms reservations and automates back-office steps.&quot;
+  {})
+
+; ── Objects ──
+
+(object RoomClass &quot;A type of room, with its nightly rate.&quot;
+  {:name String
+   :rate Int})
+
+(object Room &quot;A physical room of some room class.&quot;
+  {:number String
+   :room-class (One RoomClass)})
+
+(object Reservation &quot;A guest's booking of a room class for a stay.&quot;
+  :final {:status [:declined :checked-out]}
+  {:guest (One Guest)
+   :name String
+   :room-class (One RoomClass)
+   :room (One Room)
+   :check-in Instant
+   :check-out Instant
+   :services (Many Service)
+   :invoice (One Invoice)
+   :status (Union :requested :confirmed :declined :checked-in :checked-out)})
+
+(object Service
+  &quot;A guest-requested amenity with a charge, fulfilled by the concierge; fulfilled charges roll up onto the stay.&quot;
+  :final {:status [:fulfilled]}
+  {:kind (Union :room-service :spa :laundry :taxi)
+   :charge Int
+   :notes String
+   :reservation (One Reservation)
+   :status (Union :requested :fulfilled)})
+
+(object Invoice &quot;What the guest owes for a stay.&quot;
+  {:reservation (One Reservation)})
+
+; ── Rules: true whichever story runs ──
+
+(rule check-out-after-check-in Reservation
+  &quot;A stay ends after it starts.&quot;
+  (after? reservation.check-out reservation.check-in))
+
+(rule past-bookings-are-settled Reservation
+  &quot;Once the check-in date has passed, a booking is checked in, checked out or declined.&quot;
+  (or (in? reservation.status [:checked-in :checked-out :declined])
+      (not (after? now reservation.check-in))))
+
+; ── Formulas: worked out, not typed in ──
+
+(formula Reservation service-charges Int
+  &quot;Charges for the services fulfilled during this stay.&quot;
+  (sum (map (fn [s] s.charge)
+            (filter (fn [s] (is? s.status :fulfilled)) reservation.services))))
+
+(formula Invoice total Int
+  &quot;Nights at the room-class rate, plus fulfilled services.&quot;
+  (+ (* (days-between invoice.reservation.check-in invoice.reservation.check-out)
+        invoice.reservation.room-class.rate)
+     invoice.reservation.service-charges))
+
+; ── Stories ──
+
+(story HotelBooking &quot;From a guest's request to their arrival.&quot;
+  (step Guest submits Reservation :to System :new true
+    :requires [(known? reservation.room-class)]
+    :sets {:status :requested})
+  (step System confirms Reservation :to Guest
+    :requires [(is? reservation.status :requested)]
+    :sets {:status :confirmed})
+  (step Receptionist checks-in Reservation :for Guest
+    :requires [(is? reservation.status :confirmed)
+               (not (before? now reservation.check-in))]
+    :sets {:status :checked-in}))
+
+(story GuestServices &quot;A guest asks for something during their stay.&quot;
+  (step Guest requests Service :to Concierge :new true
+    :requires [(is? service.reservation.status :checked-in)]
+    :sets {:status :requested})
+  (step Concierge fulfils Service :for Guest
+    :requires [(is? service.status :requested)]
+    :sets {:status :fulfilled}))
+
+; ── Seed data ──
+
+(seed RoomClass
+  [{:name &quot;Standard&quot; :rate 120}
+   {:name &quot;Deluxe&quot; :rate 200}
+   {:name &quot;Suite&quot; :rate 450}])
+</code></pre>
+<h3>Checked output</h3><p>This output is regenerated by running the example during site checks. Run the command locally to execute it; this static page does not run code in your browser. <a href="/explorations/onto/output.json">Output as JSON</a></p>
+<pre tabindex="0"><code>{
+  &quot;outcomes&quot;: [
+    {
+      &quot;accepted&quot;: true,
+      &quot;commandId&quot;: &quot;submit:1&quot;
+    },
+    {
+      &quot;accepted&quot;: true,
+      &quot;commandId&quot;: &quot;confirm:1&quot;
+    },
+    {
+      &quot;accepted&quot;: false,
+      &quot;reason&quot;: &quot;requires [\&quot;not\&quot;,[\&quot;before?\&quot;,\&quot;now\&quot;,\&quot;reservation.check-in\&quot;]]&quot;,
+      &quot;commandId&quot;: &quot;check-in:early&quot;
+    },
+    {
+      &quot;accepted&quot;: true,
+      &quot;commandId&quot;: &quot;check-in:1&quot;
+    },
+    {
+      &quot;accepted&quot;: true,
+      &quot;commandId&quot;: &quot;request:1&quot;
+    },
+    {
+      &quot;accepted&quot;: true,
+      &quot;commandId&quot;: &quot;fulfil:1&quot;
+    },
+    {
+      &quot;accepted&quot;: false,
+      &quot;reason&quot;: &quot;final Service.status: fulfilled&quot;,
+      &quot;commandId&quot;: &quot;request:revive&quot;
+    }
+  ],
+  &quot;queries&quot;: {
+    &quot;roomClasses&quot;: [
+      {
+        &quot;?name&quot;: &quot;Standard&quot;,
+        &quot;?rate&quot;: 120
+      },
+      {
+        &quot;?name&quot;: &quot;Deluxe&quot;,
+        &quot;?rate&quot;: 200
+      },
+      {
+        &quot;?name&quot;: &quot;Suite&quot;,
+        &quot;?rate&quot;: 450
+      }
+    ],
+    &quot;beforeFulfilment&quot;: [],
+    &quot;service-charges&quot;: [
+      {
+        &quot;?reservation&quot;: &quot;reservation:1&quot;,
+        &quot;?total&quot;: 75
+      }
+    ],
+    &quot;check-out-after-check-in&quot;: [
+      {
+        &quot;?reservation&quot;: &quot;reservation:1&quot;
+      }
+    ]
+  },
+  &quot;journal&quot;: [
+    {
+      &quot;actor&quot;: &quot;system:seed&quot;,
+      &quot;commandId&quot;: &quot;seed:room-classes&quot;
+    },
+    {
+      &quot;actor&quot;: &quot;system:fixture&quot;,
+      &quot;commandId&quot;: &quot;seed:hotel&quot;
+    },
+    {
+      &quot;actor&quot;: &quot;guest:ada&quot;,
+      &quot;commandId&quot;: &quot;submit:1&quot;
+    },
+    {
+      &quot;actor&quot;: &quot;system:booking&quot;,
+      &quot;commandId&quot;: &quot;confirm:1&quot;
+    },
+    {
+      &quot;actor&quot;: &quot;receptionist:lee&quot;,
+      &quot;commandId&quot;: &quot;check-in:1&quot;
+    },
+    {
+      &quot;actor&quot;: &quot;guest:ada&quot;,
+      &quot;commandId&quot;: &quot;request:1&quot;
+    },
+    {
+      &quot;actor&quot;: &quot;system:fixture&quot;,
+      &quot;commandId&quot;: &quot;link:service&quot;
+    },
+    {
+      &quot;actor&quot;: &quot;concierge:sam&quot;,
+      &quot;commandId&quot;: &quot;fulfil:1&quot;
+    }
+  ],
+  &quot;notLowered&quot;: [
+    &quot;rule check-out-after-check-in: satisfaction query only; no invariant enforcement&quot;,
+    &quot;rule past-bookings-are-settled: checked as Bool; no faithful Datalog lowering or invariant enforcement&quot;,
+    &quot;formula Invoice.total: no faithful Datalog lowering for this expression&quot;,
+    &quot;requires and final states: example host guards, absent from ActionTypeIR&quot;,
+    &quot;actor type, joins and counterpart: descriptive only; no identity or authorization enforcement&quot;,
+    &quot;Union members: checked by the prelude; stored as strings without runtime enum constraints&quot;,
+    &quot;Many references: schema retained; membership facts must be transacted explicitly&quot;
+  ]
+}
+</code></pre></section>
+</div></div></main><footer>Experimental v0.1 · Local in-memory runtime. <a href="/explorations/">All explorations</a></footer></body></html>
