@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Open Ontology</title>
+  <subtitle>A shared vocabulary for operational domains. No posts are published yet.</subtitle>
+  <id>https://open-ontology.com/</id>
+  <link rel="self" href="https://open-ontology.com/feed.xml"/>
+  <link rel="alternate" href="https://open-ontology.com/"/>
+  <updated>2026-11-15T00:00:00Z</updated>
+  <author><name>Ben Jacobson</name></author>
+</feed>

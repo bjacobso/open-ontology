@@ -238,7 +238,7 @@
       "links": [
         {
           "title": "Forma application prototype",
-          "url": "https://github.com/bjacobso/forma/blob/535cd41ec7f81f3229b810df6f374ebfa04c16c7/docs/elm.md"
+          "url": "https://forma-lang.com/elm"
         },
         {
           "title": "Raw Elm prelude",
@@ -256,7 +256,7 @@
       "links": [
         {
           "title": "Prototype documentation",
-          "url": "https://github.com/bjacobso/forma/blob/535cd41ec7f81f3229b810df6f374ebfa04c16c7/docs/elm.md"
+          "url": "https://forma-lang.com/elm"
         },
         {
           "title": "Raw prelude",
@@ -279,7 +279,7 @@
       "links": [
         {
           "title": "Forma for Effect",
-          "url": "https://github.com/bjacobso/forma/blob/535cd41ec7f81f3229b810df6f374ebfa04c16c7/docs/effect.md"
+          "url": "https://forma-lang.com/effect"
         }
       ]
     },

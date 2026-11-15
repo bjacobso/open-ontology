@@ -2,7 +2,7 @@
    everything here is scoped to .ox and only adds what the homepage lacks. */
 
 .ox .oo-main { padding-bottom: 96px; }
-.ox h1 em, .ox h2 em { color: var(--accent); font-style: italic; }
+.ox h1 em, .ox h2 em { color: var(--accent); font-style: normal; }
 
 /* Hero variants. */
 .ox-hero { padding: 48px 0 64px; }

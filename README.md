@@ -1,5 +1,7 @@
 # Open Ontology
 
+A shared vocabulary for operational domains.
+
 `@open-ontology/ontology` defines a portable ontology model, compiles TypeScript and Forma sources to the same JSON-safe IR, and runs actions and named Datalog queries on Triplex.
 
 Maturity: **experimental (v0.1)**. One package, five executable examples, and a local in-memory runtime; no durable server or npm release yet.
@@ -61,7 +63,7 @@ The package exports the TypeScript DSL, portable IR, Forma elaborator, and Tripl
 
 ## Website
 
-The static site in [apps/site](apps/site) adapts the visual design of the historical repository's `packages/web/app/routes/home.*`. Its primary reader is an agent modeling a domain on someone's behalf. The homepage points agents to [`llms-full.txt`](apps/site/public/llms-full.txt), a single plain-text authoring guide covering the grammar, a modeling procedure, the checker, runtime semantics, and limits, and to its [`llms.txt`](apps/site/public/llms.txt) index. `test/agent-guide.test.ts` keeps the guide honest: every Forma block must check without warnings, and the quoted checker and example output must match what the commands print. Run `pnpm site:check` to validate local links and assets, or `pnpm site:dev` to preview it with Wrangler.
+The static site in [apps/site](apps/site), served at https://open-ontology.com, follows the WorldVM family design: the same type, palette, family strip, and footer as its sibling sites, rendered from the checked-in [family file](rollout/family.json). Its primary reader is an agent modeling a domain on someone's behalf. The homepage points agents to [`llms-full.txt`](apps/site/public/llms-full.txt), a single plain-text authoring guide covering the grammar, a modeling procedure, the checker, runtime semantics, and limits, and to its [`llms.txt`](apps/site/public/llms.txt) index. `test/agent-guide.test.ts` keeps the guide honest: every Forma block must check without warnings, and the quoted checker and example output must match what the commands print. Run `pnpm site:check` to validate local links and assets, or `pnpm site:dev` to preview it with Wrangler.
 
 The site deploys with [Alchemy](alchemy.run.ts) `2.0.0-beta.84`. [CI](.github/workflows/ci.yml) checks pull requests and pushes to `main`; after a successful push check, the [production workflow](.github/workflows/deploy.yml) deploys that checked commit to stage `prod`, adopting the existing `open-ontology-site` Worker and preserving `open-ontology.com`. The [preview workflow](.github/workflows/preview.yml) deploys same-repository PRs to `pr-<number>`, updates one PR comment with the `workers.dev` URL, and destroys the preview when the PR closes. Only `prod` binds the custom domain. See [site deployment setup](apps/site/README.md#deployment) for credentials, remote state, and local verification.
 

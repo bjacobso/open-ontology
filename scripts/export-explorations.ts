@@ -72,19 +72,20 @@ const lispLike = (path: string) => /\.(?:lisp|forma)$/.test(path);
 const status = (entry: CatalogEntry) => `<span class="oo-status oo-status--${statusClass[entry.status]}">${labels[entry.status]}</span>`;
 const overline = (index: string, title: string) => `<p class="oo-overline"><span>${index}</span>${title}</p>`;
 const crumbs = (...parts: readonly string[]) => `<nav class="ox-crumbs" aria-label="Breadcrumb"><a href="/">Open Ontology</a><span aria-hidden="true">/</span>${parts.join('<span aria-hidden="true">/</span>')}</nav>`;
-const fonts = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Instrument+Serif:ital@0;1&amp;family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,800&amp;display=swap";
+const fonts = "https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..800&amp;family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;display=swap";
 
 // The page shell matches the homepage: same fonts, navigation, footer and base styles.
 const page = (title: string, body: string) => `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f6f5ef">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f8f6f1">
 <title>${escape(title)} · Open Ontology</title><meta name="description" content="Readable, source-linked Open Ontology explorations and local examples.">
+<meta property="og:title" content="${escape(title)} · Open Ontology"><meta property="og:description" content="Readable, source-linked Open Ontology explorations and local examples."><meta property="og:image" content="https://open-ontology.com/og.png">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="alternate" type="text/plain" href="/llms.txt" title="Agent index">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="${fonts}" rel="stylesheet">
 <link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/explorations.css"><script defer src="/site.js"></script></head>
 <body><div class="oo ox"><a class="oo-skip" href="#main">Skip to content</a>
 <header class="oo-nav"><a class="oo-brand" href="/" aria-label="Open Ontology home"><img src="/favicon.svg" width="24" height="24" alt=""><span>Open Ontology</span></a><nav aria-label="Main navigation"><a class="oo-nav__section" href="/#std">Standard library</a><a class="oo-nav__section" href="/#preludes">Preludes</a><a class="oo-nav__section" href="/explorations/" aria-current="page">Explorations</a><a class="oo-nav__guide" href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">GitHub ↗</a></nav></header>
 <main id="main" class="oo-main">${body}</main>
-<footer class="oo-footer"><span class="oo-footer__brand"><b>Open Ontology</b> Experimental v0.1 · Local in-memory runtime.</span><nav aria-label="Footer navigation"><a href="/explorations/">All explorations</a><a href="/explorations/catalog.json">catalog.json</a><a href="/llms.txt">llms.txt</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">Source ↗</a></nav></footer>
+<footer class="oo-footer"><span class="oo-footer__brand"><b>Open Ontology</b> Experimental v0.1 · Local in-memory runtime.</span><nav aria-label="Footer navigation"><a href="https://worldvm.com">Part of the WorldVM family</a><a href="/explorations/">All explorations</a><a href="/explorations/catalog.json">catalog.json</a><a href="/llms.txt">llms.txt</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology">Source ↗</a></nav></footer>
 </div></body></html>\n`;
 
 const renderMarkdown = (path: string, sourcePaths: ReadonlySet<string>): string => {
@@ -122,7 +123,7 @@ export const renderExplorations = (execute = true): Map<string, string> => {
       `<span class="ox-line" id="L${i + 1}"><a class="ox-line__n" href="#L${i + 1}" aria-label="Line ${i + 1}">${i + 1}</a><code${code}>${escape(line) || " "}</code></span>`).join("\n");
     const lineCount = read(path).trimEnd().split("\n").length;
     assets.set(`source/${path}.html`, page(path, `<section class="ox-hero ox-hero--source">${crumbs('<a href="/explorations/">Explorations</a>', "Source")}
-<p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Full source · ${escape(language)} · ${lineCount} lines</p>
+<p class="oo-eyebrow">Full source · ${escape(language)} · ${lineCount} lines</p>
 <h1 class="oo-pkg ox-path">${escape(path)}</h1>
 <div class="oo-actions"><a class="oo-primary" href="${rawUrl(path)}">Raw source <span aria-hidden="true">↗</span></a><a class="oo-secondary" href="https://github.com/bjacobso/open-ontology/blob/main/${path}">View on GitHub <span aria-hidden="true">↗</span></a></div>
 <p class="oo-meta"><span>Click a line number to link to that line</span></p></section>
@@ -157,7 +158,7 @@ ${panel(`<a href="${entryUrl(entry)}output.json">output.json</a>`, escape(entry.
       ? `<figure class="oo-hero__side"><div class="oo-repl"><div class="oo-repl__bar" aria-hidden="true"><span></span><span></span><span></span><b>open-ontology</b><em>runs locally</em></div><pre class="ox-cmd"><code><span class="oo-prompt">$</span> pnpm install --frozen-lockfile\n<span class="oo-prompt">$</span> ${escape(entry.command)}\n<span class="oo-dim">${entry.test ? `# covered by ${escape(entry.test)}` : ""}</span></code></pre></div><figcaption class="oo-hero__note">↑ the exact command · <a href="#run">checked output</a></figcaption></figure>`
       : "";
     assets.set(`${entry.id}/index.html`, page(entry.title, `<section class="oo-hero ox-hero${side ? "" : " ox-hero--solo"}"><div class="oo-hero__copy">${crumbs('<a href="/explorations/">Explorations</a>', `<strong>${escape(entry.title)}</strong>`)}
-<p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> ${kindLabels[entry.kind]} · ${labels[entry.status]}</p>
+<p class="oo-eyebrow">${kindLabels[entry.kind]} · ${labels[entry.status]}</p>
 <h1>${escape(entry.title)}</h1><p class="oo-lead">${escape(entry.summary)}</p>
 <div class="oo-actions">${entry.command ? '<a class="oo-primary" href="#run">Run the example <span aria-hidden="true">↓</span></a>' : entry.readme ? '<a class="oo-primary" href="#readme">Read the documentation <span aria-hidden="true">↓</span></a>' : '<a class="oo-primary" href="#sources">Where it lives <span aria-hidden="true">↓</span></a>'}${entry.command || entry.readme ? '<a class="oo-secondary" href="#sources">Sources <span aria-hidden="true">↓</span></a>' : ""}</div>
 <p class="oo-meta">${status(entry)}${entry.test ? `<a href="https://github.com/bjacobso/open-ontology/blob/main/${entry.test}">${escape(entry.test)} ↗</a>` : ""}${entry.command ? `<a href="${entryUrl(entry)}output.json">output.json</a>` : ""}</p></div>${side}</section>
@@ -170,7 +171,7 @@ ${panel(`<a href="${entryUrl(entry)}output.json">output.json</a>`, escape(entry.
     const roles = [...new Set(entry.sources.map((s) => s.role))];
     return `<article class="oo-card ox-card ox-card--${entry.kind}"><p class="ox-card__kind">${kindLabels[entry.kind]}</p><h3 class="oo-card__title"><a href="${entryUrl(entry)}">${escape(entry.title)}</a></h3><p class="oo-card__story">${escape(entry.summary)}</p>${roles.length ? `<ul class="oo-uses">${roles.map((r) => `<li>${escape(r)}</li>`).join("")}</ul>` : ""}${entry.command ? `<code class="oo-install">${escape(entry.command)}</code>` : ""}<div class="ox-card__foot">${status(entry)}<span aria-hidden="true">→</span></div></article>`;
   }).join("\n");
-  assets.set("index.html", page("Explorations", `<section class="oo-hero ox-hero ox-hero--solo"><div class="oo-hero__copy"><p class="oo-eyebrow"><span class="oo-pulse" aria-hidden="true"></span> Open Ontology · Explorations</p><h1>Read the language. <em>Follow it into a running example.</em></h1>
+  assets.set("index.html", page("Explorations", `<section class="oo-hero ox-hero ox-hero--solo"><div class="oo-hero__copy"><p class="oo-eyebrow">Open Ontology · Explorations</p><h1>Read the language. <em>Follow it into a running example.</em></h1>
 <p class="oo-lead">Business domains, platform sketches, and language experiments in one place. Each entry says what exists and where it runs: source with line links, rendered documentation, and checked output.</p>
 <div class="oo-actions"><a class="oo-primary" href="#catalog">Browse ${catalog.entries.length} explorations <span aria-hidden="true">↓</span></a><a class="oo-secondary" href="#adding">Add a domain <span aria-hidden="true">↓</span></a></div>
 <p class="oo-meta"><a href="/explorations/catalog.json">catalog.json</a><a href="/llms-full.txt">Agent guide</a><a href="https://github.com/bjacobso/open-ontology/blob/main/examples/catalog.json">Source ↗</a></p></div></section>

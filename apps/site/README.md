@@ -1,6 +1,8 @@
 # Website
 
-This static site preserves the layout and palette of the historical Open Ontology homepage at [`packages/web/app/routes/home.tsx`](https://github.com/bjacobso/open-ontology-legacy/blob/7c2ff8a614b9f06a6e530aa80d0c7311dc81a323/packages/web/app/routes/home.tsx) and [`home.css`](https://github.com/bjacobso/open-ontology-legacy/blob/7c2ff8a614b9f06a6e530aa80d0c7311dc81a323/packages/web/app/routes/home.css). Its content reflects the new repository's smaller package boundary and is written first for agents modeling a domain for someone: `public/llms-full.txt` is the complete authoring guide, and `public/llms.txt` is its index.
+This static site follows the WorldVM family design shared by [forma-lang.com](https://forma-lang.com), [triplex.build](https://triplex.build) and [worldvm.com](https://worldvm.com): DM Sans and IBM Plex Mono on a warm off-white page, a family strip rendered from [`rollout/family.json`](../../rollout/family.json) directly above the footer, the family relationship sentence once in the body, `sitemap.xml`, `robots.txt`, an Atom `feed.xml` (no posts yet), and a 1200×630 `og.png` share image. `check.mjs` enforces each of these. Copy `rollout/family.json` from bjacobso/worldvm when the family changes; no build fetches it. The homepage labels what runs in v0.1 separately from the v0.2 design. Its content is written first for agents modeling a domain for someone: `public/llms-full.txt` is the complete authoring guide, and `public/llms.txt` is its index.
+
+`public/og.png` is a 1200×630 screenshot of [`og.html`](og.html); open it in a browser at that viewport and recapture it if the pitch changes.
 
 `public/` is served directly as Cloudflare Worker static assets. No React app, old runtime, or workspace package is needed.
 
