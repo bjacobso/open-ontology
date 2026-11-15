@@ -147,7 +147,7 @@ current-state guard could otherwise revive a declined reservation.
 
 The supplied monomorphic `is?` workaround stays in the prelude. Forma's
 keyword inference and missing-hole destructuring issues were addressed upstream
-in [Forma PR 110](https://github.com/bjacobso/forma/pull/110); this example does
+in Forma pull request 110 (`bjacobso/forma#110`); this example does
 not implement either compiler fix.
 
 ## Forma package provenance

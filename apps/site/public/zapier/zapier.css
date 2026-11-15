@@ -29,7 +29,7 @@
 .zp-node-type { display: block; color: var(--muted); font: 9px/1.5 var(--mono); }
 .zp-node strong { display: block; margin: 4px 0 6px; font-size: 14px; font-weight: 600; }
 .zp .zp-node code { padding: 0; border: 0; background: none; color: var(--muted); font-size: 10px; white-space: normal; overflow-wrap: anywhere; }
-.zp-app { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 37px; height: 37px; border: 1px solid rgb(16 32 26 / 8%); border-radius: 9px; font: 600 22px/1 Inter, sans-serif; }
+.zp-app { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 37px; height: 37px; border: 1px solid rgb(16 32 26 / 8%); border-radius: 9px; font: 600 22px/1 "DM Sans", sans-serif; }
 .zp-app--salesforce { background: #eaf5fd; color: #087da8; font-size: 16px; letter-spacing: -2px; padding-right: 2px; }
 .zp-app--filter { background: var(--zap-soft); color: var(--zap); }
 .zp-app--stripe { background: #eeecff; color: #6251cc; font-style: italic; }
@@ -85,7 +85,7 @@
 .zp-review-layout .zp-section-heading { margin: 0; }
 .zp-review-options { margin-top: 26px; }
 .zp-review-options:not([hidden]) { display: grid; gap: 8px; }
-.zp-review-options button { display: flex; align-items: center; gap: 12px; padding: 13px 15px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--muted); text-align: left; font: 12px/1.5 Inter, sans-serif; cursor: pointer; }
+.zp-review-options button { display: flex; align-items: center; gap: 12px; padding: 13px 15px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--muted); text-align: left; font: 12px/1.5 "DM Sans", sans-serif; cursor: pointer; }
 .zp-review-options button[aria-pressed="true"] { border-color: var(--rule-strong); background: #eeede5; color: var(--ink); }
 .zp-review-options button span { color: var(--zap); font-size: 17px; }
 .zp-review-panel { min-width: 0; align-self: center; overflow: hidden; border: 1px solid var(--rule-strong); border-radius: 8px; background: #fffefb; }
